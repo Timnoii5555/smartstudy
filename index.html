@@ -124,7 +124,7 @@
 
         <div id="profileListContainer" class="flex flex-col gap-3" style="margin-bottom:2rem"></div>
 
-        <div class="setup-card">
+        <div id="createProfileCard" class="setup-card">
             <div class="setup-card__head">
                 <span class="setup-card__head-icon"><span class="material-symbols-outlined" aria-hidden="true">person_add</span></span>
                 <h2 style="font-size:1.125rem;font-weight:500" class="thai-title" data-i18n="s0.createTitle">Create a new profile</h2>
@@ -139,7 +139,7 @@
             </div>
         </div>
 
-        <div style="margin-top:1.5rem">
+        <div id="createProfileWrap" style="margin-top:1.5rem">
             <button id="createProfileBtn" class="btn btn--primary btn--block" style="padding-top:1.25rem;padding-bottom:1.25rem">
                 <span data-i18n="s0.createBtn">Start studying</span><span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
             </button>
@@ -339,6 +339,7 @@
                     </div>
                 </div>
                 <div id="syllabusChecklistContainer" class="checklist"></div>
+                <div id="readAheadPrompt" hidden style="margin-top:1rem"></div>
             </div>
         </div>
     </main>

@@ -26,6 +26,9 @@
     const profileEmojiPicker = document.getElementById('profileEmojiPicker');
     const newProfileNameInput = document.getElementById('newProfileNameInput');
     const createProfileBtn = document.getElementById('createProfileBtn');
+    const guestSectionLabel = document.getElementById('guestSectionLabel');
+    const createProfileCard = document.getElementById('createProfileCard');
+    const createProfileWrap = document.getElementById('createProfileWrap');
 
     // ---------------------------------------------------------------- Real accounts (Firebase)
 
@@ -183,8 +186,15 @@
             renderEmojiPicker();
             renderProfileList();
 
-            authSection.hidden = !Auth.isEnabled();
-            document.getElementById('guestSectionLabel').hidden = !Auth.isEnabled();
+            // Once real accounts work, the local/guest path is retired from the
+            // UI entirely — it only ever reappears as a fallback if Firebase
+            // itself is unreachable (see js/auth.js's isEnabled()).
+            const useCloudOnly = Auth.isEnabled();
+            authSection.hidden = !useCloudOnly;
+            guestSectionLabel.hidden = useCloudOnly;
+            profileListContainer.hidden = useCloudOnly;
+            createProfileCard.hidden = useCloudOnly;
+            createProfileWrap.hidden = useCloudOnly;
             if (Auth.isEnabled()) {
                 setAuthTab('login');
                 loginEmail.value = ''; loginPassword.value = '';

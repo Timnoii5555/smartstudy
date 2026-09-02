@@ -21,6 +21,7 @@
     const totalLessonsBadge = document.getElementById('totalLessonsBadge');
     const dashboardMainSubject = document.getElementById('dashboardMainSubject');
     const checklistContainer = document.getElementById('syllabusChecklistContainer');
+    const readAheadPrompt = document.getElementById('readAheadPrompt');
     const pointsBadge = document.getElementById('pointsBadge');
     const questsCard = document.getElementById('questsCard');
 
@@ -52,27 +53,77 @@
         if (!wasDone && TFS.Quests) TFS.Quests.bump('complete-topic', 1);
     }
 
+    /** The end of the "currently visible" window into the reading plan:
+     *  today, or later if the learner already opted to read ahead (see
+     *  renderReadAheadPrompt below). ISO date strings compare correctly with
+     *  plain string comparison, so `Math.max`-by-string via `>` is enough. */
+    function currentCutoffISO() {
+        const today = U.formatDateISO(new Date());
+        const readAhead = State.get().plan.readAheadUntilDate;
+        return (readAhead && readAhead > today) ? readAhead : today;
+    }
+
     /** Today's actionable slice of the syllabus: whatever the reading plan
      *  (built in onboarding.js from js/planner.js) has scheduled on or before
-     *  today, still including already-completed ones so ticking a box doesn't
-     *  make it vanish mid-session. Falls back to the full topic list when
-     *  there is no plan yet (e.g. older saved data from before planner.js
-     *  existed, or the daily-goal/exam-date fields were edited via Settings
-     *  without regenerating a plan) so the checklist is never just empty.
+     *  the current cutoff date, still including already-completed ones so
+     *  ticking a box doesn't make it vanish mid-session. Falls back to the
+     *  full topic list when there is no plan yet (e.g. older saved data from
+     *  before planner.js existed, or the daily-goal/exam-date fields were
+     *  edited via Settings without regenerating a plan) so the checklist is
+     *  never just empty.
      */
     function getTodaysTopics(subject) {
         const plan = State.get().plan.readingPlan;
         if (!plan || plan.subjectId !== subject.id || !plan.days.length) return subject.topics;
-        const todayISO = U.formatDateISO(new Date());
-        const dueIds = TFS.Planner.topicsDueBy(plan, todayISO);
+        const dueIds = TFS.Planner.topicsDueBy(plan, currentCutoffISO());
         const dueTopics = subject.topics.filter(t => dueIds.includes(t.id));
         return dueTopics.length ? dueTopics : subject.topics;
+    }
+
+    /** The next day in the plan (in the reading-order the learner picked on
+     *  screen 2) that still has content beyond what's currently visible, or
+     *  null if the plan has nothing left past the cutoff. */
+    function findNextChunkDate(plan, cutoffISO) {
+        if (!plan) return null;
+        const next = plan.days.find(d => d.dateISO > cutoffISO && d.topicIds.length > 0);
+        return next ? next.dateISO : null;
+    }
+
+    function renderReadAheadPrompt(subject, todaysTopics, progress) {
+        readAheadPrompt.innerHTML = '';
+        readAheadPrompt.hidden = true;
+        if (todaysTopics.length === 0) return;
+
+        const allDone = todaysTopics.every(t => !!progress[t.id]);
+        if (!allDone) return;
+
+        const plan = State.get().plan.readingPlan;
+        if (!plan || plan.subjectId !== subject.id) return;
+        const nextDate = findNextChunkDate(plan, currentCutoffISO());
+        if (!nextDate) return; // nothing left beyond today — the "subject complete" flow handles that case
+
+        readAheadPrompt.hidden = false;
+        readAheadPrompt.appendChild(U.el('div', { className: 'read-ahead-card' }, [
+            U.el('span', { className: 'material-symbols-outlined', attrs: { 'aria-hidden': 'true' }, text: 'auto_awesome' }),
+            U.el('p', { text: I18n.t('s3.readAheadText') }),
+            U.el('button', {
+                className: 'btn btn--pill-white btn--sm', attrs: { type: 'button' },
+                text: I18n.t('s3.readAheadBtn'),
+                on: {
+                    click: () => {
+                        State.commit({ plan: { readAheadUntilDate: nextDate } });
+                        render();
+                    }
+                }
+            })
+        ]));
     }
 
     function renderChecklist(subject) {
         checklistContainer.innerHTML = '';
         if (!subject) {
             checklistContainer.appendChild(U.el('p', { className: 'text-outline text-center', text: I18n.t('s3.emptyChecklist') }));
+            readAheadPrompt.hidden = true;
             return;
         }
         const progress = getTopicProgressMap(subject.id);
@@ -94,6 +145,7 @@
             ]);
             checklistContainer.appendChild(item);
         });
+        renderReadAheadPrompt(subject, todaysTopics, progress);
     }
 
     function renderPointsBadge() {

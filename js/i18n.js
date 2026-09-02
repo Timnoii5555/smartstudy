@@ -89,7 +89,9 @@
                 todoTitle: 'หัวข้อที่ต้องอ่าน',
                 lessonsUnit: 'บท',
                 tickHint: 'ติ๊กเมื่อเรียนจบ',
-                emptyChecklist: 'ยังไม่มีวิชาที่เลือก กลับไปเลือกวิชาที่หน้าแรกก่อนนะครับ'
+                emptyChecklist: 'ยังไม่มีวิชาที่เลือก กลับไปเลือกวิชาที่หน้าแรกก่อนนะครับ',
+                readAheadText: 'เก่งมาก! อ่านครบตามเป้าหมายวันนี้แล้ว อยากอ่านต่อเลยไหม?',
+                readAheadBtn: 'อ่านต่อเลย'
             },
             congrats: {
                 title: 'ยินดีด้วย! 🎉',
@@ -296,7 +298,9 @@
                 todoTitle: "Topics to read",
                 lessonsUnit: 'topics',
                 tickHint: 'Tap to mark as done',
-                emptyChecklist: 'No subject selected yet. Go back to the first screen to choose one.'
+                emptyChecklist: 'No subject selected yet. Go back to the first screen to choose one.',
+                readAheadText: "Nice work! You've hit today's target. Want to keep reading ahead?",
+                readAheadBtn: 'Keep reading'
             },
             congrats: {
                 title: 'Congratulations! 🎉',

@@ -104,7 +104,8 @@
                 dailyGoalSeconds: 4.5 * 3600,
                 orderStrategy: 'balanced', // 'sequential' | 'easyFirst' | 'hardFirst' | 'balanced'
                 readingPlan: null, // { subjectId, orderStrategy, generatedAt, days: [{dateISO, topicIds}] } — see planner.js
-                completedSubjects: [] // subject ids the learner has fully finished, so a new one can be suggested
+                completedSubjects: [], // subject ids the learner has fully finished, so a new one can be suggested
+                readAheadUntilDate: null // set when the learner opts to pull tomorrow's (or later) topics into today — see dashboard.js
             },
             syllabusProgress: {
                 // subjectId -> { topicId: true }
