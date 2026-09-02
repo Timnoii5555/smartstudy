@@ -173,6 +173,8 @@
             <p class="text-outline" style="font-size:0.875rem;margin-top:0.25rem" data-i18n="s1.hint">*Pick one subject</p>
         </div>
 
+        <div class="subject-category-tabs" id="subjectCategoryTabs" role="tablist" aria-label="Subject category"></div>
+
         <div class="subject-grid" id="subjectGrid" role="radiogroup" aria-label="Subject"></div>
     </main>
 
@@ -784,6 +786,44 @@
     </div>
 </div>
 
+<div id="customSubjectModal" class="modal-overlay hidden">
+    <div class="modal-panel" data-modal-panel>
+        <div class="modal-header">
+            <h2 class="modal-title"><span class="material-symbols-outlined" aria-hidden="true">edit_note</span> <span data-i18n="modalCustomSubject.title">Create my own subject</span></h2>
+            <button type="button" id="closeCustomSubjectBtn" class="modal-close" data-i18n-attr='{"aria-label":"aria.closeDialog"}' aria-label="Close"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">close</span></button>
+        </div>
+        <div class="field" style="margin-bottom:1rem">
+            <label class="field__label" for="customSubjectName" data-i18n="modalCustomSubject.nameLabel">Subject name</label>
+            <input type="text" id="customSubjectName" class="input" maxlength="40" data-i18n-attr='{"placeholder":"modalCustomSubject.namePlaceholder"}'>
+        </div>
+        <div class="field">
+            <label class="field__label" data-i18n="modalCustomSubject.topicsLabel">Topics to read</label>
+            <div id="customTopicRows" class="flex flex-col gap-2"></div>
+            <button type="button" id="addCustomTopicRowBtn" class="btn btn--outline btn--block" style="margin-top:0.5rem">
+                <span class="material-symbols-outlined" aria-hidden="true">add</span> <span data-i18n="modalCustomSubject.addTopic">Add a topic</span>
+            </button>
+        </div>
+        <div class="modal-actions">
+            <button type="button" id="closeCustomSubjectBtn2" class="btn btn--ghost btn--flex" data-i18n="common.cancel">Cancel</button>
+            <button type="button" id="saveCustomSubjectBtn" class="btn btn--primary btn--flex" data-i18n="common.save">Save</button>
+        </div>
+    </div>
+</div>
+
+<div id="renameModal" class="modal-overlay hidden">
+    <div class="modal-panel modal-panel--sm" data-modal-panel>
+        <h2 class="modal-title" style="margin-bottom:1rem"><span class="material-symbols-outlined" aria-hidden="true">edit</span> <span data-i18n="modalRename.title">Change name / nickname</span></h2>
+        <div class="field">
+            <label class="field__label" for="renameInput" data-i18n="s0.nameLabel">Your name</label>
+            <input type="text" id="renameInput" class="input" maxlength="24">
+        </div>
+        <div class="modal-actions">
+            <button type="button" id="closeRenameBtn" class="btn btn--ghost btn--flex" data-i18n="common.cancel">Cancel</button>
+            <button type="button" id="saveRenameBtn" class="btn btn--primary btn--flex" data-i18n="common.save">Save</button>
+        </div>
+    </div>
+</div>
+
 <div id="forgotPasswordModal" class="modal-overlay hidden">
     <div class="modal-panel modal-panel--sm" data-modal-panel>
         <h2 class="modal-title" style="margin-bottom:0.5rem"><span class="material-symbols-outlined" aria-hidden="true">lock_reset</span> <span data-i18n="modalForgotPassword.title">Reset your password</span></h2>
@@ -940,6 +980,9 @@
         <div class="settings-section">
             <span class="settings-section__title" data-i18n="settings.accountSection">Account</span>
             <div class="flex flex-col gap-2">
+                <button type="button" id="settingsRenameBtn" class="btn btn--ghost btn--block" style="justify-content:flex-start">
+                    <span class="material-symbols-outlined" aria-hidden="true">edit</span><span data-i18n="settings.renameBtn">Change name / nickname</span>
+                </button>
                 <button type="button" id="settingsSwitchProfileBtn" class="btn btn--ghost btn--block" style="justify-content:flex-start">
                     <span class="material-symbols-outlined" aria-hidden="true">switch_account</span><span data-i18n="settings.switchProfile">Switch profile</span>
                 </button>

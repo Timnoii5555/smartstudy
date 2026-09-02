@@ -56,7 +56,10 @@
                 next: 'ถัดไป',
                 errSelectSubject: 'กรุณาเลือกวิชาที่จะสอบก่อนครับ',
                 completedTag: '✓ เรียนจบแล้ว',
-                completedDisabledHint: 'คุณเรียนวิชานี้จบไปแล้ว เลือกวิชาอื่นได้เลย'
+                completedDisabledHint: 'คุณเรียนวิชานี้จบไปแล้ว เลือกวิชาอื่นได้เลย',
+                addCustomDesc: 'สร้างวิชาและหัวข้อของคุณเอง',
+                deleteCustomTitle: 'ลบวิชานี้?',
+                deleteCustomMsg: 'วิชา "{name}" และความคืบหน้าทั้งหมดจะถูกลบอย่างถาวร'
             },
             s2: {
                 title: 'กำหนดวันสอบและเวลาที่คุณมี',
@@ -130,6 +133,20 @@
             modalTimePicker: { title: 'เลือกเวลา', confirm: 'ยืนยันเวลา' },
             modalDeckSelector: { title: 'เลือกชุดคำศัพท์', createNew: 'สร้างชุดคำศัพท์ใหม่', wordsCount: '{n} คำศัพท์' },
             modalDeleteCard: { title: 'ลบคำศัพท์', selectLabel: 'เลือกคำศัพท์ที่ต้องการลบ', warning: '*การลบคำศัพท์จะไม่สามารถกู้คืนได้', ok: 'ลบคำศัพท์' },
+            modalCustomSubject: {
+                title: 'สร้างวิชาของฉันเอง',
+                nameLabel: 'ชื่อวิชา',
+                namePlaceholder: 'เช่น IELTS, ใบขับขี่, วิชาที่โรงเรียนสอน',
+                topicsLabel: 'หัวข้อที่ต้องอ่าน',
+                addTopic: 'เพิ่มหัวข้อ',
+                topicPlaceholder: 'เช่น บทที่ 1: คำศัพท์พื้นฐาน',
+                errName: 'กรุณาตั้งชื่อวิชาก่อนครับ',
+                errTopics: 'กรุณาเพิ่มอย่างน้อย 1 หัวข้อ'
+            },
+            modalRename: {
+                title: 'เปลี่ยนชื่อ / นามแฝง',
+                success: 'เปลี่ยนชื่อเรียบร้อยแล้ว'
+            },
             modalForgotPassword: {
                 title: 'ตั้งรหัสผ่านใหม่',
                 hint: 'เราจะส่งลิงก์สำหรับตั้งรหัสผ่านใหม่ไปที่อีเมลของคุณ',
@@ -206,7 +223,8 @@
                 focusMin: 'ช่วงโฟกัส (นาที)', shortBreakMin: 'พักสั้น (นาที)',
                 longBreakMin: 'พักยาว (นาที)', cycles: 'จำนวนรอบก่อนพักยาว',
                 soundSection: 'เสียง', soundEnabled: 'เปิดเสียงแจ้งเตือน',
-                accountSection: 'บัญชี', switchProfile: 'สลับโปรไฟล์ผู้ใช้', logout: 'ออกจากระบบ',
+                accountSection: 'บัญชี', renameBtn: 'เปลี่ยนชื่อ / นามแฝง',
+                switchProfile: 'สลับโปรไฟล์ผู้ใช้', logout: 'ออกจากระบบ',
                 historySection: 'ประวัติการอ่าน', historyBtn: 'ดูสิ่งที่อ่านจบไปแล้ว',
                 feedbackSection: 'ความคิดเห็น', reportBtn: 'รายงานบัค / ข้อเสนอแนะ'
             },
@@ -272,7 +290,10 @@
                 next: 'Next',
                 errSelectSubject: 'Please choose a subject to continue.',
                 completedTag: '✓ Completed',
-                completedDisabledHint: "You've already finished this subject — pick another one."
+                completedDisabledHint: "You've already finished this subject — pick another one.",
+                addCustomDesc: 'Create your own subject and topics',
+                deleteCustomTitle: 'Delete this subject?',
+                deleteCustomMsg: 'The "{name}" subject and all its progress will be permanently deleted.'
             },
             s2: {
                 title: 'Set your exam date & available time',
@@ -346,6 +367,20 @@
             modalTimePicker: { title: 'Choose time', confirm: 'Confirm time' },
             modalDeckSelector: { title: 'Choose a deck', createNew: 'Create new deck', wordsCount: '{n} words' },
             modalDeleteCard: { title: 'Delete word', selectLabel: 'Choose a word to delete', warning: '*This cannot be undone.', ok: 'Delete word' },
+            modalCustomSubject: {
+                title: 'Create my own subject',
+                nameLabel: 'Subject name',
+                namePlaceholder: 'e.g. IELTS, driving test, a school course',
+                topicsLabel: 'Topics to read',
+                addTopic: 'Add a topic',
+                topicPlaceholder: 'e.g. Chapter 1: Basic vocabulary',
+                errName: 'Please name your subject first.',
+                errTopics: 'Please add at least one topic.'
+            },
+            modalRename: {
+                title: 'Change name / nickname',
+                success: 'Your name has been updated.'
+            },
             modalForgotPassword: {
                 title: 'Reset your password',
                 hint: "We'll email you a link to set a new password.",
@@ -422,7 +457,8 @@
                 focusMin: 'Focus length (min)', shortBreakMin: 'Short break (min)',
                 longBreakMin: 'Long break (min)', cycles: 'Cycles before long break',
                 soundSection: 'Sound', soundEnabled: 'Enable notification sound',
-                accountSection: 'Account', switchProfile: 'Switch profile', logout: 'Log out',
+                accountSection: 'Account', renameBtn: 'Change name / nickname',
+                switchProfile: 'Switch profile', logout: 'Log out',
                 historySection: 'Reading history', historyBtn: "See what you've finished",
                 feedbackSection: 'Feedback', reportBtn: 'Report a bug / suggestion'
             },

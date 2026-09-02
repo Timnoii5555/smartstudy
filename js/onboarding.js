@@ -13,13 +13,62 @@
     const State = TFS.State;
 
     const subjectGrid = document.getElementById('subjectGrid');
+    const subjectCategoryTabs = document.getElementById('subjectCategoryTabs');
     const nextBtn1 = document.getElementById('nextBtn1');
 
     let selectedSubjectId = State.get().plan.subject || null;
 
+    // ---------------------------------------------------------------- Category tabs
+    // Splits the 23+ built-in subjects (plus whatever the learner has made
+    // themselves) into quick-jump tabs instead of one long scroll — see
+    // TFS.Data.categoryOf() for how a subject is sorted into one of these.
+    const CATEGORIES = [
+        { key: 'all', label: { th: 'ทั้งหมด', en: 'All' } },
+        { key: 'tgat', label: { th: 'TGAT', en: 'TGAT' } },
+        { key: 'tpat', label: { th: 'TPAT', en: 'TPAT' } },
+        { key: 'alevel', label: { th: 'A-Level', en: 'A-Level' } },
+        { key: 'custom', label: { th: 'ของฉัน', en: 'Mine' } }
+    ];
+    let activeCategory = 'all';
+
+    function renderCategoryTabs() {
+        subjectCategoryTabs.innerHTML = '';
+        CATEGORIES.forEach(cat => {
+            subjectCategoryTabs.appendChild(U.el('button', {
+                className: 'subject-category-tab' + (activeCategory === cat.key ? ' is-active' : ''),
+                attrs: { type: 'button', role: 'tab', 'aria-selected': activeCategory === cat.key ? 'true' : 'false' },
+                text: I18n.pick(cat.label),
+                on: { click: () => { activeCategory = cat.key; renderCategoryTabs(); renderSubjectGrid(); } }
+            }));
+        });
+    }
+
+    function visibleSubjects() {
+        const all = TFS.Data.getSubjects();
+        return activeCategory === 'all' ? all : all.filter(s => TFS.Data.categoryOf(s) === activeCategory);
+    }
+
+    async function confirmDeleteCustomSubject(subject) {
+        const ok = await TFS.Modal.confirm({
+            title: I18n.t('s1.deleteCustomTitle'),
+            message: I18n.t('s1.deleteCustomMsg', { name: I18n.pick(subject.name) }),
+            confirmText: I18n.t('common.delete'),
+            cancelText: I18n.t('common.cancel'),
+            danger: true
+        });
+        if (!ok) return;
+        const remaining = (State.get().customSubjects || []).filter(s => s.id !== subject.id);
+        State.commit({ customSubjects: remaining });
+        if (selectedSubjectId === subject.id) selectedSubjectId = null;
+        // Deleting the subject you're actively studying would otherwise leave
+        // plan.subject pointing at nothing — send the learner back to pick again.
+        if (State.get().plan.subject === subject.id) State.commit({ plan: { subject: null, readingPlan: null } });
+        renderSubjectGrid();
+    }
+
     function renderSubjectGrid() {
         subjectGrid.innerHTML = '';
-        const subjects = TFS.Data.getSubjects();
+        const subjects = visibleSubjects();
         const completedIds = State.get().plan.completedSubjects || [];
         subjects.forEach((subject, index) => {
             const isSelected = subject.id === selectedSubjectId;
@@ -54,6 +103,10 @@
                             U.el('p', { className: 'subject-card__desc', text: I18n.pick(subject.description) })
                         ])
                     ]),
+                    subject.isCustom ? U.el('button', {
+                        className: 'icon-btn icon-btn--danger', attrs: { type: 'button', 'aria-label': I18n.t('s1.deleteCustomTitle') },
+                        on: { click: (e) => { e.stopPropagation(); confirmDeleteCustomSubject(subject); } }
+                    }, [U.el('span', { className: 'material-symbols-outlined', attrs: { 'aria-hidden': 'true' }, text: 'delete' })]) : null,
                     U.el('div', { className: 'subject-card__check' }, [
                         U.el('span', { className: 'material-symbols-outlined', attrs: { 'aria-hidden': 'true' }, text: 'check' })
                     ])
@@ -68,7 +121,79 @@
             ]);
             subjectGrid.appendChild(card);
         });
+
+        // Shown whenever "All" or "Mine" is the active tab, so a learner who
+        // doesn't want any of the prepared content is never more than one tap
+        // away from defining their own instead.
+        if (activeCategory === 'all' || activeCategory === 'custom') {
+            subjectGrid.appendChild(U.el('button', {
+                className: 'subject-card subject-card--add', attrs: { type: 'button' },
+                on: { click: openCustomSubjectModal }
+            }, [
+                U.el('div', { className: 'subject-card__main' }, [
+                    U.el('div', { className: 'subject-card__icon' }, [
+                        U.el('span', { className: 'material-symbols-outlined', attrs: { 'aria-hidden': 'true' }, text: 'add' })
+                    ]),
+                    U.el('div', {}, [
+                        U.el('h3', { className: 'subject-card__title', text: I18n.t('modalCustomSubject.title') }),
+                        U.el('p', { className: 'subject-card__desc', text: I18n.t('s1.addCustomDesc') })
+                    ])
+                ])
+            ]));
+        }
     }
+
+    // ---------------------------------------------------------------- Create-my-own-subject modal
+
+    const customSubjectModal = document.getElementById('customSubjectModal');
+    const customSubjectName = document.getElementById('customSubjectName');
+    const customTopicRows = document.getElementById('customTopicRows');
+
+    function addCustomTopicRow() {
+        const row = U.el('div', { className: 'flex gap-2 items-center' }, [
+            U.el('input', { className: 'input custom-topic-input', attrs: { type: 'text', maxlength: '80' } }),
+            U.el('button', {
+                className: 'icon-btn icon-btn--danger', attrs: { type: 'button' },
+                on: { click: () => row.remove() }
+            }, [U.el('span', { className: 'material-symbols-outlined', attrs: { 'aria-hidden': 'true' }, text: 'close' })])
+        ]);
+        row.querySelector('.custom-topic-input').placeholder = I18n.t('modalCustomSubject.topicPlaceholder');
+        customTopicRows.appendChild(row);
+    }
+
+    function openCustomSubjectModal() {
+        customSubjectName.value = '';
+        customTopicRows.innerHTML = '';
+        addCustomTopicRow();
+        addCustomTopicRow();
+        TFS.Modal.open(customSubjectModal);
+    }
+
+    document.getElementById('addCustomTopicRowBtn').addEventListener('click', addCustomTopicRow);
+    document.getElementById('closeCustomSubjectBtn').addEventListener('click', () => TFS.Modal.close(customSubjectModal));
+    document.getElementById('closeCustomSubjectBtn2').addEventListener('click', () => TFS.Modal.close(customSubjectModal));
+    document.getElementById('saveCustomSubjectBtn').addEventListener('click', () => {
+        const name = customSubjectName.value.trim();
+        if (!name) { TFS.Toast.warn(I18n.t('modalCustomSubject.errName')); return; }
+        const topicNames = U.qsa('.custom-topic-input', customTopicRows).map(el => el.value.trim()).filter(Boolean);
+        if (topicNames.length === 0) { TFS.Toast.warn(I18n.t('modalCustomSubject.errTopics')); return; }
+
+        const newSubject = {
+            id: 'custom:' + U.uuid(),
+            code: name.slice(0, 24),
+            name: { th: name, en: name },
+            description: { th: 'วิชาที่กำหนดเอง', en: 'Custom subject' },
+            icon: 'edit_note',
+            colorToken: 'primary',
+            isCustom: true,
+            topics: topicNames.map(label => ({ id: 'topic:' + U.uuid(), label: { th: label, en: label }, difficulty: 2, estMinutes: 120 }))
+        };
+        State.commit({ customSubjects: [...(State.get().customSubjects || []), newSubject] });
+        TFS.Modal.close(customSubjectModal);
+        activeCategory = 'custom';
+        renderCategoryTabs();
+        selectSubject(newSubject.id);
+    });
 
     function selectSubject(id) {
         selectedSubjectId = id;
@@ -215,6 +340,7 @@
     });
 
     I18n.onChange(() => {
+        renderCategoryTabs();
         renderSubjectGrid();
         updateHoursDisplay(parseFloat(timeSlider.value));
         refreshDateDisplay();
@@ -223,12 +349,13 @@
     });
 
     TFS.Router.register('screen1', {
-        onEnter: () => { TFS.Nav.hide(); renderSubjectGrid(); }
+        onEnter: () => { TFS.Nav.hide(); renderCategoryTabs(); renderSubjectGrid(); }
     });
     TFS.Router.register('screen2', {
         onEnter: () => { TFS.Nav.hide(); initScreen2FromState(); }
     });
 
+    renderCategoryTabs();
     renderSubjectGrid();
 
 })(window);

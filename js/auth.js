@@ -157,6 +157,16 @@
 
     function resetPassword(email) { return auth.sendPasswordResetEmail(email); }
 
+    /** Renames the currently logged-in account everywhere its display name is
+     *  read from: the Firebase Auth profile itself, and the mirrored
+     *  Firestore doc the leaderboard actually queries (Auth profile changes
+     *  aren't visible to other users' leaderboard reads, only this document is). */
+    async function updateDisplayName(name) {
+        if (!currentUser) throw new Error('not_logged_in');
+        await currentUser.updateProfile({ displayName: name });
+        await db.collection('users').doc(currentUser.uid).set({ displayName: name }, { merge: true });
+    }
+
     /** One-way mirror: local points (computed by quests.js) → cloud. The
      *  cloud copy is read-only from the app's own point of view — it exists
      *  only so the leaderboard query has something to read across users. */
@@ -175,7 +185,7 @@
 
     TFS.Auth = {
         isEnabled, isCloudProfileId, cloudProfileId, init, onAuthChange, getCurrentUser,
-        signUp, logIn, logOut, resetPassword, syncPoints, fetchLeaderboard, errorKey
+        signUp, logIn, logOut, resetPassword, updateDisplayName, syncPoints, fetchLeaderboard, errorKey
     };
 
 })(window);

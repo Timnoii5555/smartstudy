@@ -97,6 +97,47 @@
         render();
     });
 
+    // ---------------------------------------------------------------- Change name / nickname
+    // Works for both a real account (Firebase Auth profile + the mirrored
+    // Firestore doc the leaderboard reads) and a local guest profile (just
+    // its entry in storage.js's profiles index) — whichever is active.
+    const renameModal = document.getElementById('renameModal');
+    const renameInput = document.getElementById('renameInput');
+
+    function currentDisplayName() {
+        const activeId = TFS.Storage.getActiveProfileId();
+        if (TFS.Auth && TFS.Auth.isEnabled() && TFS.Auth.isCloudProfileId(activeId)) {
+            const user = TFS.Auth.getCurrentUser();
+            return (user && user.displayName) || '';
+        }
+        const profile = TFS.Storage.listProfiles().find(p => p.id === activeId);
+        return profile ? profile.name : '';
+    }
+
+    document.getElementById('settingsRenameBtn').addEventListener('click', () => {
+        TFS.Modal.close(settingsModal);
+        renameInput.value = currentDisplayName();
+        setTimeout(() => TFS.Modal.open(renameModal), 200);
+    });
+    document.getElementById('closeRenameBtn').addEventListener('click', () => TFS.Modal.close(renameModal));
+    document.getElementById('saveRenameBtn').addEventListener('click', async () => {
+        const name = renameInput.value.trim();
+        if (!name) { TFS.Toast.warn(I18n.t('s0.errName')); return; }
+        const activeId = TFS.Storage.getActiveProfileId();
+        try {
+            if (TFS.Auth && TFS.Auth.isEnabled() && TFS.Auth.isCloudProfileId(activeId)) {
+                await TFS.Auth.updateDisplayName(name);
+            } else {
+                TFS.Storage.renameProfile(activeId, name);
+            }
+            TFS.Toast.success(I18n.t('modalRename.success'));
+            TFS.Modal.close(renameModal);
+        } catch (e) {
+            console.error('[settings] Rename failed', e);
+            TFS.Toast.error(I18n.t('modalAuth.errGeneric'));
+        }
+    });
+
     document.getElementById('settingsSwitchProfileBtn').addEventListener('click', () => {
         TFS.Modal.close(settingsModal);
         TFS.Router.show('screen0');

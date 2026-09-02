@@ -358,8 +358,25 @@
         }
     ];
 
-    function getSubjects() { return SUBJECTS; }
-    function getSubject(id) { return SUBJECTS.find(s => s.id === id) || null; }
+    /** The 23 built-in TCAS subjects PLUS any subjects the learner defined
+     *  themselves (state.customSubjects — see onboarding.js's "create my own
+     *  subject" flow). Custom subjects live in state, not here, since this
+     *  file is a shared static asset, not per-user data. */
+    function getSubjects() {
+        const custom = (TFS.State && TFS.State.get().customSubjects) || [];
+        return [...SUBJECTS, ...custom];
+    }
+    function getSubject(id) { return getSubjects().find(s => s.id === id) || null; }
+
+    /** 'tgat' | 'tpat' | 'alevel' | 'custom' — used by onboarding.js's
+     *  category tabs so a learner can jump straight to the section they
+     *  want instead of scrolling through all 23+ subjects. */
+    function categoryOf(subject) {
+        if (subject.isCustom) return 'custom';
+        if (subject.id.indexOf('tpat') === 0) return 'tpat';
+        if (subject.id.indexOf('alevel') === 0) return 'alevel';
+        return 'tgat';
+    }
 
     /**
      * Fresh copy of the starter flashcard decks, keyed by a stable id so they
@@ -405,6 +422,6 @@
         return decks;
     }
 
-    TFS.Data = { getSubjects, getSubject, createStarterDecks };
+    TFS.Data = { getSubjects, getSubject, categoryOf, createStarterDecks };
 
 })(window);

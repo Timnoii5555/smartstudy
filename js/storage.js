@@ -66,6 +66,10 @@
 
     function switchProfile(id) { setActiveProfileId(id); }
 
+    function renameProfile(id, newName) {
+        writeJSON(PROFILES_INDEX_KEY, listProfiles().map(p => p.id === id ? { ...p, name: newName } : p));
+    }
+
     function deleteProfile(id) {
         writeJSON(PROFILES_INDEX_KEY, listProfiles().filter(p => p.id !== id));
         try { global.localStorage.removeItem(profileStateKey(id)); } catch (e) { /* ignore */ }
@@ -110,6 +114,11 @@
             syllabusProgress: {
                 // subjectId -> { topicId: true }
             },
+            customSubjects: [
+                // Subjects the learner defined themselves (see onboarding.js's
+                // "create my own subject" flow) — same shape as data/subjects.js's
+                // built-ins, merged in by TFS.Data.getSubjects(), plus `isCustom: true`.
+            ],
             schedule: {
                 sessions: []
                 // { id, dateISO, startMin, endMin, topicId, topicLabel, color, completed }
@@ -273,7 +282,7 @@
         isBroken: () => storageBroken,
         wasCorrupt: () => hadCorruptData,
         // Local profiles ("login") — see the block above.
-        listProfiles, getActiveProfileId, setActiveProfileId, createProfile, switchProfile, deleteProfile
+        listProfiles, getActiveProfileId, setActiveProfileId, createProfile, switchProfile, deleteProfile, renameProfile
     };
 
 })(window);
