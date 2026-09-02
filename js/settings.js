@@ -1,7 +1,7 @@
 /**
  * settings.js
- * The Settings panel (Part 2): language, theme, daily goal, exam date,
- * Pomodoro durations, sound, and data export/import/reset. Reachable from
+ * The Settings panel: language, theme, daily goal, exam date, Pomodoro
+ * durations, sound, account, reading history and feedback. Reachable from
  * the settings icon on screens 3, 4 and 6 via the shared `.js-open-settings`
  * class, so there is one implementation instead of one per screen.
  */
@@ -27,10 +27,6 @@
     const longBreakInput = document.getElementById('settingsLongBreakMin');
     const cyclesInput = document.getElementById('settingsCycles');
     const soundToggle = document.getElementById('settingsSoundToggle');
-    const exportBtn = document.getElementById('settingsExportBtn');
-    const importBtn = document.getElementById('settingsImportBtn');
-    const importFile = document.getElementById('settingsImportFile');
-    const resetBtn = document.getElementById('settingsResetBtn');
 
     function render() {
         const s = State.get();
@@ -132,47 +128,6 @@
         const mailto = `mailto:${REPORT_EMAIL}?subject=${subject}&body=${encodeURIComponent(body)}`;
         global.location.href = mailto;
         TFS.Modal.close(reportModal);
-    });
-
-    exportBtn.addEventListener('click', () => {
-        State.flushNow();
-        const filename = `smart-study-backup-${U.formatDateISO(new Date())}.json`;
-        U.downloadText(filename, TFS.Storage.exportJSON(State.get()));
-        TFS.Toast.success(I18n.t('settings.exportSuccess'));
-    });
-
-    importBtn.addEventListener('click', () => importFile.click());
-    importFile.addEventListener('change', async () => {
-        const file = importFile.files[0];
-        importFile.value = '';
-        if (!file) return;
-        try {
-            const text = await U.readFileAsText(file);
-            const imported = TFS.Storage.importJSON(text);
-            State.replaceAll(imported);
-            TFS.Toast.success(I18n.t('settings.importSuccess'));
-            // A full reload is the safest way to restart every stateful engine
-            // (the Pomodoro timer, the ambient audio graph, i18n/theme) from the
-            // freshly imported data, rather than trying to patch each one live.
-            setTimeout(() => global.location.reload(), 600);
-        } catch (e) {
-            const key = e.message === 'invalid_json' ? 'settings.importErrorJson' : 'settings.importErrorShape';
-            TFS.Toast.error(I18n.t(key));
-        }
-    });
-
-    resetBtn.addEventListener('click', async () => {
-        const ok = await TFS.Modal.confirm({
-            title: I18n.t('settings.resetConfirmTitle'),
-            message: I18n.t('settings.resetConfirmMsg'),
-            confirmText: I18n.t('settings.resetConfirmOk'),
-            cancelText: I18n.t('common.cancel'),
-            danger: true
-        });
-        if (!ok) return;
-        State.resetToDefaults();
-        TFS.Toast.success(I18n.t('settings.resetSuccess'));
-        setTimeout(() => global.location.reload(), 600);
     });
 
     I18n.onChange(() => { if (TFS.Modal.isOpen(settingsModal)) render(); });

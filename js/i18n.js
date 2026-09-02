@@ -199,15 +199,7 @@
                 soundSection: 'เสียง', soundEnabled: 'เปิดเสียงแจ้งเตือน',
                 accountSection: 'บัญชี', switchProfile: 'สลับโปรไฟล์ผู้ใช้', logout: 'ออกจากระบบ',
                 historySection: 'ประวัติการอ่าน', historyBtn: 'ดูสิ่งที่อ่านจบไปแล้ว',
-                feedbackSection: 'ความคิดเห็น', reportBtn: 'รายงานบัค / ข้อเสนอแนะ',
-                dataSection: 'ข้อมูล',
-                exportBtn: 'ส่งออกข้อมูล (JSON)', importBtn: 'นำเข้าข้อมูล (JSON)',
-                resetAllBtn: 'ล้างข้อมูลทั้งหมด',
-                resetConfirmTitle: 'ล้างข้อมูลทั้งหมด?', resetConfirmMsg: 'การกระทำนี้จะลบแผนการอ่าน ตารางเรียน คำศัพท์ และสถิติทั้งหมดอย่างถาวร ไม่สามารถกู้คืนได้',
-                resetConfirmOk: 'ล้างข้อมูลทั้งหมด',
-                exportSuccess: 'ส่งออกข้อมูลเรียบร้อยแล้ว', importSuccess: 'นำเข้าข้อมูลเรียบร้อยแล้ว',
-                importErrorJson: 'ไฟล์ที่เลือกไม่ใช่ไฟล์ JSON ที่ถูกต้อง', importErrorShape: 'ไฟล์นี้ไม่ใช่ไฟล์ข้อมูลของ Smart Study',
-                resetSuccess: 'ล้างข้อมูลทั้งหมดเรียบร้อยแล้ว'
+                feedbackSection: 'ความคิดเห็น', reportBtn: 'รายงานบัค / ข้อเสนอแนะ'
             },
             quests: {
                 cardTitle: 'เควสประจำวัน',
@@ -414,15 +406,7 @@
                 soundSection: 'Sound', soundEnabled: 'Enable notification sound',
                 accountSection: 'Account', switchProfile: 'Switch profile', logout: 'Log out',
                 historySection: 'Reading history', historyBtn: "See what you've finished",
-                feedbackSection: 'Feedback', reportBtn: 'Report a bug / suggestion',
-                dataSection: 'Data',
-                exportBtn: 'Export data (JSON)', importBtn: 'Import data (JSON)',
-                resetAllBtn: 'Reset all data',
-                resetConfirmTitle: 'Reset all data?', resetConfirmMsg: 'This permanently deletes your study plan, schedule, flashcards and stats. This cannot be undone.',
-                resetConfirmOk: 'Reset everything',
-                exportSuccess: 'Data exported successfully.', importSuccess: 'Data imported successfully.',
-                importErrorJson: 'That file is not valid JSON.', importErrorShape: 'That file is not a Smart Study data export.',
-                resetSuccess: 'All data has been reset.'
+                feedbackSection: 'Feedback', reportBtn: 'Report a bug / suggestion'
             },
             quests: {
                 cardTitle: 'Daily quests',
