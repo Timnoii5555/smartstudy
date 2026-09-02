@@ -111,6 +111,9 @@
         const claimed = { ...State.get().quests.claimed, [questId]: true };
         const total = State.get().points.total + def.points;
         State.commit({ quests: { claimed }, points: { total } });
+        // Mirrors to the shared leaderboard when logged in with a real account
+        // (js/auth.js) — a no-op otherwise, e.g. on a local-only profile.
+        if (TFS.Auth && TFS.Auth.isEnabled() && TFS.Auth.getCurrentUser()) TFS.Auth.syncPoints(total);
         TFS.Toast.success(I18n.t('quests.claimedToast', { points: def.points }));
         renderIfMounted();
     }

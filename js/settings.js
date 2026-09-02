@@ -52,6 +52,9 @@
 
         soundToggle.querySelector('.switch').classList.toggle('is-on', s.settings.soundEnabled);
         soundToggle.setAttribute('aria-pressed', String(s.settings.soundEnabled));
+
+        const onCloudAccount = TFS.Auth && TFS.Auth.isEnabled() && TFS.Auth.isCloudProfileId(TFS.Storage.getActiveProfileId());
+        document.getElementById('settingsLogoutBtn').hidden = !onCloudAccount;
     }
 
     document.querySelectorAll('.js-open-settings').forEach(btn => {
@@ -101,6 +104,11 @@
     document.getElementById('settingsSwitchProfileBtn').addEventListener('click', () => {
         TFS.Modal.close(settingsModal);
         TFS.Router.show('screen0');
+    });
+    document.getElementById('settingsLogoutBtn').addEventListener('click', async () => {
+        try { await TFS.Auth.logOut(); } catch (e) { console.error('[settings] Sign-out failed', e); }
+        TFS.Storage.setActiveProfileId(null);
+        global.location.reload();
     });
 
     // ---------------------------------------------------------------- Bug/feedback report

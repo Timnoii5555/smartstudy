@@ -38,6 +38,13 @@
                 deleteProfile: 'ลบโปรไฟล์นี้',
                 deleteConfirmTitle: 'ลบโปรไฟล์นี้?',
                 deleteConfirmMsg: 'ข้อมูลทั้งหมดของ "{name}" (แผนการอ่าน คะแนน สถิติ) จะถูกลบอย่างถาวร',
+                tabLogin: 'เข้าสู่ระบบ', tabSignup: 'สมัครสมาชิก',
+                emailLabel: 'อีเมล', passwordLabel: 'รหัสผ่าน',
+                loginBtn: 'เข้าสู่ระบบ', signupBtn: 'สร้างบัญชี',
+                avatarHint: 'ไม่บังคับ — แตะเพื่อเลือกรูป', passwordHint: 'อย่างน้อย 6 ตัวอักษร',
+                orDivider: 'หรือ',
+                guestSectionLabel: 'ใช้แบบไม่มีบัญชี (เก็บข้อมูลในเครื่องนี้เท่านั้น)',
+                errFillFields: 'กรุณากรอกข้อมูลให้ครบครับ'
             },
             s1: {
                 stepLabel: 'ขั้นที่ {n} จาก 3',
@@ -120,6 +127,24 @@
             modalTimePicker: { title: 'เลือกเวลา', confirm: 'ยืนยันเวลา' },
             modalDeckSelector: { title: 'เลือกชุดคำศัพท์', createNew: 'สร้างชุดคำศัพท์ใหม่', wordsCount: '{n} คำศัพท์' },
             modalDeleteCard: { title: 'ลบคำศัพท์', selectLabel: 'เลือกคำศัพท์ที่ต้องการลบ', warning: '*การลบคำศัพท์จะไม่สามารถกู้คืนได้', ok: 'ลบคำศัพท์' },
+            modalAuth: {
+                errEmailInUse: 'อีเมลนี้มีบัญชีอยู่แล้ว ลองเข้าสู่ระบบแทนไหมครับ?',
+                errInvalidEmail: 'รูปแบบอีเมลไม่ถูกต้อง',
+                errWeakPassword: 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร',
+                errUserNotFound: 'ไม่พบบัญชีนี้ในระบบ',
+                errWrongPassword: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง',
+                errNetwork: 'เชื่อมต่อเครือข่ายไม่ได้ ลองใหม่อีกครั้ง',
+                errTooMany: 'ลองผิดหลายครั้งเกินไป กรุณารอสักครู่แล้วลองใหม่',
+                errGeneric: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง'
+            },
+            modalLeaderboard: {
+                title: 'กระดานผู้นำ',
+                notConfigured: 'ฟีเจอร์นี้ยังไม่เปิดใช้งาน (ต้องตั้งค่าระบบบัญชีก่อน)',
+                needLogin: 'เข้าสู่ระบบด้วยบัญชีจริงเพื่อดูกระดานผู้นำและแข่งกับคนอื่นครับ',
+                loadError: 'โหลดกระดานผู้นำไม่สำเร็จ ลองใหม่อีกครั้ง',
+                empty: 'ยังไม่มีใครอยู่ในกระดานผู้นำเลย',
+                anonymous: 'ผู้ใช้ไม่ระบุชื่อ'
+            },
             modalHistory: {
                 title: 'ประวัติการอ่าน',
                 empty: 'ยังไม่มีหัวข้อที่อ่านจบเลย เริ่มติ๊กจากหน้าแรกได้เลยครับ',
@@ -172,7 +197,7 @@
                 focusMin: 'ช่วงโฟกัส (นาที)', shortBreakMin: 'พักสั้น (นาที)',
                 longBreakMin: 'พักยาว (นาที)', cycles: 'จำนวนรอบก่อนพักยาว',
                 soundSection: 'เสียง', soundEnabled: 'เปิดเสียงแจ้งเตือน',
-                accountSection: 'บัญชี', switchProfile: 'สลับโปรไฟล์ผู้ใช้',
+                accountSection: 'บัญชี', switchProfile: 'สลับโปรไฟล์ผู้ใช้', logout: 'ออกจากระบบ',
                 historySection: 'ประวัติการอ่าน', historyBtn: 'ดูสิ่งที่อ่านจบไปแล้ว',
                 feedbackSection: 'ความคิดเห็น', reportBtn: 'รายงานบัค / ข้อเสนอแนะ',
                 dataSection: 'ข้อมูล',
@@ -200,7 +225,7 @@
                 stopTimerFirst: 'กรุณาหยุดเวลาก่อนแก้ไขเป้าหมายครับ'
             },
             aria: {
-                closeDialog: 'ปิดหน้าต่าง', openSettings: 'เปิดการตั้งค่า', openSearch: 'ค้นหา',
+                closeDialog: 'ปิดหน้าต่าง', openSettings: 'เปิดการตั้งค่า', openLeaderboard: 'กระดานผู้นำ', openSearch: 'ค้นหา',
                 closeSearch: 'ปิดการค้นหา', deleteWord: 'ลบคำศัพท์', addWord: 'เพิ่มคำศัพท์',
                 prevMonth: 'เดือนก่อนหน้า', nextMonth: 'เดือนถัดไป', prevWeek: 'สัปดาห์ก่อนหน้า', nextWeek: 'สัปดาห์ถัดไป',
                 playAmbient: 'เล่นเสียงบรรยากาศ', pauseAmbient: 'หยุดเสียงบรรยากาศ', ambientVolume: 'ระดับเสียงบรรยากาศ',
@@ -228,6 +253,13 @@
                 deleteProfile: 'Delete this profile',
                 deleteConfirmTitle: 'Delete this profile?',
                 deleteConfirmMsg: 'All of "{name}"\'s data (plan, points, stats) will be permanently deleted.',
+                tabLogin: 'Log in', tabSignup: 'Sign up',
+                emailLabel: 'Email', passwordLabel: 'Password',
+                loginBtn: 'Log in', signupBtn: 'Create account',
+                avatarHint: 'Optional — tap to choose a photo', passwordHint: 'At least 6 characters.',
+                orDivider: 'or',
+                guestSectionLabel: 'Use without an account (this device only)',
+                errFillFields: 'Please fill in all fields.'
             },
             s1: {
                 stepLabel: 'Step {n} of 3',
@@ -310,6 +342,24 @@
             modalTimePicker: { title: 'Choose time', confirm: 'Confirm time' },
             modalDeckSelector: { title: 'Choose a deck', createNew: 'Create new deck', wordsCount: '{n} words' },
             modalDeleteCard: { title: 'Delete word', selectLabel: 'Choose a word to delete', warning: '*This cannot be undone.', ok: 'Delete word' },
+            modalAuth: {
+                errEmailInUse: 'That email already has an account — try logging in instead?',
+                errInvalidEmail: 'That email address looks invalid.',
+                errWeakPassword: 'Password must be at least 6 characters.',
+                errUserNotFound: 'No account found with that email.',
+                errWrongPassword: 'Incorrect email or password.',
+                errNetwork: 'Could not reach the network — please try again.',
+                errTooMany: 'Too many attempts — please wait a moment and try again.',
+                errGeneric: 'Something went wrong — please try again.'
+            },
+            modalLeaderboard: {
+                title: 'Leaderboard',
+                notConfigured: "This feature isn't set up yet (needs the account system configured first).",
+                needLogin: 'Log in with a real account to see the leaderboard and compete with others.',
+                loadError: 'Could not load the leaderboard — please try again.',
+                empty: 'Nobody is on the leaderboard yet.',
+                anonymous: 'Anonymous learner'
+            },
             modalHistory: {
                 title: 'Reading history',
                 empty: "You haven't finished any topics yet — start ticking them off on the first screen.",
@@ -362,7 +412,7 @@
                 focusMin: 'Focus length (min)', shortBreakMin: 'Short break (min)',
                 longBreakMin: 'Long break (min)', cycles: 'Cycles before long break',
                 soundSection: 'Sound', soundEnabled: 'Enable notification sound',
-                accountSection: 'Account', switchProfile: 'Switch profile',
+                accountSection: 'Account', switchProfile: 'Switch profile', logout: 'Log out',
                 historySection: 'Reading history', historyBtn: "See what you've finished",
                 feedbackSection: 'Feedback', reportBtn: 'Report a bug / suggestion',
                 dataSection: 'Data',
@@ -390,7 +440,7 @@
                 stopTimerFirst: 'Please stop the timer before editing the goal.'
             },
             aria: {
-                closeDialog: 'Close dialog', openSettings: 'Open settings', openSearch: 'Search',
+                closeDialog: 'Close dialog', openSettings: 'Open settings', openLeaderboard: 'Leaderboard', openSearch: 'Search',
                 closeSearch: 'Close search', deleteWord: 'Delete word', addWord: 'Add word',
                 prevMonth: 'Previous month', nextMonth: 'Next month', prevWeek: 'Previous week', nextWeek: 'Next week',
                 playAmbient: 'Play ambient sound', pauseAmbient: 'Pause ambient sound', ambientVolume: 'Ambient volume',

@@ -17,6 +17,7 @@
     const U = TFS.Utils;
     const I18n = TFS.I18n;
     const Storage = TFS.Storage;
+    const Auth = TFS.Auth;
 
     const AVATAR_EMOJIS = ['📚', '🎓', '🦉', '🧠', '🚀', '🌟', '🐯', '🍀'];
     let selectedEmoji = AVATAR_EMOJIS[0];
@@ -25,6 +26,90 @@
     const profileEmojiPicker = document.getElementById('profileEmojiPicker');
     const newProfileNameInput = document.getElementById('newProfileNameInput');
     const createProfileBtn = document.getElementById('createProfileBtn');
+
+    // ---------------------------------------------------------------- Real accounts (Firebase)
+
+    const authSection = document.getElementById('authSection');
+    const authTabLogin = document.getElementById('authTabLogin');
+    const authTabSignup = document.getElementById('authTabSignup');
+    const loginPane = document.getElementById('loginPane');
+    const signupPane = document.getElementById('signupPane');
+    const loginEmail = document.getElementById('loginEmail');
+    const loginPassword = document.getElementById('loginPassword');
+    const loginSubmitBtn = document.getElementById('loginSubmitBtn');
+    const signupName = document.getElementById('signupName');
+    const signupEmail = document.getElementById('signupEmail');
+    const signupPassword = document.getElementById('signupPassword');
+    const signupSubmitBtn = document.getElementById('signupSubmitBtn');
+    const signupAvatarPickBtn = document.getElementById('signupAvatarPickBtn');
+    const signupAvatarInput = document.getElementById('signupAvatarInput');
+    const signupAvatarPreview = document.getElementById('signupAvatarPreview');
+    const signupAvatarPlaceholder = document.getElementById('signupAvatarPlaceholder');
+    let pendingAvatarFile = null;
+
+    function setAuthTab(tab) {
+        authTabLogin.classList.toggle('is-active', tab === 'login');
+        authTabSignup.classList.toggle('is-active', tab === 'signup');
+        loginPane.hidden = tab !== 'login';
+        signupPane.hidden = tab !== 'signup';
+    }
+    authTabLogin.addEventListener('click', () => setAuthTab('login'));
+    authTabSignup.addEventListener('click', () => setAuthTab('signup'));
+
+    signupAvatarPickBtn.addEventListener('click', () => signupAvatarInput.click());
+    signupAvatarInput.addEventListener('change', () => {
+        const file = signupAvatarInput.files[0];
+        if (!file) return;
+        pendingAvatarFile = file;
+        const url = URL.createObjectURL(file);
+        signupAvatarPreview.src = url;
+        signupAvatarPreview.hidden = false;
+        signupAvatarPlaceholder.hidden = true;
+    });
+
+    /** After a successful log-in/sign-up, switch this browser's active
+     *  profile to the cloud account and reload — the same "reload to
+     *  re-init state.js against the right key" pattern local profile
+     *  switching, import and reset already use. */
+    function enterCloudProfile(uid) {
+        Storage.setActiveProfileId(Auth.cloudProfileId(uid));
+        global.location.reload();
+    }
+
+    function setAuthBusy(busy) {
+        loginSubmitBtn.disabled = busy;
+        signupSubmitBtn.disabled = busy;
+    }
+
+    loginSubmitBtn.addEventListener('click', async () => {
+        const email = loginEmail.value.trim();
+        const password = loginPassword.value;
+        if (!email || !password) { TFS.Toast.warn(I18n.t('s0.errFillFields')); return; }
+        setAuthBusy(true);
+        try {
+            const user = await Auth.logIn(email, password);
+            enterCloudProfile(user.uid);
+        } catch (e) {
+            TFS.Toast.error(I18n.t(Auth.errorKey(e)));
+            setAuthBusy(false);
+        }
+    });
+
+    signupSubmitBtn.addEventListener('click', async () => {
+        const name = signupName.value.trim();
+        const email = signupEmail.value.trim();
+        const password = signupPassword.value;
+        if (!name || !email || !password) { TFS.Toast.warn(I18n.t('s0.errFillFields')); return; }
+        if (password.length < 6) { TFS.Toast.warn(I18n.t('modalAuth.errWeakPassword')); return; }
+        setAuthBusy(true);
+        try {
+            const user = await Auth.signUp({ email, password, displayName: name, avatarFile: pendingAvatarFile });
+            enterCloudProfile(user.uid);
+        } catch (e) {
+            TFS.Toast.error(I18n.t(Auth.errorKey(e)));
+            setAuthBusy(false);
+        }
+    });
 
     function renderEmojiPicker() {
         profileEmojiPicker.innerHTML = '';
@@ -97,6 +182,18 @@
             selectedEmoji = AVATAR_EMOJIS[0];
             renderEmojiPicker();
             renderProfileList();
+
+            authSection.hidden = !Auth.isEnabled();
+            document.getElementById('guestSectionLabel').hidden = !Auth.isEnabled();
+            if (Auth.isEnabled()) {
+                setAuthTab('login');
+                loginEmail.value = ''; loginPassword.value = '';
+                signupName.value = ''; signupEmail.value = ''; signupPassword.value = '';
+                pendingAvatarFile = null;
+                signupAvatarPreview.hidden = true;
+                signupAvatarPlaceholder.hidden = false;
+                setAuthBusy(false);
+            }
         }
     });
 

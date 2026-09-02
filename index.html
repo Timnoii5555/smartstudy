@@ -64,6 +64,64 @@
             <p class="thai-title" style="font-size:1.125rem" data-i18n="s0.subtitle">Pick your profile so we remember your own progress.</p>
         </div>
 
+        <!-- Real account (Firebase). Hidden entirely by profile.js when
+             js/firebaseConfig.js has no real project config yet — the local
+             guest-profile section below is the only thing shown until then. -->
+        <div id="authSection" hidden>
+            <div class="auth-tabs">
+                <button type="button" id="authTabLogin" class="auth-tab is-active" data-i18n="s0.tabLogin">Log in</button>
+                <button type="button" id="authTabSignup" class="auth-tab" data-i18n="s0.tabSignup">Sign up</button>
+            </div>
+
+            <div id="loginPane">
+                <div class="field" style="margin-bottom:0.75rem">
+                    <label class="field__label" for="loginEmail" data-i18n="s0.emailLabel">Email</label>
+                    <input type="email" id="loginEmail" class="input" autocomplete="email">
+                </div>
+                <div class="field">
+                    <label class="field__label" for="loginPassword" data-i18n="s0.passwordLabel">Password</label>
+                    <input type="password" id="loginPassword" class="input" autocomplete="current-password">
+                </div>
+                <button type="button" id="loginSubmitBtn" class="btn btn--primary btn--block" style="margin-top:1.25rem">
+                    <span data-i18n="s0.loginBtn">Log in</span><span class="material-symbols-outlined" aria-hidden="true">login</span>
+                </button>
+            </div>
+
+            <div id="signupPane" hidden>
+                <div class="field" style="margin-bottom:0.75rem">
+                    <label class="field__label" data-i18n="s0.avatarLabel">Avatar</label>
+                    <div class="flex items-center gap-3">
+                        <button type="button" id="signupAvatarPickBtn" class="avatar-upload-btn">
+                            <img id="signupAvatarPreview" hidden alt="">
+                            <span id="signupAvatarPlaceholder" class="material-symbols-outlined" aria-hidden="true">add_a_photo</span>
+                        </button>
+                        <span class="text-outline" style="font-size:0.75rem" data-i18n="s0.avatarHint">Optional — tap to choose a photo</span>
+                        <input type="file" id="signupAvatarInput" class="settings-file-input" accept="image/*">
+                    </div>
+                </div>
+                <div class="field" style="margin-bottom:0.75rem">
+                    <label class="field__label" for="signupName" data-i18n="s0.nameLabel">Your name</label>
+                    <input type="text" id="signupName" class="input" maxlength="24" autocomplete="name">
+                </div>
+                <div class="field" style="margin-bottom:0.75rem">
+                    <label class="field__label" for="signupEmail" data-i18n="s0.emailLabel">Email</label>
+                    <input type="email" id="signupEmail" class="input" autocomplete="email">
+                </div>
+                <div class="field">
+                    <label class="field__label" for="signupPassword" data-i18n="s0.passwordLabel">Password</label>
+                    <input type="password" id="signupPassword" class="input" autocomplete="new-password">
+                    <p class="text-outline" style="font-size:0.6875rem" data-i18n="s0.passwordHint">At least 6 characters.</p>
+                </div>
+                <button type="button" id="signupSubmitBtn" class="btn btn--primary btn--block" style="margin-top:1.25rem">
+                    <span data-i18n="s0.signupBtn">Create account</span><span class="material-symbols-outlined" aria-hidden="true">person_add</span>
+                </button>
+            </div>
+
+            <div class="auth-divider"><span data-i18n="s0.orDivider">or</span></div>
+        </div>
+
+        <p id="guestSectionLabel" hidden class="text-outline" style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:0.75rem" data-i18n="s0.guestSectionLabel">Use without an account (this device only)</p>
+
         <div id="profileListContainer" class="flex flex-col gap-3" style="margin-bottom:2rem"></div>
 
         <div class="setup-card">
@@ -208,6 +266,9 @@
                 <h1 data-i18n="brand.short">Smart Study</h1>
             </button>
             <div class="app-header__actions">
+                <button type="button" id="openLeaderboardBtn" class="icon-btn" data-i18n-attr='{"aria-label":"aria.openLeaderboard"}' aria-label="Leaderboard">
+                    <span class="material-symbols-outlined" aria-hidden="true">emoji_events</span>
+                </button>
                 <button type="button" class="icon-btn js-open-settings" data-i18n-attr='{"aria-label":"aria.openSettings"}' aria-label="Settings">
                     <span class="material-symbols-outlined" aria-hidden="true">settings</span>
                 </button>
@@ -700,6 +761,16 @@
     </div>
 </div>
 
+<div id="leaderboardModal" class="modal-overlay hidden">
+    <div class="modal-panel modal-panel--sheet" data-modal-panel>
+        <div class="modal-header">
+            <h2 class="modal-title"><span class="material-symbols-outlined" aria-hidden="true">emoji_events</span> <span data-i18n="modalLeaderboard.title">Leaderboard</span></h2>
+            <button type="button" id="closeLeaderboardBtn" class="modal-close" data-i18n-attr='{"aria-label":"aria.closeDialog"}' aria-label="Close"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">close</span></button>
+        </div>
+        <div id="leaderboardBody"></div>
+    </div>
+</div>
+
 <div id="historyModal" class="modal-overlay hidden">
     <div class="modal-panel modal-panel--sheet" data-modal-panel>
         <div class="modal-header">
@@ -850,9 +921,14 @@
 
         <div class="settings-section">
             <span class="settings-section__title" data-i18n="settings.accountSection">Account</span>
-            <button type="button" id="settingsSwitchProfileBtn" class="btn btn--ghost btn--block" style="justify-content:flex-start">
-                <span class="material-symbols-outlined" aria-hidden="true">switch_account</span><span data-i18n="settings.switchProfile">Switch profile</span>
-            </button>
+            <div class="flex flex-col gap-2">
+                <button type="button" id="settingsSwitchProfileBtn" class="btn btn--ghost btn--block" style="justify-content:flex-start">
+                    <span class="material-symbols-outlined" aria-hidden="true">switch_account</span><span data-i18n="settings.switchProfile">Switch profile</span>
+                </button>
+                <button type="button" id="settingsLogoutBtn" class="btn btn--ghost btn--block" style="justify-content:flex-start" hidden>
+                    <span class="material-symbols-outlined" aria-hidden="true">logout</span><span data-i18n="settings.logout">Log out</span>
+                </button>
+            </div>
         </div>
 
         <div class="settings-section">
@@ -891,9 +967,19 @@
 <script src="js/toast.js"></script>
 <script src="js/quests.js"></script>
 <script src="js/customSounds.js"></script>
+<!-- Firebase is entirely optional — see js/firebaseConfig.js. If these fail
+     to load (offline, or blocked) js/auth.js catches it and the app runs on
+     local-only profiles exactly as it did before real accounts existed. -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script src="js/firebaseConfig.js"></script>
+<script src="js/auth.js"></script>
 <script src="js/modal.js"></script>
 <script src="js/router.js"></script>
 <script src="js/profile.js"></script>
+<script src="js/leaderboard.js"></script>
 <script src="js/datepicker.js"></script>
 <script src="js/wheelpicker.js"></script>
 <script src="js/onboarding.js"></script>
