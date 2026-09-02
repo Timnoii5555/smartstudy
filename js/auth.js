@@ -155,6 +155,8 @@
 
     function logOut() { return auth.signOut(); }
 
+    function resetPassword(email) { return auth.sendPasswordResetEmail(email); }
+
     /** One-way mirror: local points (computed by quests.js) → cloud. The
      *  cloud copy is read-only from the app's own point of view — it exists
      *  only so the leaderboard query has something to read across users. */
@@ -173,7 +175,7 @@
 
     TFS.Auth = {
         isEnabled, isCloudProfileId, cloudProfileId, init, onAuthChange, getCurrentUser,
-        signUp, logIn, logOut, syncPoints, fetchLeaderboard, errorKey
+        signUp, logIn, logOut, resetPassword, syncPoints, fetchLeaderboard, errorKey
     };
 
 })(window);

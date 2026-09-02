@@ -43,6 +43,7 @@
                 loginBtn: 'เข้าสู่ระบบ', signupBtn: 'สร้างบัญชี',
                 avatarHint: 'ไม่บังคับ — แตะเพื่อเลือกรูป', passwordHint: 'อย่างน้อย 6 ตัวอักษร',
                 orDivider: 'หรือ',
+                forgotPassword: 'ลืมรหัสผ่าน?',
                 guestSectionLabel: 'ใช้แบบไม่มีบัญชี (เก็บข้อมูลในเครื่องนี้เท่านั้น)',
                 errFillFields: 'กรุณากรอกข้อมูลให้ครบครับ'
             },
@@ -129,6 +130,12 @@
             modalTimePicker: { title: 'เลือกเวลา', confirm: 'ยืนยันเวลา' },
             modalDeckSelector: { title: 'เลือกชุดคำศัพท์', createNew: 'สร้างชุดคำศัพท์ใหม่', wordsCount: '{n} คำศัพท์' },
             modalDeleteCard: { title: 'ลบคำศัพท์', selectLabel: 'เลือกคำศัพท์ที่ต้องการลบ', warning: '*การลบคำศัพท์จะไม่สามารถกู้คืนได้', ok: 'ลบคำศัพท์' },
+            modalForgotPassword: {
+                title: 'ตั้งรหัสผ่านใหม่',
+                hint: 'เราจะส่งลิงก์สำหรับตั้งรหัสผ่านใหม่ไปที่อีเมลของคุณ',
+                send: 'ส่งลิงก์รีเซ็ต',
+                sent: 'ส่งลิงก์รีเซ็ตรหัสผ่านไปที่อีเมลแล้ว กรุณาเช็คกล่องจดหมาย'
+            },
             modalAuth: {
                 errEmailInUse: 'อีเมลนี้มีบัญชีอยู่แล้ว ลองเข้าสู่ระบบแทนไหมครับ?',
                 errInvalidEmail: 'รูปแบบอีเมลไม่ถูกต้อง',
@@ -252,6 +259,7 @@
                 loginBtn: 'Log in', signupBtn: 'Create account',
                 avatarHint: 'Optional — tap to choose a photo', passwordHint: 'At least 6 characters.',
                 orDivider: 'or',
+                forgotPassword: 'Forgot your password?',
                 guestSectionLabel: 'Use without an account (this device only)',
                 errFillFields: 'Please fill in all fields.'
             },
@@ -338,6 +346,12 @@
             modalTimePicker: { title: 'Choose time', confirm: 'Confirm time' },
             modalDeckSelector: { title: 'Choose a deck', createNew: 'Create new deck', wordsCount: '{n} words' },
             modalDeleteCard: { title: 'Delete word', selectLabel: 'Choose a word to delete', warning: '*This cannot be undone.', ok: 'Delete word' },
+            modalForgotPassword: {
+                title: 'Reset your password',
+                hint: "We'll email you a link to set a new password.",
+                send: 'Send reset link',
+                sent: 'Password reset link sent — please check your inbox.'
+            },
             modalAuth: {
                 errEmailInUse: 'That email already has an account — try logging in instead?',
                 errInvalidEmail: 'That email address looks invalid.',

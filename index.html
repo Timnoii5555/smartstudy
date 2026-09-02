@@ -117,6 +117,8 @@
                 </button>
             </div>
 
+            <button type="button" id="forgotPasswordBtn" class="auth-link" data-i18n="s0.forgotPassword">Forgot your password?</button>
+
             <div class="auth-divider"><span data-i18n="s0.orDivider">or</span></div>
         </div>
 
@@ -779,6 +781,21 @@
             <button type="button" id="closeHistoryBtn" class="modal-close" data-i18n-attr='{"aria-label":"aria.closeDialog"}' aria-label="Close"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">close</span></button>
         </div>
         <div id="historyListContainer" class="flex flex-col gap-4 custom-scroll" style="max-height:24rem;overflow-y:auto"></div>
+    </div>
+</div>
+
+<div id="forgotPasswordModal" class="modal-overlay hidden">
+    <div class="modal-panel modal-panel--sm" data-modal-panel>
+        <h2 class="modal-title" style="margin-bottom:0.5rem"><span class="material-symbols-outlined" aria-hidden="true">lock_reset</span> <span data-i18n="modalForgotPassword.title">Reset your password</span></h2>
+        <p class="text-outline" style="font-size:0.8125rem;margin-bottom:1rem" data-i18n="modalForgotPassword.hint">We'll email you a link to set a new password.</p>
+        <div class="field">
+            <label class="field__label" for="forgotPasswordEmail" data-i18n="s0.emailLabel">Email</label>
+            <input type="email" id="forgotPasswordEmail" class="input" autocomplete="email">
+        </div>
+        <div class="modal-actions">
+            <button type="button" id="closeForgotPasswordBtn" class="btn btn--ghost btn--flex" data-i18n="common.cancel">Cancel</button>
+            <button type="button" id="sendForgotPasswordBtn" class="btn btn--primary btn--flex" data-i18n="modalForgotPassword.send">Send reset link</button>
+        </div>
     </div>
 </div>
 

@@ -98,6 +98,36 @@
         }
     });
 
+    // ---------------------------------------------------------------- Forgot password
+
+    const forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
+    const forgotPasswordModal = document.getElementById('forgotPasswordModal');
+    const forgotPasswordEmail = document.getElementById('forgotPasswordEmail');
+    const sendForgotPasswordBtn = document.getElementById('sendForgotPasswordBtn');
+
+    forgotPasswordBtn.addEventListener('click', () => {
+        forgotPasswordEmail.value = loginEmail.value.trim();
+        TFS.Modal.open(forgotPasswordModal);
+    });
+    document.getElementById('closeForgotPasswordBtn').addEventListener('click', () => TFS.Modal.close(forgotPasswordModal));
+    sendForgotPasswordBtn.addEventListener('click', async () => {
+        const email = forgotPasswordEmail.value.trim();
+        if (!email) { TFS.Toast.warn(I18n.t('s0.errFillFields')); return; }
+        sendForgotPasswordBtn.disabled = true;
+        try {
+            await Auth.resetPassword(email);
+            TFS.Toast.success(I18n.t('modalForgotPassword.sent'));
+            TFS.Modal.close(forgotPasswordModal);
+        } catch (e) {
+            // Firebase deliberately reports "user not found" here too in newer
+            // SDK versions (to avoid leaking which emails have accounts) — the
+            // generic wrong-password/user-not-found copy reads fine either way.
+            TFS.Toast.error(I18n.t(Auth.errorKey(e)));
+        } finally {
+            sendForgotPasswordBtn.disabled = false;
+        }
+    });
+
     signupSubmitBtn.addEventListener('click', async () => {
         const name = signupName.value.trim();
         const email = signupEmail.value.trim();
