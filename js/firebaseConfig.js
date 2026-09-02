@@ -16,12 +16,12 @@
     const TFS = global.TFS = global.TFS || {};
 
     const FIREBASE_CONFIG = {
-        apiKey: "PASTE_YOUR_API_KEY_HERE",
-        authDomain: "PASTE_YOUR_PROJECT_ID.firebaseapp.com",
-        projectId: "PASTE_YOUR_PROJECT_ID",
-        storageBucket: "PASTE_YOUR_PROJECT_ID.appspot.com",
-        messagingSenderId: "PASTE_YOUR_SENDER_ID",
-        appId: "PASTE_YOUR_APP_ID"
+        apiKey: "AIzaSyCKg9JTSiRmI9gviorGz1BWO57g0Zvwr-k",
+        authDomain: "smartstudy-7a7cc.firebaseapp.com",
+        projectId: "smartstudy-7a7cc",
+        storageBucket: "smartstudy-7a7cc.firebasestorage.app",
+        messagingSenderId: "1035137479760",
+        appId: "1:1035137479760:web:56e189c2bdb244e84fcd55"
     };
 
     TFS.FIREBASE_CONFIG = FIREBASE_CONFIG;
