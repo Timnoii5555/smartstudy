@@ -153,9 +153,18 @@ html.dark .schedule-block--teal { background: rgba(20,184,166,0.15); color: #5ee
 .focus-stat-card__accent { position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: var(--color-success); }
 .ambient-panel { width: 100%; padding: 1rem 1.25rem; border-radius: var(--radius-lg); background: var(--color-surface-low); border: 1px solid var(--color-border); display: flex; flex-direction: column; gap: 0.75rem; }
 .ambient-panel__row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
-.ambient-panel__types { display: flex; gap: 0.5rem; }
-.ambient-type-btn { padding: 0.4rem 0.8rem; border-radius: var(--radius-full); border: 1px solid var(--color-border); background: var(--color-surface-lowest); font-size: 0.75rem; font-weight: 600; }
+.ambient-panel__types { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.ambient-type-btn {
+    display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.4rem 0.8rem;
+    border-radius: var(--radius-full); border: 1px solid var(--color-border);
+    background: var(--color-surface-lowest); font-size: 0.75rem; font-weight: 600; white-space: nowrap;
+}
 .ambient-type-btn.is-active { background: var(--color-primary-solid); border-color: var(--color-primary-solid); color: #fff; }
+.ambient-type-btn--add { color: var(--color-primary); border-style: dashed; }
+.ambient-type-btn__remove {
+    font-size: 0.9rem !important; margin-left: 0.15rem; border-radius: 50%; opacity: 0.7;
+}
+.ambient-type-btn__remove:hover { opacity: 1; }
 .ambient-panel__volume { display: flex; align-items: center; gap: 0.5rem; }
 .ambient-panel__volume input[type=range] { width: 8rem; }
 

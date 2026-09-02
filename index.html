@@ -16,7 +16,14 @@
 <script>
 (function () {
     try {
-        var raw = localStorage.getItem('tfs:v1:state');
+        // Local "profiles" (js/profile.js) each keep their own state blob under
+        // 'tfs:v1:state:<id>' instead of the unscoped legacy key — read whichever
+        // one storage.js will actually load, so the very first paint already
+        // matches that profile's saved theme/language instead of flashing to
+        // the system default and then correcting itself once theme.js runs.
+        var activeProfileId = localStorage.getItem('tfs:v1:activeProfile');
+        var stateKey = activeProfileId ? ('tfs:v1:state:' + activeProfileId) : 'tfs:v1:state';
+        var raw = localStorage.getItem(stateKey);
         var data = raw ? JSON.parse(raw) : null;
         var themeSetting = (data && data.settings && data.settings.theme) || 'system';
         var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -42,6 +49,45 @@
 <a class="skip-link" href="#mainContent" data-i18n="aria.skipToContent">Skip to main content</a>
 
 <div id="mainContent" tabindex="-1">
+
+<!-- ============================== SCREEN 0 — Local profile picker ("login") ============================== -->
+<div id="screen0" class="screen">
+    <header class="app-header">
+        <div class="app-header__inner" style="justify-content:flex-start">
+            <h1 class="text-primary" style="font-size:1.125rem;font-weight:700" data-i18n="brand.full">The Focused Scholar</h1>
+        </div>
+    </header>
+
+    <main class="screen__main container-narrow">
+        <div style="margin-bottom:2rem">
+            <h2 class="text-primary" data-screen-heading style="font-size:1.875rem;font-weight:700;margin-bottom:0.75rem" data-i18n="s0.title">Who's studying?</h2>
+            <p class="thai-title" style="font-size:1.125rem" data-i18n="s0.subtitle">Pick your profile so we remember your own progress.</p>
+        </div>
+
+        <div id="profileListContainer" class="flex flex-col gap-3" style="margin-bottom:2rem"></div>
+
+        <div class="setup-card">
+            <div class="setup-card__head">
+                <span class="setup-card__head-icon"><span class="material-symbols-outlined" aria-hidden="true">person_add</span></span>
+                <h2 style="font-size:1.125rem;font-weight:500" class="thai-title" data-i18n="s0.createTitle">Create a new profile</h2>
+            </div>
+            <div class="field" style="margin-bottom:1rem">
+                <label class="field__label" for="newProfileNameInput" data-i18n="s0.nameLabel">Your name</label>
+                <input type="text" id="newProfileNameInput" class="input" maxlength="24" data-i18n-attr='{"placeholder":"s0.namePlaceholder"}' placeholder="e.g. Nueng">
+            </div>
+            <div class="field">
+                <label class="field__label" data-i18n="s0.avatarLabel">Avatar</label>
+                <div class="flex flex-wrap gap-2" id="profileEmojiPicker" role="radiogroup"></div>
+            </div>
+        </div>
+
+        <div style="margin-top:1.5rem">
+            <button id="createProfileBtn" class="btn btn--primary btn--block" style="padding-top:1.25rem;padding-bottom:1.25rem">
+                <span data-i18n="s0.createBtn">Start studying</span><span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+            </button>
+        </div>
+    </main>
+</div>
 
 <!-- ============================== SCREEN 1 — Subject picker ============================== -->
 <div id="screen1" class="screen">
@@ -134,6 +180,15 @@
                     <p id="calculationText" data-i18n="s2.calcDefault">Choose your exam date to calculate remaining time.</p>
                 </div>
             </div>
+
+            <div class="setup-card">
+                <div class="setup-card__head">
+                    <span class="setup-card__head-icon setup-card__head-icon--tertiary"><span class="material-symbols-outlined" aria-hidden="true">sort</span></span>
+                    <h2 style="font-size:1.125rem;font-weight:500" class="thai-title" data-i18n="s2.orderSection">Reading order</h2>
+                </div>
+                <p class="text-outline" style="font-size:0.8125rem;margin-bottom:1rem" data-i18n="s2.orderHint">How should we sequence your topics day to day?</p>
+                <div id="orderStrategyGrid" class="order-strategy-grid" role="radiogroup" aria-label="Reading order"></div>
+            </div>
         </section>
 
         <div style="margin-top:3rem">
@@ -162,9 +217,14 @@
 
     <main class="screen__main container-wide">
         <section style="margin-bottom:2rem">
-            <h1 data-screen-heading style="font-size:1.75rem;font-weight:600" data-i18n="s3.greeting">Hi, here's today's summary</h1>
+            <div class="flex items-center justify-between flex-wrap gap-2">
+                <h1 data-screen-heading style="font-size:1.75rem;font-weight:600" data-i18n="s3.greeting">Hi, here's today's summary</h1>
+                <span id="pointsBadge" class="points-badge"></span>
+            </div>
             <p class="text-outline" style="font-size:0.875rem" data-i18n="s3.subtitle">Update your progress below 🚀</p>
         </section>
+
+        <div id="questsCard" class="card quests-card" style="margin-bottom:1.5rem"></div>
 
         <div class="dashboard-grid">
             <div class="card dashboard-card--wide progress-ring-card">
@@ -474,17 +534,15 @@
                         <span class="material-symbols-outlined" aria-hidden="true" id="ambientPlayIcon">play_arrow</span>
                     </button>
                 </div>
+                <div class="ambient-panel__types custom-scroll" id="ambientTypeGrid" role="radiogroup" aria-label="Ambient sound type"></div>
                 <div class="ambient-panel__row">
-                    <div class="ambient-panel__types">
-                        <button type="button" id="ambientTypeBrown" class="ambient-type-btn is-active" data-i18n="s6.ambientBrown">Brown noise</button>
-                        <button type="button" id="ambientTypeRain" class="ambient-type-btn" data-i18n="s6.ambientRain">Rain</button>
-                    </div>
                     <div class="ambient-panel__volume">
                         <span class="material-symbols-outlined text-outline" aria-hidden="true" style="font-size:1.1rem">volume_down</span>
                         <label for="ambientVolumeSlider" class="sr-only" data-i18n-attr='{"aria-label":"aria.ambientVolume"}'>Volume</label>
                         <input type="range" id="ambientVolumeSlider" min="0" max="1" step="0.01" value="0.5">
                     </div>
                 </div>
+                <input type="file" id="ambientUploadInput" class="settings-file-input" accept="audio/*">
             </div>
         </div>
 
@@ -647,7 +705,10 @@
         <div class="modal-panel__icon modal-panel__icon--success"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:2.5rem;font-variation-settings:'FILL' 1">workspace_premium</span></div>
         <h2 style="font-size:1.5rem;font-weight:700;margin-bottom:0.5rem" data-i18n="congrats.title">Congratulations! 🎉</h2>
         <p class="text-outline" style="font-size:0.875rem;margin-bottom:1.5rem" data-i18n="congrats.message">You did it!</p>
-        <button type="button" id="closeCongratsBtn" class="btn btn--primary btn--block" data-i18n="congrats.close">Awesome!</button>
+        <div class="flex flex-col gap-2">
+            <button type="button" id="chooseNextSubjectBtn" class="btn btn--primary btn--block" data-i18n="congrats.chooseNext">Choose your next subject</button>
+            <button type="button" id="closeCongratsBtn" class="btn btn--ghost btn--block" data-i18n="congrats.close">Awesome!</button>
+        </div>
     </div>
 </div>
 
@@ -763,6 +824,13 @@
         </div>
 
         <div class="settings-section">
+            <span class="settings-section__title" data-i18n="settings.accountSection">Account</span>
+            <button type="button" id="settingsSwitchProfileBtn" class="btn btn--ghost btn--block" style="justify-content:flex-start">
+                <span class="material-symbols-outlined" aria-hidden="true">switch_account</span><span data-i18n="settings.switchProfile">Switch profile</span>
+            </button>
+        </div>
+
+        <div class="settings-section">
             <span class="settings-section__title" data-i18n="settings.dataSection">Data</span>
             <div class="flex flex-col gap-2">
                 <button type="button" id="settingsExportBtn" class="btn btn--ghost btn--block" style="justify-content:flex-start"><span class="material-symbols-outlined" aria-hidden="true">download</span><span data-i18n="settings.exportBtn">Export</span></button>
@@ -777,12 +845,16 @@
 <script src="js/utils.js"></script>
 <script src="js/storage.js"></script>
 <script src="data/subjects.js"></script>
+<script src="js/planner.js"></script>
 <script src="js/state.js"></script>
 <script src="js/i18n.js"></script>
 <script src="js/theme.js"></script>
 <script src="js/toast.js"></script>
+<script src="js/quests.js"></script>
+<script src="js/customSounds.js"></script>
 <script src="js/modal.js"></script>
 <script src="js/router.js"></script>
+<script src="js/profile.js"></script>
 <script src="js/datepicker.js"></script>
 <script src="js/wheelpicker.js"></script>
 <script src="js/onboarding.js"></script>

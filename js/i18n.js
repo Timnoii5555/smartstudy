@@ -26,14 +26,28 @@
                 noResults: 'ไม่พบผลลัพธ์', search: 'ค้นหา', settings: 'ตั้งค่า', on: 'เปิด', off: 'ปิด'
             },
             nav: { home: 'หน้าหลัก', schedule: 'ตาราง', flashcards: 'แฟลชการ์ด', focus: 'โฟกัส' },
+            s0: {
+                title: 'ใครจะอ่านหนังสือวันนี้?',
+                subtitle: 'เลือกโปรไฟล์ของคุณ เพื่อให้เราจดจำความคืบหน้าของคุณโดยเฉพาะ',
+                createTitle: 'สร้างโปรไฟล์ใหม่',
+                nameLabel: 'ชื่อของคุณ',
+                namePlaceholder: 'เช่น หนึ่ง',
+                avatarLabel: 'เลือกไอคอนประจำตัว',
+                createBtn: 'เริ่มอ่านหนังสือ',
+                errName: 'กรุณาใส่ชื่อของคุณก่อนครับ',
+                deleteProfile: 'ลบโปรไฟล์นี้',
+                deleteConfirmTitle: 'ลบโปรไฟล์นี้?',
+                deleteConfirmMsg: 'ข้อมูลทั้งหมดของ "{name}" (แผนการอ่าน คะแนน สถิติ) จะถูกลบอย่างถาวร',
+            },
             s1: {
                 stepLabel: 'ขั้นที่ {n} จาก 3',
                 title: 'เป้าหมายของคุณ',
                 subtitle: 'คุณกำลังเตรียมตัวสอบวิชาอะไรบ้าง?',
-                hint: '*เลือกได้เพียง 1 วิชาเพื่อโฟกัสให้เต็มที่',
+                hint: '*เลือกได้เพียง 1 วิชาเพื่อโฟกัสให้เต็มที่ (เรียนจบแล้วค่อยเลือกวิชาถัดไปได้)',
                 topicsHeading: 'เนื้อหาที่ต้องอ่าน:',
                 next: 'ถัดไป',
-                errSelectSubject: 'กรุณาเลือกวิชาที่จะสอบก่อนครับ'
+                errSelectSubject: 'กรุณาเลือกวิชาที่จะสอบก่อนครับ',
+                completedTag: '✓ เรียนจบแล้ว'
             },
             s2: {
                 title: 'กำหนดวันสอบและเวลาที่คุณมี',
@@ -48,7 +62,9 @@
                 calcToday: 'สอบวันนี้! มีเวลาทบทวน {hrs} ชม.',
                 calcDaysLeft: 'เหลือเวลา {days} วัน (รวมเวลาอ่าน {total} ชม.)',
                 generate: 'สร้างแผนการเรียนอัจฉริยะ',
-                errSelectDate: 'เลือกวันสอบก่อนครับ 📅'
+                errSelectDate: 'เลือกวันสอบก่อนครับ 📅',
+                orderSection: 'ลำดับการอ่าน',
+                orderHint: 'อยากให้เราจัดลำดับหัวข้อในแต่ละวันแบบไหน?'
             },
             datePicker: { title: 'เลือกวันสอบ' },
             s3: {
@@ -70,7 +86,8 @@
             congrats: {
                 title: 'ยินดีด้วย! 🎉',
                 message: 'คุณทำภารกิจอ่านหนังสือครบ 100% แล้ว\nความพยายามของคุณยอดเยี่ยมมาก ขอให้โชคดีกับการสอบนะครับ!',
-                close: 'ยอดเยี่ยม!'
+                close: 'ยอดเยี่ยม!',
+                chooseNext: 'เลือกวิชาถัดไป'
             },
             s4: {
                 title: 'ตารางเรียน',
@@ -126,6 +143,8 @@
                 start: 'เริ่มจับเวลา', pause: 'หยุดพัก', resume: 'ทำต่อ', reset: 'รีเซ็ต',
                 soundToggleLabel: 'เสียงแจ้งเตือนเมื่อครบเวลา',
                 ambientLabel: 'เสียงบรรยากาศ (Ambient)', ambientBrown: 'เสียงสีน้ำตาล', ambientRain: 'เสียงฝน',
+                ambientAddCustom: 'เพิ่มเสียงของฉัน', ambientUploadSuccess: 'เพิ่มเสียงเรียบร้อยแล้ว',
+                ambientUploadError: 'ไม่สามารถบันทึกไฟล์เสียงนี้ได้', ambientCustomError: 'เล่นไฟล์เสียงนี้ไม่ได้ ขอเปลี่ยนเป็นเสียงสีน้ำตาลแทน',
                 today: 'วันนี้', goal: 'เป้าหมาย',
                 timerAnnounce: '{phase} เหลือเวลา {time}',
                 phaseCompleteFocus: 'ครบเวลาโฟกัสแล้ว ถึงเวลาพัก!',
@@ -139,6 +158,7 @@
                 focusMin: 'ช่วงโฟกัส (นาที)', shortBreakMin: 'พักสั้น (นาที)',
                 longBreakMin: 'พักยาว (นาที)', cycles: 'จำนวนรอบก่อนพักยาว',
                 soundSection: 'เสียง', soundEnabled: 'เปิดเสียงแจ้งเตือน',
+                accountSection: 'บัญชี', switchProfile: 'สลับโปรไฟล์ผู้ใช้',
                 dataSection: 'ข้อมูล',
                 exportBtn: 'ส่งออกข้อมูล (JSON)', importBtn: 'นำเข้าข้อมูล (JSON)',
                 resetAllBtn: 'ล้างข้อมูลทั้งหมด',
@@ -147,6 +167,13 @@
                 exportSuccess: 'ส่งออกข้อมูลเรียบร้อยแล้ว', importSuccess: 'นำเข้าข้อมูลเรียบร้อยแล้ว',
                 importErrorJson: 'ไฟล์ที่เลือกไม่ใช่ไฟล์ JSON ที่ถูกต้อง', importErrorShape: 'ไฟล์นี้ไม่ใช่ไฟล์ข้อมูลของ Smart Study',
                 resetSuccess: 'ล้างข้อมูลทั้งหมดเรียบร้อยแล้ว'
+            },
+            quests: {
+                cardTitle: 'เควสประจำวัน',
+                pointsTotal: '{n} คะแนนสะสม',
+                pointsBadge: '⭐ {n} · {level}',
+                claim: 'รับ +{points}',
+                claimedToast: 'รับรางวัลแล้ว! +{points} คะแนน 🎉'
             },
             errors: {
                 storageUnavailable: 'เบราว์เซอร์นี้ไม่รองรับการบันทึกข้อมูลถาวร (เช่น โหมดส่วนตัว) การเปลี่ยนแปลงจะหายไปเมื่อปิดแท็บนี้',
@@ -171,14 +198,28 @@
                 noResults: 'No results found', search: 'Search', settings: 'Settings', on: 'On', off: 'Off'
             },
             nav: { home: 'Home', schedule: 'Schedule', flashcards: 'Flashcards', focus: 'Focus' },
+            s0: {
+                title: "Who's studying today?",
+                subtitle: 'Pick your profile so we can remember your own progress.',
+                createTitle: 'Create a new profile',
+                nameLabel: 'Your name',
+                namePlaceholder: 'e.g. Alex',
+                avatarLabel: 'Choose an avatar',
+                createBtn: 'Start studying',
+                errName: 'Please enter your name first.',
+                deleteProfile: 'Delete this profile',
+                deleteConfirmTitle: 'Delete this profile?',
+                deleteConfirmMsg: 'All of "{name}"\'s data (plan, points, stats) will be permanently deleted.',
+            },
             s1: {
                 stepLabel: 'Step {n} of 3',
                 title: 'Your Goal',
                 subtitle: 'Which exam are you preparing for?',
-                hint: '*Pick just one subject so you can focus fully',
+                hint: '*Pick just one subject so you can focus fully (choose another once you finish it)',
                 topicsHeading: 'Topics to cover:',
                 next: 'Next',
-                errSelectSubject: 'Please choose a subject to continue.'
+                errSelectSubject: 'Please choose a subject to continue.',
+                completedTag: '✓ Completed'
             },
             s2: {
                 title: 'Set your exam date & available time',
@@ -193,7 +234,9 @@
                 calcToday: "It's exam day! You have {hrs} hrs left to review.",
                 calcDaysLeft: '{days} days left (total study time: {total} hrs)',
                 generate: 'Generate my smart study plan',
-                errSelectDate: 'Please choose your exam date first 📅'
+                errSelectDate: 'Please choose your exam date first 📅',
+                orderSection: 'Reading order',
+                orderHint: 'How should we sequence your topics day to day?'
             },
             datePicker: { title: 'Choose exam date' },
             s3: {
@@ -215,7 +258,8 @@
             congrats: {
                 title: 'Congratulations! 🎉',
                 message: "You've covered 100% of your syllabus.\nAmazing effort — good luck on the exam!",
-                close: 'Awesome!'
+                close: 'Awesome!',
+                chooseNext: 'Choose your next subject'
             },
             s4: {
                 title: 'Schedule',
@@ -271,6 +315,8 @@
                 start: 'Start', pause: 'Pause', resume: 'Resume', reset: 'Reset',
                 soundToggleLabel: 'Play a sound when time is up',
                 ambientLabel: 'Ambient sound', ambientBrown: 'Brown noise', ambientRain: 'Rain',
+                ambientAddCustom: 'Add my own sound', ambientUploadSuccess: 'Sound added successfully.',
+                ambientUploadError: 'Could not save that sound file.', ambientCustomError: "Couldn't play that sound file — switched back to brown noise.",
                 today: 'Today', goal: 'Goal',
                 timerAnnounce: '{phase}, {time} remaining',
                 phaseCompleteFocus: 'Focus session complete — time for a break!',
@@ -284,6 +330,7 @@
                 focusMin: 'Focus length (min)', shortBreakMin: 'Short break (min)',
                 longBreakMin: 'Long break (min)', cycles: 'Cycles before long break',
                 soundSection: 'Sound', soundEnabled: 'Enable notification sound',
+                accountSection: 'Account', switchProfile: 'Switch profile',
                 dataSection: 'Data',
                 exportBtn: 'Export data (JSON)', importBtn: 'Import data (JSON)',
                 resetAllBtn: 'Reset all data',
@@ -292,6 +339,13 @@
                 exportSuccess: 'Data exported successfully.', importSuccess: 'Data imported successfully.',
                 importErrorJson: 'That file is not valid JSON.', importErrorShape: 'That file is not a Smart Study data export.',
                 resetSuccess: 'All data has been reset.'
+            },
+            quests: {
+                cardTitle: 'Daily quests',
+                pointsTotal: '{n} points',
+                pointsBadge: '⭐ {n} · {level}',
+                claim: 'Claim +{points}',
+                claimedToast: 'Reward claimed! +{points} points 🎉'
             },
             errors: {
                 storageUnavailable: "This browser can't persist data here (e.g. private browsing). Changes will be lost when you close this tab.",

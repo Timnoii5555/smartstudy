@@ -318,11 +318,13 @@
     document.getElementById('btnReviewAgain').addEventListener('click', () => {
         sessionResults[sessionOrder[sessionIndex]] = false;
         sessionIndex++;
+        if (TFS.Quests) TFS.Quests.bump('flashcard-review', 1);
         render();
     });
     document.getElementById('btnRemembered').addEventListener('click', () => {
         sessionResults[sessionOrder[sessionIndex]] = true;
         sessionIndex++;
+        if (TFS.Quests) TFS.Quests.bump('flashcard-review', 1);
         render();
     });
     btnRestartFlashcards.addEventListener('click', () => {

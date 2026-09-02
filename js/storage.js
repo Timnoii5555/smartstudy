@@ -15,6 +15,72 @@
     const STORAGE_KEY = 'tfs:v1:state';
     const SCHEMA_VERSION = 1;
 
+    // ---- Local profiles ("login") ------------------------------------------
+    // There is no server here, so "login" means "which named local profile on
+    // this device am I studying as" rather than real authentication. Each
+    // profile gets its own state blob under its own key so progress, points,
+    // flashcards etc. never bleed between people sharing one computer.
+    // These three keys live OUTSIDE the versioned state blob on purpose: they
+    // must be readable before any profile's state has even been chosen.
+    const PROFILES_INDEX_KEY = 'tfs:v1:profiles';
+    const ACTIVE_PROFILE_KEY = 'tfs:v1:activeProfile';
+
+    function profileStateKey(profileId) { return `tfs:v1:state:${profileId}`; }
+
+    function readJSON(key, fallback) {
+        try {
+            const raw = global.localStorage.getItem(key);
+            return raw ? JSON.parse(raw) : fallback;
+        } catch (e) { return fallback; }
+    }
+    function writeJSON(key, value) {
+        try { global.localStorage.setItem(key, JSON.stringify(value)); return true; }
+        catch (e) { console.error('[storage] Failed to write', key, e); return false; }
+    }
+
+    function listProfiles() { return readJSON(PROFILES_INDEX_KEY, []); }
+
+    function getActiveProfileId() {
+        try { return global.localStorage.getItem(ACTIVE_PROFILE_KEY) || null; }
+        catch (e) { return null; }
+    }
+
+    function setActiveProfileId(id) {
+        try {
+            if (id) global.localStorage.setItem(ACTIVE_PROFILE_KEY, id);
+            else global.localStorage.removeItem(ACTIVE_PROFILE_KEY);
+        } catch (e) { /* ignore — worst case the profile picker shows again next launch */ }
+    }
+
+    /** Create a brand-new, empty profile and make it the active one. Does NOT
+     *  reload the page — the caller (profile.js) does that, the same way
+     *  settings.js reloads after import/reset, so every stateful engine
+     *  (timers, i18n, ambient audio) restarts clean against the new profile. */
+    function createProfile(name, emoji) {
+        const id = U.uuid();
+        const profiles = [...listProfiles(), { id, name, emoji: emoji || '📚', createdAt: Date.now() }];
+        writeJSON(PROFILES_INDEX_KEY, profiles);
+        setActiveProfileId(id);
+        return id;
+    }
+
+    function switchProfile(id) { setActiveProfileId(id); }
+
+    function deleteProfile(id) {
+        writeJSON(PROFILES_INDEX_KEY, listProfiles().filter(p => p.id !== id));
+        try { global.localStorage.removeItem(profileStateKey(id)); } catch (e) { /* ignore */ }
+        if (getActiveProfileId() === id) setActiveProfileId(null);
+    }
+
+    /** The localStorage key this session's state actually lives under: the
+     *  active profile's own key once one has been chosen, or the legacy
+     *  unscoped key before any profile system existed / before the very
+     *  first profile is created. */
+    function effectiveKey() {
+        const activeId = getActiveProfileId();
+        return activeId ? profileStateKey(activeId) : STORAGE_KEY;
+    }
+
     // In-memory fallback used only when localStorage is unavailable, so the
     // app keeps working for the current tab session even without persistence.
     let memoryFallback = null;
@@ -35,7 +101,10 @@
             plan: {
                 subject: null,
                 examDateISO: null,
-                dailyGoalSeconds: 4.5 * 3600
+                dailyGoalSeconds: 4.5 * 3600,
+                orderStrategy: 'balanced', // 'sequential' | 'easyFirst' | 'hardFirst' | 'balanced'
+                readingPlan: null, // { subjectId, orderStrategy, generatedAt, days: [{dateISO, topicIds}] } — see planner.js
+                completedSubjects: [] // subject ids the learner has fully finished, so a new one can be suggested
             },
             syllabusProgress: {
                 // subjectId -> { topicId: true }
@@ -60,6 +129,14 @@
             },
             ui: {
                 lastScreen: 'screen1'
+            },
+            quests: {
+                dateISO: null, // set to today's date the first time quests.js touches it
+                progress: {},  // questId -> number, reset daily
+                claimed: {}    // questId -> true, reset daily
+            },
+            points: {
+                total: 0 // cumulative — never reset by the daily quest rollover
             }
         };
     }
@@ -116,7 +193,7 @@
             return memoryFallback || defaultState();
         }
         try {
-            const raw = global.localStorage.getItem(STORAGE_KEY);
+            const raw = global.localStorage.getItem(effectiveKey());
             if (!raw) return defaultState();
             const parsed = JSON.parse(raw);
             // Merge onto defaults so any field missing from an older/partial save
@@ -136,7 +213,7 @@
             return false;
         }
         try {
-            global.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            global.localStorage.setItem(effectiveKey(), JSON.stringify(state));
             return true;
         } catch (e) {
             console.error('[storage] Failed to write state (quota exceeded or storage disabled).', e);
@@ -166,7 +243,7 @@
         debouncedWrite.cancel && debouncedWrite.cancel();
         memoryFallback = null;
         if (!storageBroken) {
-            try { global.localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignore */ }
+            try { global.localStorage.removeItem(effectiveKey()); } catch (e) { /* ignore */ }
         }
     }
 
@@ -192,7 +269,9 @@
         STORAGE_KEY, SCHEMA_VERSION,
         defaultState, load, save, flush, clearAll, exportJSON, importJSON,
         isBroken: () => storageBroken,
-        wasCorrupt: () => hadCorruptData
+        wasCorrupt: () => hadCorruptData,
+        // Local profiles ("login") — see the block above.
+        listProfiles, getActiveProfileId, setActiveProfileId, createProfile, switchProfile, deleteProfile
     };
 
 })(window);

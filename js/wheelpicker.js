@@ -46,6 +46,27 @@
         wheelEl.addEventListener('scroll', () => updateSelection(wheelEl));
     }
 
-    TFS.WheelPicker = { createItems, updateSelection, getValue, setValue, attachScrollSync };
+    /**
+     * A raw `wheel` event over a tall list with small items translates a single
+     * mouse-wheel notch (deltaY often 100-120px) into several items at once —
+     * on a 40px-tall `.wheel-item` that flies past 2-3 values per notch, making
+     * it impossible to stop on the exact hour/minute you want. This normalizes
+     * every wheel gesture (mouse notch or trackpad) to move exactly one step,
+     * with a short cooldown so a single big-delta notch can't double-fire.
+     */
+    function attachWheelStep(wheelEl, max) {
+        let cooldown = false;
+        wheelEl.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (cooldown) return;
+            cooldown = true;
+            const dir = e.deltaY > 0 ? 1 : -1;
+            const next = Math.min(max, Math.max(0, getValue(wheelEl) + dir));
+            setValue(wheelEl, next);
+            setTimeout(() => { cooldown = false; }, 90);
+        }, { passive: false });
+    }
+
+    TFS.WheelPicker = { createItems, updateSelection, getValue, setValue, attachScrollSync, attachWheelStep };
 
 })(window);

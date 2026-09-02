@@ -51,6 +51,7 @@
     });
 
     function resolveInitialScreen() {
+        if (!TFS.Storage.getActiveProfileId()) return 'screen0';
         const s = State.get();
         if (!s.plan.subject) return 'screen1';
         if (!s.plan.examDateISO) return 'screen2';

@@ -65,6 +65,14 @@
         const totals = { ...State.get().focus.totalSecondsByDate };
         totals[today] = Math.max(0, (totals[today] || 0) + n);
         State.commit({ focus: { totalSecondsByDate: totals } });
+
+        // Guarded so this only commits state (and re-renders subscribers) the
+        // instant the goal is actually crossed, not on every single tick.
+        const goal = State.get().plan.dailyGoalSeconds;
+        if (goal > 0 && TFS.Quests) {
+            const reached = totals[today] >= goal ? 1 : 0;
+            if (TFS.Quests.getProgress('daily-goal') !== reached) TFS.Quests.setProgress('daily-goal', reached);
+        }
     }
 
     // ---------------------------------------------------------------- DOM refs
@@ -128,6 +136,7 @@
             const cycles = pomodoroSettings().cyclesBeforeLongBreak;
             mode = (cyclesCompletedToday % cycles === 0) ? 'longBreak' : 'shortBreak';
             TFS.Toast.info(I18n.t('s6.phaseCompleteFocus'));
+            if (TFS.Quests) TFS.Quests.bump('focus-session', 1);
         } else {
             mode = 'focus';
             TFS.Toast.info(I18n.t('s6.phaseCompleteBreak'));
@@ -212,6 +221,8 @@
             WP.createItems(minutesWheel, 59, true);
             WP.attachScrollSync(hoursWheel);
             WP.attachScrollSync(minutesWheel);
+            WP.attachWheelStep(hoursWheel, 24);
+            WP.attachWheelStep(minutesWheel, 59);
             goalWheelsBuilt = true;
         }
         const goal = State.get().plan.dailyGoalSeconds;
@@ -235,14 +246,56 @@
     // — which fails under file:// the same way fetch() does. ScriptProcessorNode
     // still works everywhere and needs no extra file, so it is the pragmatic choice
     // for an app meant to be opened straight from disk with zero server.
-    let audioCtx = null, noiseNode = null, filterNode = null, gainNode = null;
+    //
+    // Six generated sounds ship out of the box, each just a different filter
+    // (+ optional slow LFO amplitude wobble) over the same underlying noise
+    // source — no audio files to bundle, so the app stays a handful of KB.
+    // A learner can also upload their own file (js/customSounds.js); that
+    // path bypasses the noise graph entirely and loops a decoded AudioBuffer.
+    const BUILTIN_AMBIENT_TYPES = {
+        brown: { icon: 'water_drop', filterType: 'lowpass', freq: 400, q: 0.7, label: { th: 'เสียงสีน้ำตาล', en: 'Brown noise' } },
+        rain: { icon: 'rainy', filterType: 'bandpass', freq: 2500, q: 0.7, label: { th: 'เสียงฝน', en: 'Rain' } },
+        white: { icon: 'blur_on', filterType: 'highpass', freq: 20, q: 0.0001, label: { th: 'เสียงสีขาว', en: 'White noise' } },
+        ocean: { icon: 'waves', filterType: 'lowpass', freq: 600, q: 0.8, lfo: { freq: 0.15, depth: 0.55 }, label: { th: 'คลื่นทะเล', en: 'Ocean waves' } },
+        wind: { icon: 'air', filterType: 'bandpass', freq: 800, q: 0.5, lfo: { freq: 0.4, depth: 0.35 }, label: { th: 'เสียงลม', en: 'Wind' } },
+        cafe: { icon: 'local_cafe', filterType: 'bandpass', freq: 1200, q: 0.3, lfo: { freq: 1.3, depth: 0.15 }, label: { th: 'ร้านกาแฟ', en: 'Café murmur' } }
+    };
+
+    let audioCtx = null, gainNode = null;
+    let noiseNode = null, filterNode = null, modGain = null, lfoOsc = null, lfoDepthGain = null;
+    let customSourceNode = null, customSourceLoadToken = 0;
     let ambientPlaying = false;
 
-    function ensureAmbientGraph() {
+    function ensureAudioCtx() {
         if (audioCtx) return;
         audioCtx = new (global.AudioContext || global.webkitAudioContext)();
         gainNode = audioCtx.createGain();
         gainNode.gain.value = State.get().settings.ambientVolume;
+        gainNode.connect(audioCtx.destination);
+        audioCtx.suspend(); // start silent until the user presses play
+    }
+
+    function teardownBuiltinGraph() {
+        if (noiseNode) { noiseNode.disconnect(); noiseNode.onaudioprocess = null; noiseNode = null; }
+        if (filterNode) { filterNode.disconnect(); filterNode = null; }
+        if (lfoOsc) { try { lfoOsc.stop(); } catch (e) { /* already stopped */ } lfoOsc.disconnect(); lfoOsc = null; }
+        if (lfoDepthGain) { lfoDepthGain.disconnect(); lfoDepthGain = null; }
+        if (modGain) { modGain.disconnect(); modGain = null; }
+    }
+
+    function teardownCustomSource() {
+        if (customSourceNode) {
+            try { customSourceNode.stop(); } catch (e) { /* already stopped */ }
+            customSourceNode.disconnect();
+            customSourceNode = null;
+        }
+    }
+
+    function buildBuiltinGraph(cfg) {
+        teardownCustomSource();
+        teardownBuiltinGraph();
+        modGain = audioCtx.createGain();
+        modGain.gain.value = 1;
         filterNode = audioCtx.createBiquadFilter();
         noiseNode = audioCtx.createScriptProcessor(4096, 1, 1);
         let lastOut = 0;
@@ -255,16 +308,56 @@
             }
         };
         noiseNode.connect(filterNode);
-        filterNode.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-        applyAmbientType(State.get().settings.ambientType);
-        audioCtx.suspend(); // start silent until the user presses play
+        filterNode.connect(modGain);
+        modGain.connect(gainNode);
+
+        filterNode.type = cfg.filterType;
+        filterNode.frequency.value = cfg.freq;
+        filterNode.Q.value = cfg.q;
+
+        if (cfg.lfo) {
+            lfoOsc = audioCtx.createOscillator();
+            lfoOsc.frequency.value = cfg.lfo.freq;
+            lfoDepthGain = audioCtx.createGain();
+            lfoDepthGain.gain.value = cfg.lfo.depth;
+            lfoOsc.connect(lfoDepthGain);
+            lfoDepthGain.connect(modGain.gain);
+            lfoOsc.start();
+        }
+    }
+
+    async function buildCustomGraph(soundId) {
+        teardownBuiltinGraph();
+        teardownCustomSource();
+        const token = ++customSourceLoadToken;
+        try {
+            const blob = await TFS.CustomSounds.getSoundBlob(soundId);
+            if (!blob) throw new Error('sound_not_found');
+            const arrayBuffer = await blob.arrayBuffer();
+            const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+            if (token !== customSourceLoadToken) return; // a newer selection superseded this one mid-decode
+            customSourceNode = audioCtx.createBufferSource();
+            customSourceNode.buffer = audioBuffer;
+            customSourceNode.loop = true;
+            customSourceNode.connect(gainNode);
+            customSourceNode.start(0);
+        } catch (e) {
+            console.warn('[focus] Could not play custom ambient sound, falling back to brown noise.', e);
+            TFS.Toast.error(I18n.t('s6.ambientCustomError'));
+            State.commit({ settings: { ambientType: 'brown' } });
+            buildBuiltinGraph(BUILTIN_AMBIENT_TYPES.brown);
+            renderAmbientUI();
+            renderAmbientTypeGrid();
+        }
     }
 
     function applyAmbientType(type) {
-        if (!filterNode) return;
-        if (type === 'rain') { filterNode.type = 'bandpass'; filterNode.frequency.value = 2500; filterNode.Q.value = 0.7; }
-        else { filterNode.type = 'lowpass'; filterNode.frequency.value = 400; filterNode.Q.value = 0.7; }
+        ensureAudioCtx();
+        if (typeof type === 'string' && type.indexOf('custom:') === 0) {
+            buildCustomGraph(type.slice('custom:'.length));
+        } else {
+            buildBuiltinGraph(BUILTIN_AMBIENT_TYPES[type] || BUILTIN_AMBIENT_TYPES.brown);
+        }
     }
 
     function stopAmbient() {
@@ -274,7 +367,8 @@
     }
 
     function toggleAmbient() {
-        ensureAmbientGraph();
+        ensureAudioCtx();
+        if (!noiseNode && !customSourceNode) applyAmbientType(State.get().settings.ambientType);
         if (ambientPlaying) { audioCtx.suspend(); ambientPlaying = false; }
         else { audioCtx.resume(); ambientPlaying = true; }
         renderAmbientUI();
@@ -282,9 +376,83 @@
 
     const ambientPlayBtn = document.getElementById('ambientPlayBtn');
     const ambientPlayIcon = document.getElementById('ambientPlayIcon');
-    const ambientTypeBrown = document.getElementById('ambientTypeBrown');
-    const ambientTypeRain = document.getElementById('ambientTypeRain');
+    const ambientTypeGrid = document.getElementById('ambientTypeGrid');
     const ambientVolumeSlider = document.getElementById('ambientVolumeSlider');
+    const ambientUploadInput = document.getElementById('ambientUploadInput');
+
+    function selectAmbientType(type) {
+        State.commit({ settings: { ambientType: type } });
+        applyAmbientType(type);
+        renderAmbientUI();
+        renderAmbientTypeGrid(); // rebuild so `is-active` moves to the newly picked button
+    }
+
+    async function renderAmbientTypeGrid() {
+        ambientTypeGrid.innerHTML = '';
+        const currentType = State.get().settings.ambientType;
+
+        Object.entries(BUILTIN_AMBIENT_TYPES).forEach(([key, cfg]) => {
+            ambientTypeGrid.appendChild(U.el('button', {
+                className: 'ambient-type-btn' + (currentType === key ? ' is-active' : ''),
+                attrs: { type: 'button' },
+                on: { click: () => selectAmbientType(key) }
+            }, [
+                U.el('span', { className: 'material-symbols-outlined', attrs: { 'aria-hidden': 'true', style: 'font-size:1.1rem' }, text: cfg.icon }),
+                U.el('span', { text: I18n.pick(cfg.label) })
+            ]));
+        });
+
+        if (TFS.CustomSounds.isSupported()) {
+            let customSounds = [];
+            try { customSounds = await TFS.CustomSounds.listSounds(); } catch (e) { /* IndexedDB unavailable — just show none */ }
+
+            customSounds.forEach(sound => {
+                const key = 'custom:' + sound.id;
+                ambientTypeGrid.appendChild(U.el('button', {
+                    className: 'ambient-type-btn ambient-type-btn--custom' + (currentType === key ? ' is-active' : ''),
+                    attrs: { type: 'button', title: sound.name },
+                    on: { click: () => selectAmbientType(key) }
+                }, [
+                    U.el('span', { className: 'material-symbols-outlined', attrs: { 'aria-hidden': 'true', style: 'font-size:1.1rem' }, text: 'music_note' }),
+                    U.el('span', { text: sound.name, attrs: { style: 'max-width:6rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap' } }),
+                    U.el('span', {
+                        className: 'material-symbols-outlined ambient-type-btn__remove', attrs: { 'aria-hidden': 'true', style: 'font-size:0.95rem' }, text: 'close',
+                        on: { click: (e) => { e.stopPropagation(); removeCustomSound(sound.id, key, currentType); } }
+                    })
+                ]));
+            });
+
+            ambientTypeGrid.appendChild(U.el('button', {
+                className: 'ambient-type-btn ambient-type-btn--add', attrs: { type: 'button' },
+                on: { click: () => ambientUploadInput.click() }
+            }, [
+                U.el('span', { className: 'material-symbols-outlined', attrs: { 'aria-hidden': 'true', style: 'font-size:1.1rem' }, text: 'add' }),
+                U.el('span', { text: I18n.t('s6.ambientAddCustom') })
+            ]));
+        }
+    }
+
+    async function removeCustomSound(soundId, key, currentType) {
+        await TFS.CustomSounds.deleteSound(soundId);
+        if (currentType === key) selectAmbientType('brown');
+        renderAmbientTypeGrid();
+    }
+
+    ambientUploadInput.addEventListener('change', async () => {
+        const file = ambientUploadInput.files[0];
+        ambientUploadInput.value = '';
+        if (!file) return;
+        const name = file.name.replace(/\.[^/.]+$/, '').slice(0, 30) || 'Custom sound';
+        try {
+            const id = await TFS.CustomSounds.addSound(name, file);
+            await renderAmbientTypeGrid();
+            selectAmbientType('custom:' + id);
+            TFS.Toast.success(I18n.t('s6.ambientUploadSuccess'));
+        } catch (e) {
+            console.error('[focus] Failed to store custom ambient sound', e);
+            TFS.Toast.error(I18n.t('s6.ambientUploadError'));
+        }
+    });
 
     function renderAmbientUI() {
         ambientPlayIcon.textContent = ambientPlaying ? 'pause' : 'play_arrow';
@@ -296,15 +464,10 @@
         const labelKey = ambientPlaying ? 'aria.pauseAmbient' : 'aria.playAmbient';
         ambientPlayBtn.setAttribute('data-i18n-attr', JSON.stringify({ 'aria-label': labelKey }));
         ambientPlayBtn.setAttribute('aria-label', I18n.t(labelKey));
-        const type = State.get().settings.ambientType;
-        ambientTypeBrown.classList.toggle('is-active', type === 'brown');
-        ambientTypeRain.classList.toggle('is-active', type === 'rain');
         ambientVolumeSlider.value = State.get().settings.ambientVolume;
     }
 
     ambientPlayBtn.addEventListener('click', toggleAmbient);
-    ambientTypeBrown.addEventListener('click', () => { State.commit({ settings: { ambientType: 'brown' } }); applyAmbientType('brown'); renderAmbientUI(); });
-    ambientTypeRain.addEventListener('click', () => { State.commit({ settings: { ambientType: 'rain' } }); applyAmbientType('rain'); renderAmbientUI(); });
     ambientVolumeSlider.addEventListener('input', () => {
         const v = parseFloat(ambientVolumeSlider.value);
         if (gainNode) gainNode.gain.value = v;
@@ -324,6 +487,7 @@
             loadRuntimeFromState();
             render();
             renderAmbientUI();
+            renderAmbientTypeGrid();
         },
         onLeave: () => {
             // Bug 1.2: never let the Pomodoro countdown or ambient audio keep

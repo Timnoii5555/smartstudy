@@ -98,6 +98,11 @@
         render();
     });
 
+    document.getElementById('settingsSwitchProfileBtn').addEventListener('click', () => {
+        TFS.Modal.close(settingsModal);
+        TFS.Router.show('screen0');
+    });
+
     exportBtn.addEventListener('click', () => {
         State.flushNow();
         const filename = `smart-study-backup-${U.formatDateISO(new Date())}.json`;

@@ -136,6 +136,45 @@
 .subject-card__accordion { width: 100%; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--color-border); }
 .subject-card__accordion p { font-size: 0.875rem; font-weight: 700; color: var(--color-primary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.25rem; }
 .subject-card__accordion ul { font-size: 0.75rem; color: var(--color-outline); list-style: disc; margin-left: 1.5rem; display: flex; flex-direction: column; gap: 0.25rem; }
+.subject-card.is-completed { opacity: 0.75; }
+.subject-card__done-tag { font-size: 0.6875rem; font-weight: 700; color: var(--color-success, #16a34a); vertical-align: middle; }
+
+/* ---------- Reading-order picker (screen 2) ---------- */
+
+.order-strategy-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+@media (max-width: 30rem) { .order-strategy-grid { grid-template-columns: 1fr; } }
+.order-strategy-card {
+    display: flex; align-items: flex-start; gap: 0.75rem; text-align: left; padding: 1rem;
+    background: var(--color-surface-lowest); border: 2px solid transparent; border-radius: var(--radius-lg);
+    cursor: pointer; font: inherit; color: inherit; position: relative;
+}
+.order-strategy-card:hover { background: var(--color-surface-low); }
+.order-strategy-card.is-selected { border-color: var(--color-primary); }
+.order-strategy-card__icon { color: var(--color-primary); font-size: 1.5rem; flex-shrink: 0; }
+.order-strategy-card__title { font-size: 0.8125rem; font-weight: 700; margin-bottom: 0.125rem; }
+.order-strategy-card__desc { font-size: 0.6875rem; color: var(--color-outline); line-height: 1.4; }
+.order-strategy-card__check { position: absolute; top: 0.5rem; right: 0.5rem; font-size: 1.1rem; color: var(--color-primary); opacity: 0; transition: opacity 0.15s ease; }
+.order-strategy-card.is-selected .order-strategy-card__check { opacity: 1; }
+
+/* ---------- Local profile picker (screen 0) ---------- */
+
+.profile-pick-card { display: flex; align-items: stretch; gap: 0.5rem; }
+.profile-pick-card__main {
+    flex: 1; display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem;
+    background: var(--color-surface-lowest); border-radius: var(--radius-xl); box-shadow: var(--shadow-sm);
+    border: none; font: inherit; color: inherit; cursor: pointer; text-align: left;
+}
+.profile-pick-card__main:hover { background: var(--color-surface-low); }
+.profile-pick-card__avatar {
+    width: 2.75rem; height: 2.75rem; border-radius: 50%; background: var(--color-primary-fixed);
+    display: flex; align-items: center; justify-content: center; font-size: 1.375rem; flex-shrink: 0;
+}
+.profile-pick-card__name { flex: 1; font-weight: 600; font-size: 1rem; }
+.profile-emoji-btn {
+    width: 2.75rem; height: 2.75rem; border-radius: 50%; border: 2px solid transparent;
+    background: var(--color-surface-high); font-size: 1.25rem; cursor: pointer;
+}
+.profile-emoji-btn.is-selected { border-color: var(--color-primary); background: var(--color-primary-fixed); }
 
 /* ---------- Form controls ---------- */
 
@@ -213,6 +252,43 @@ input[type=range]::-moz-range-track { height: 0.5rem; background: var(--color-su
 
 /* ---------- Badge ---------- */
 .badge { display: inline-flex; align-items: baseline; gap: 0.25rem; background: var(--color-surface-low); padding: 0.5rem 1rem; border-radius: var(--radius-lg); border: 1px solid var(--color-border); }
+
+.points-badge {
+    display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.75rem; font-weight: 700;
+    color: var(--color-tertiary, var(--color-primary)); background: var(--color-tertiary-fixed, var(--color-primary-fixed));
+    padding: 0.35rem 0.75rem; border-radius: var(--radius-full); white-space: nowrap;
+}
+
+/* ---------- Quests card (screen 3) ---------- */
+
+.quests-card { padding: 1.25rem 1.5rem; }
+.quests-card__title { font-size: 1.0625rem; font-weight: 700; margin-bottom: 1rem; }
+.quests-card__header { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.25rem; }
+.quests-card__level { display: flex; align-items: center; gap: 0.75rem; }
+.quests-card__level-icon {
+    width: 2.75rem; height: 2.75rem; border-radius: 50%; background: var(--color-primary-fixed); color: var(--color-primary);
+    display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;
+}
+.quests-card__level-title { font-weight: 700; font-size: 0.9375rem; }
+.quests-card__level-points { font-size: 0.75rem; color: var(--color-outline); }
+.quests-card__level-track { height: 0.375rem; border-radius: var(--radius-full); background: var(--color-surface-highest); overflow: hidden; }
+.quests-card__level-fill { height: 100%; background: linear-gradient(90deg, var(--color-primary), var(--color-tertiary, var(--color-primary))); border-radius: inherit; transition: width 0.3s ease; }
+.quests-card__list { display: flex; flex-direction: column; gap: 0.75rem; }
+
+.quest-row { display: flex; align-items: center; gap: 0.875rem; padding: 0.75rem; border-radius: var(--radius-lg); background: var(--color-surface-low); }
+.quest-row.is-claimed { opacity: 0.55; }
+.quest-row__icon {
+    width: 2.25rem; height: 2.25rem; border-radius: var(--radius-md); background: var(--color-surface-lowest);
+    display: flex; align-items: center; justify-content: center; color: var(--color-primary); flex-shrink: 0;
+}
+.quest-row.is-claimed .quest-row__icon { color: var(--color-success, #16a34a); }
+.quest-row__body { flex: 1; min-width: 0; }
+.quest-row__label { font-size: 0.8125rem; font-weight: 500; margin-bottom: 0.375rem; }
+.quest-row__track { height: 0.3rem; border-radius: var(--radius-full); background: var(--color-surface-highest); overflow: hidden; }
+.quest-row__fill { height: 100%; background: var(--color-primary); border-radius: inherit; transition: width 0.3s ease; }
+.quest-row__count { font-size: 0.6875rem; font-weight: 700; color: var(--color-outline); flex-shrink: 0; }
+.quest-row__claim { flex-shrink: 0; animation: quest-claim-pulse 1.4s ease-in-out infinite; }
+@keyframes quest-claim-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
 
 /* ---------- Modal ---------- */
 

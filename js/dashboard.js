@@ -21,6 +21,8 @@
     const totalLessonsBadge = document.getElementById('totalLessonsBadge');
     const dashboardMainSubject = document.getElementById('dashboardMainSubject');
     const checklistContainer = document.getElementById('syllabusChecklistContainer');
+    const pointsBadge = document.getElementById('pointsBadge');
+    const questsCard = document.getElementById('questsCard');
 
     const RING_CIRCUMFERENCE = 2 * Math.PI * 88; // matches the SVG circle's r="88"
 
@@ -38,12 +40,31 @@
     function toggleTopic(subjectId, topicId) {
         const allProgress = { ...State.get().syllabusProgress };
         const topicMap = { ...(allProgress[subjectId] || {}) };
-        if (topicMap[topicId]) delete topicMap[topicId];
+        const wasDone = !!topicMap[topicId];
+        if (wasDone) delete topicMap[topicId];
         else topicMap[topicId] = true;
         allProgress[subjectId] = topicMap;
         // No explicit render() call here: this screen is subscribed to state
         // changes below and re-renders itself whenever it is the active screen.
         State.commit({ syllabusProgress: allProgress });
+        if (!wasDone && TFS.Quests) TFS.Quests.bump('complete-topic', 1);
+    }
+
+    /** Today's actionable slice of the syllabus: whatever the reading plan
+     *  (built in onboarding.js from js/planner.js) has scheduled on or before
+     *  today, still including already-completed ones so ticking a box doesn't
+     *  make it vanish mid-session. Falls back to the full topic list when
+     *  there is no plan yet (e.g. older saved data from before planner.js
+     *  existed, or the daily-goal/exam-date fields were edited via Settings
+     *  without regenerating a plan) so the checklist is never just empty.
+     */
+    function getTodaysTopics(subject) {
+        const plan = State.get().plan.readingPlan;
+        if (!plan || plan.subjectId !== subject.id || !plan.days.length) return subject.topics;
+        const todayISO = U.formatDateISO(new Date());
+        const dueIds = TFS.Planner.topicsDueBy(plan, todayISO);
+        const dueTopics = subject.topics.filter(t => dueIds.includes(t.id));
+        return dueTopics.length ? dueTopics : subject.topics;
     }
 
     function renderChecklist(subject) {
@@ -53,7 +74,9 @@
             return;
         }
         const progress = getTopicProgressMap(subject.id);
-        subject.topics.forEach(topic => {
+        const todaysTopics = getTodaysTopics(subject);
+        totalLessonsBadge.textContent = String(todaysTopics.length);
+        todaysTopics.forEach(topic => {
             const done = !!progress[topic.id];
             const item = U.el('button', {
                 className: 'task-item' + (done ? ' is-done' : ''),
@@ -71,6 +94,22 @@
         });
     }
 
+    function renderPointsBadge() {
+        if (!TFS.Quests) return;
+        const points = State.get().points.total;
+        const level = TFS.Quests.levelFor(points);
+        pointsBadge.innerHTML = '';
+        pointsBadge.appendChild(U.el('span', { className: 'material-symbols-outlined', attrs: { 'aria-hidden': 'true', style: 'font-size:1rem' }, text: 'star' }));
+        pointsBadge.appendChild(document.createTextNode(I18n.t('quests.pointsBadge', { n: points, level: I18n.pick(level.current.title) })));
+    }
+
+    function markSubjectCompleted(subjectId) {
+        const done = State.get().plan.completedSubjects || [];
+        if (!done.includes(subjectId)) {
+            State.commit({ plan: { completedSubjects: [...done, subjectId] } });
+        }
+    }
+
     function render() {
         const subject = getCurrentSubject();
         const plan = State.get().plan;
@@ -85,14 +124,16 @@
 
         progressPercentText.textContent = percent + '%';
         completedLessonsText.textContent = String(completed);
-        totalLessonsBadge.textContent = String(total);
         miniProgressBar.style.width = percent + '%';
         progressCircle.setAttribute('stroke-dasharray', RING_CIRCUMFERENCE.toFixed(2));
         progressCircle.setAttribute('stroke-dashoffset', (RING_CIRCUMFERENCE - (percent / 100) * RING_CIRCUMFERENCE).toFixed(2));
 
         renderChecklist(subject);
+        renderPointsBadge();
+        if (TFS.Quests) TFS.Quests.renderCard(questsCard);
 
         if (percent === 100 && total > 0) {
+            if (subject) markSubjectCompleted(subject.id);
             if (!hasShownCongratsThisSession) {
                 TFS.Modal.open('congratsModal');
                 hasShownCongratsThisSession = true;
@@ -103,6 +144,10 @@
     }
 
     document.getElementById('closeCongratsBtn').addEventListener('click', () => TFS.Modal.close('congratsModal'));
+    document.getElementById('chooseNextSubjectBtn').addEventListener('click', () => {
+        TFS.Modal.close('congratsModal');
+        TFS.Router.show('screen1');
+    });
 
     function isActive() { return TFS.Router.current() === 'screen3'; }
     // Both guarded by isActive(): render() can pop the congrats modal open, which

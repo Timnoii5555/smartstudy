@@ -326,6 +326,8 @@
         WP.createItems(wheelMinutesClass, 59, true);
         WP.attachScrollSync(wheelHoursClass);
         WP.attachScrollSync(wheelMinutesClass);
+        WP.attachWheelStep(wheelHoursClass, 23);
+        WP.attachWheelStep(wheelMinutesClass, 59);
         wheelsBuilt = true;
     }
 
