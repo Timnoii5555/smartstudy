@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Focused Scholar - Smart Study Planner</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%9A%3C/text%3E%3C/svg%3E">
+
+<!--
+  Zero-flash theme bootstrap. This MUST run before any CSS paints, so it is an
+  inline, synchronous script at the very top of <head> — before stylesheets,
+  before theme.js. It duplicates a couple of lines of logic from
+  storage.js/theme.js on purpose (those files load far too late to prevent a
+  flash of the wrong theme on the very first frame).
+-->
+<script>
+(function () {
+    try {
+        var raw = localStorage.getItem('tfs:v1:state');
+        var data = raw ? JSON.parse(raw) : null;
+        var themeSetting = (data && data.settings && data.settings.theme) || 'system';
+        var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var isDark = themeSetting === 'dark' || (themeSetting === 'system' && prefersDark);
+        document.documentElement.classList.toggle('dark', isDark);
+        document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+
+        var lang = (data && data.settings && data.settings.language) || (navigator.language || 'th').toLowerCase().indexOf('en') === 0 ? 'en' : 'th';
+        document.documentElement.setAttribute('lang', lang);
+    } catch (e) { /* localStorage unavailable or corrupt — fall back to light theme, Thai */ }
+})();
+</script>
+
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Kanit:wght@300;400;500;600&family=Prompt:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="styles/tokens.css" rel="stylesheet"/>
+<link href="styles/base.css" rel="stylesheet"/>
+<link href="styles/components.css" rel="stylesheet"/>
+<link href="styles/screens.css" rel="stylesheet"/>
+</head>
+<body>
+
+<a class="skip-link" href="#mainContent" data-i18n="aria.skipToContent">Skip to main content</a>
+
+<div id="mainContent" tabindex="-1">
+
+<!-- ============================== SCREEN 1 — Subject picker ============================== -->
+<div id="screen1" class="screen">
+    <header class="app-header">
+        <div class="app-header__inner" style="justify-content:flex-start">
+            <h1 class="text-primary" style="font-size:1.125rem;font-weight:700" data-i18n="brand.full">The Focused Scholar</h1>
+        </div>
+    </header>
+
+    <main class="screen__main container-narrow">
+        <div class="flex items-center justify-between" style="margin-bottom:3rem">
+            <div class="step-dots">
+                <div class="step-dots__dot is-active"></div>
+                <div class="step-dots__dot"></div>
+                <div class="step-dots__dot"></div>
+            </div>
+            <span class="text-outline" style="font-size:0.875rem;font-weight:500" data-i18n="s1.stepLabel" data-i18n-vars='{"n":1}'>Step 1 of 3</span>
+        </div>
+
+        <div style="margin-bottom:2.5rem">
+            <h2 class="text-primary" data-screen-heading style="font-size:1.875rem;font-weight:700;margin-bottom:0.75rem" data-i18n="s1.title">Your goal</h2>
+            <p class="thai-title" style="font-size:1.25rem" data-i18n="s1.subtitle">Which exam are you preparing for?</p>
+            <p class="text-outline" style="font-size:0.875rem;margin-top:0.25rem" data-i18n="s1.hint">*Pick one subject</p>
+        </div>
+
+        <div class="subject-grid" id="subjectGrid" role="radiogroup" aria-label="Subject"></div>
+    </main>
+
+    <footer class="app-footer">
+        <button id="nextBtn1" class="btn btn--primary w-full" style="max-width:28rem;height:3.5rem">
+            <span data-i18n="s1.next">Next</span><span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+        </button>
+    </footer>
+</div>
+
+<!-- ============================== SCREEN 2 — Exam date & hours ============================== -->
+<div id="screen2" class="screen">
+    <header class="app-header">
+        <div class="app-header__inner">
+            <button class="app-header__brand js-back-to-setup">
+                <span class="material-symbols-outlined" aria-hidden="true">menu_book</span>
+                <h1 data-i18n="brand.short">Smart Study</h1>
+            </button>
+        </div>
+    </header>
+
+    <main class="screen__main container-narrow">
+        <header style="margin-bottom:3rem">
+            <h1 data-screen-heading style="font-size:1.5rem;font-weight:600;margin-bottom:0.5rem" class="thai-title" data-i18n="s2.title">Set your exam date &amp; hours</h1>
+            <p class="text-outline" style="font-size:0.875rem" data-i18n="s2.subtitle">We'll calculate the best plan for you.</p>
+        </header>
+
+        <section class="setup-section">
+            <div class="setup-card">
+                <div class="setup-card__head">
+                    <span class="setup-card__head-icon"><span class="material-symbols-outlined" aria-hidden="true">calendar_today</span></span>
+                    <h2 style="font-size:1.125rem;font-weight:500" class="thai-title" data-i18n="s2.examDateSection">Your exam date</h2>
+                </div>
+                <button type="button" id="openDatePickerBtn" class="date-trigger">
+                    <label class="field__label" style="margin-bottom:0.5rem;display:block" data-i18n="s2.examDateFieldLabel">Date</label>
+                    <span class="date-trigger__row">
+                        <span id="displayDate" class="date-trigger__value" data-i18n="s2.examDatePlaceholder">Choose date...</span>
+                        <span class="material-symbols-outlined text-primary" aria-hidden="true">event_note</span>
+                    </span>
+                </button>
+            </div>
+
+            <div class="setup-card">
+                <div class="flex justify-between items-center">
+                    <div class="setup-card__head">
+                        <span class="setup-card__head-icon setup-card__head-icon--tertiary"><span class="material-symbols-outlined" aria-hidden="true">schedule</span></span>
+                        <h2 style="font-size:1.125rem;font-weight:500" class="thai-title" data-i18n="s2.dailyHoursSection">Daily study hours</h2>
+                    </div>
+                    <div class="hours-readout">
+                        <span id="timeDisplay" class="hours-readout__value">4.5</span>
+                        <span class="text-outline" data-i18n="common.hours">hrs</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="timeSlider" class="sr-only" data-i18n="s2.dailyHoursSection">Daily study hours</label>
+                    <input id="timeSlider" max="12" min="1" step="0.5" type="range" value="4.5" aria-valuetext="4.5 hours"/>
+                    <div class="slider-labels">
+                        <span data-i18n="s2.sliderEasy">Light</span>
+                        <span data-i18n="s2.sliderHard">Warrior mode</span>
+                    </div>
+                </div>
+                <div class="callout" role="status">
+                    <span class="material-symbols-outlined" aria-hidden="true" style="font-variation-settings:'FILL' 1">lightbulb</span>
+                    <p id="calculationText" data-i18n="s2.calcDefault">Choose your exam date to calculate remaining time.</p>
+                </div>
+            </div>
+        </section>
+
+        <div style="margin-top:3rem">
+            <button id="generateBtn" class="btn btn--primary btn--block" style="padding-top:1.25rem;padding-bottom:1.25rem">
+                <span data-i18n="s2.generate">Generate my study plan</span><span class="material-symbols-outlined" aria-hidden="true">bolt</span>
+            </button>
+        </div>
+    </main>
+</div>
+
+<!-- ============================== SCREEN 3 — Dashboard ============================== -->
+<div id="screen3" class="screen">
+    <header class="app-header">
+        <div class="app-header__inner">
+            <button class="app-header__brand js-back-to-setup">
+                <span class="material-symbols-outlined" aria-hidden="true">menu_book</span>
+                <h1 data-i18n="brand.short">Smart Study</h1>
+            </button>
+            <div class="app-header__actions">
+                <button type="button" class="icon-btn js-open-settings" data-i18n-attr='{"aria-label":"aria.openSettings"}' aria-label="Settings">
+                    <span class="material-symbols-outlined" aria-hidden="true">settings</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="screen__main container-wide">
+        <section style="margin-bottom:2rem">
+            <h1 data-screen-heading style="font-size:1.75rem;font-weight:600" data-i18n="s3.greeting">Hi, here's today's summary</h1>
+            <p class="text-outline" style="font-size:0.875rem" data-i18n="s3.subtitle">Update your progress below 🚀</p>
+        </section>
+
+        <div class="dashboard-grid">
+            <div class="card dashboard-card--wide progress-ring-card">
+                <h3 class="w-full" style="font-size:0.875rem;font-weight:500;margin-bottom:2rem" data-i18n="s3.progressTitle">Core content progress</h3>
+                <div class="progress-ring">
+                    <svg viewBox="0 0 192 192">
+                        <circle class="progress-ring__track" cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" stroke-width="12"></circle>
+                        <circle id="progressCircle" class="text-primary" cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" stroke-dasharray="552.92" stroke-dashoffset="552.92" stroke-linecap="round" stroke-width="12"></circle>
+                    </svg>
+                    <div class="progress-ring__value-wrap">
+                        <span id="progressPercentText" class="progress-ring__pct">0%</span>
+                        <span class="text-outline" style="font-size:0.75rem;font-weight:500" data-i18n="s3.readinessLabel">Readiness</span>
+                    </div>
+                </div>
+                <div class="progress-stats">
+                    <div class="progress-stats__item">
+                        <span id="dashboardGoalHours" class="progress-stats__value">00:00</span>
+                        <span class="text-outline" style="font-size:0.75rem" data-i18n="s3.goalLabel">Goal</span>
+                    </div>
+                    <div class="progress-stats__item progress-stats__item--bordered">
+                        <span id="completedLessonsText" class="progress-stats__value text-tertiary">0</span>
+                        <span class="text-outline" style="font-size:0.75rem" data-i18n="s3.completedLabel">Completed</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-card--narrow flex flex-col gap-4">
+                <div class="goal-banner">
+                    <div class="flex justify-between items-center" style="align-items:flex-start;margin-bottom:1.5rem">
+                        <div>
+                            <p style="opacity:0.8;font-size:0.75rem;font-weight:500;margin-bottom:0.25rem" data-i18n="s3.dailyGoalTag">Daily goal</p>
+                            <h3 id="dashboardMainSubject" style="font-size:1.25rem;font-weight:600" data-i18n="s3.subjectLoading">Loading subject...</h3>
+                        </div>
+                        <span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.875rem;font-variation-settings:'FILL' 1">auto_awesome</span>
+                    </div>
+                    <div class="goal-banner__inner">
+                        <div class="flex justify-between" style="font-size:0.75rem;margin-bottom:0.5rem"><span data-i18n="s3.progressCaption">Push to 100%</span></div>
+                        <div class="mini-progress"><div class="mini-progress__fill" id="miniProgressBar" style="width:0%"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card dashboard-card--full" style="padding:1.5rem">
+                <div class="flex justify-between items-center flex-wrap gap-3" style="margin-bottom:1.5rem">
+                    <h3 style="font-size:1.125rem;font-weight:600" data-i18n="s3.todoTitle">Today's to-do list</h3>
+                    <div class="badge">
+                        <span id="totalLessonsBadge" class="text-primary" style="font-size:1.25rem;font-weight:700">0</span>
+                        <span class="text-outline" style="font-size:0.75rem" data-i18n="s3.lessonsUnit">topics</span>
+                        <span style="width:1px;height:1.25rem;background:var(--color-border);margin:0 0.25rem"></span>
+                        <span class="text-outline" style="font-size:0.6875rem" data-i18n="s3.tickHint">Tap to mark done</span>
+                    </div>
+                </div>
+                <div id="syllabusChecklistContainer" class="checklist"></div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- ============================== SCREEN 4 — Schedule ============================== -->
+<div id="screen4" class="screen">
+    <header class="app-header">
+        <div class="app-header__inner">
+            <button class="app-header__brand js-back-to-setup">
+                <span class="material-symbols-outlined" aria-hidden="true">menu_book</span>
+                <h1 data-i18n="brand.short">Smart Study</h1>
+            </button>
+            <div class="app-header__actions">
+                <button type="button" id="openScheduleSearchBtn" class="icon-btn" aria-expanded="false" aria-controls="scheduleSearchPanel" data-i18n-attr='{"aria-label":"aria.openSearch"}' aria-label="Search">
+                    <span class="material-symbols-outlined" aria-hidden="true">search</span>
+                </button>
+                <button type="button" class="icon-btn js-open-settings" data-i18n-attr='{"aria-label":"aria.openSettings"}' aria-label="Settings">
+                    <span class="material-symbols-outlined" aria-hidden="true">settings</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="screen__main container-wide">
+        <div id="scheduleSearchPanel" class="search-panel" hidden>
+            <div class="search-panel__input-wrap">
+                <span class="material-symbols-outlined" aria-hidden="true">search</span>
+                <input type="search" id="scheduleSearchInput" class="input search-panel__input" data-i18n-attr='{"placeholder":"s4.searchPlaceholder"}' placeholder="Search...">
+            </div>
+            <div id="scheduleSearchResults" class="search-results"></div>
+        </div>
+
+        <section class="schedule-top-bar">
+            <div>
+                <h1 data-screen-heading style="font-size:1.875rem;font-weight:700" data-i18n="s4.title">Schedule</h1>
+            </div>
+            <button id="openModalBtn" class="btn btn--primary btn--sm">
+                <span class="material-symbols-outlined" aria-hidden="true" style="font-size:1rem">add</span><span data-i18n="s4.addSession">Add session</span>
+            </button>
+        </section>
+
+        <div class="schedule-layout">
+            <div class="schedule-sidebar flex flex-col gap-4">
+                <div class="card mini-calendar-card">
+                    <div class="mini-calendar-card__head">
+                        <span style="font-weight:600;font-size:0.875rem" id="miniMonthYear">-</span>
+                        <div class="flex gap-2">
+                            <button type="button" id="prevMonthBtn" class="icon-btn" style="width:1.75rem;height:1.75rem" data-i18n-attr='{"aria-label":"aria.prevMonth"}' aria-label="Previous month"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">chevron_left</span></button>
+                            <button type="button" id="nextMonthBtn" class="icon-btn" style="width:1.75rem;height:1.75rem" data-i18n-attr='{"aria-label":"aria.nextMonth"}' aria-label="Next month"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">chevron_right</span></button>
+                        </div>
+                    </div>
+                    <div class="calendar__weekdays" id="miniCalendarWeekdays"></div>
+                    <div class="calendar__days" id="miniCalendarDays"></div>
+                    <div id="examDateIndicator" class="exam-indicator" hidden>
+                        <span class="calendar__pulse"><span class="calendar__pulse-ping"></span><span class="calendar__pulse-dot"></span></span>
+                        <span data-i18n="s4.examIndicator">Exam:</span> <span id="examDateTextDisplay">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="schedule-main flex flex-col gap-4">
+                <div class="flex justify-between items-center flex-wrap gap-3">
+                    <div class="week-nav">
+                        <button type="button" id="weekPrevBtn" class="icon-btn" data-i18n-attr='{"aria-label":"aria.prevWeek"}' aria-label="Previous week"><span class="material-symbols-outlined" aria-hidden="true">chevron_left</span></button>
+                        <span id="weekRangeLabel" class="week-nav__label">-</span>
+                        <button type="button" id="weekNextBtn" class="icon-btn" data-i18n-attr='{"aria-label":"aria.nextWeek"}' aria-label="Next week"><span class="material-symbols-outlined" aria-hidden="true">chevron_right</span></button>
+                    </div>
+                    <button type="button" id="weekTodayBtn" class="btn btn--pill-white btn--sm" data-i18n="common.today">Today</button>
+                </div>
+
+                <div class="card schedule-card">
+                    <div class="schedule-day-headers" id="scheduleDateHeaders"></div>
+                    <div class="schedule-scroll custom-scroll">
+                        <div class="schedule-scroll-inner">
+                            <div class="schedule-hour-lines" id="scheduleHourLines"></div>
+                            <div class="schedule-columns-wrap">
+                                <div class="schedule-hour-labels" id="scheduleHourLabels"></div>
+                                <div class="schedule-grid-area" id="scheduleGridContainer"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section style="margin-top:2rem">
+            <h3 style="font-size:1.125rem;font-weight:700;margin-bottom:1rem" class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary" aria-hidden="true">task_alt</span> <span data-i18n="s4.todoTitle">Today's to-do list</span>
+            </h3>
+            <div class="card" style="padding:1.5rem">
+                <div id="scheduleTodoList" class="flex flex-col gap-3">
+                    <p id="emptyTodoMsg" class="text-outline text-center" style="font-size:0.875rem;padding:1rem 0" data-i18n="s4.todoEmpty">No sessions yet.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- ============================== SCREEN 5 — Flashcards ============================== -->
+<div id="screen5" class="screen">
+    <header class="app-header">
+        <div class="app-header__inner">
+            <button class="app-header__brand js-back-to-setup">
+                <span class="material-symbols-outlined" aria-hidden="true">menu_book</span>
+                <h1 data-i18n="brand.short">Smart Study</h1>
+            </button>
+            <div class="app-header__actions">
+                <button type="button" id="btnOpenDeleteFlashcard" class="icon-btn icon-btn--danger" hidden data-i18n-attr='{"aria-label":"aria.deleteWord"}' aria-label="Delete word">
+                    <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+                </button>
+                <button type="button" id="btnOpenAddFlashcard" class="icon-btn" style="background:var(--color-primary-fixed);color:var(--color-primary)" hidden data-i18n-attr='{"aria-label":"aria.addWord"}' aria-label="Add word">
+                    <span class="material-symbols-outlined" aria-hidden="true">add</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="screen__main container-narrow flex flex-col items-center">
+        <div class="w-full text-center" style="margin-bottom:2rem">
+            <h1 class="text-primary" data-screen-heading style="font-size:1.875rem;font-weight:700;margin-bottom:0.75rem" data-i18n="s5.title">Vocabulary</h1>
+            <div class="flex items-center justify-center gap-2">
+                <span class="text-outline" style="font-size:0.875rem;font-weight:500" data-i18n="s5.deckLabel">Deck:</span>
+                <button type="button" id="customDeckSelectorBtn" style="display:flex;align-items:center;gap:0.25rem;background:var(--color-primary-fixed);color:var(--color-primary);padding:0.25rem 0.75rem;border-radius:var(--radius-md);font-weight:700;font-size:0.875rem;border:none">
+                    <span id="currentDeckLabel">-</span>
+                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">expand_more</span>
+                </button>
+                <span style="width:0.25rem;height:0.25rem;border-radius:50%;background:var(--color-outline-variant)"></span>
+                <span class="text-outline" id="flashcardProgressText" style="font-size:0.875rem;font-weight:500">0 / 0</span>
+            </div>
+        </div>
+
+        <div class="deck-progress-track"><div id="flashcardProgressBar" class="deck-progress-track__fill"></div></div>
+
+        <div class="flashcard-shell">
+            <div id="flashcardEmptyState" class="flashcard-empty">
+                <span class="material-symbols-outlined" aria-hidden="true" style="font-size:3.75rem;color:var(--color-outline-variant);margin-bottom:1rem">style</span>
+                <p class="text-center" style="font-weight:500;color:var(--color-outline)">
+                    <span data-i18n="s5.emptyTitle">This deck is empty</span><br>
+                    <span data-i18n="s5.emptyHint">Tap + to add a word</span>
+                </p>
+            </div>
+
+            <div class="flip-card" id="flashcardContainer" role="button" tabindex="0" aria-label="Flip card">
+                <div class="flip-card__inner" id="flashcardInner">
+                    <div class="flip-card__face">
+                        <span class="text-primary flip-card__eyebrow" data-i18n="s5.term">Term</span>
+                        <h3 id="flashcardTerm" class="flip-card__term">-</h3>
+                        <p class="text-outline" style="font-size:0.875rem;font-style:italic" id="flashcardHint" data-i18n="s5.hintTap">Tap to reveal meaning</p>
+                        <div style="margin-top:2rem" id="flashcardIconContainer">
+                            <span class="material-symbols-outlined text-primary" aria-hidden="true" style="font-size:2.25rem;opacity:0.3">psychology</span>
+                        </div>
+                    </div>
+                    <div class="flip-card__face flip-card__face--back">
+                        <span class="text-tertiary flip-card__eyebrow" data-i18n="s5.meaning">Meaning</span>
+                        <h3 id="flashcardDef" class="flip-card__def">-</h3>
+                        <div class="flip-card__example-box" id="flashcardExContainer">
+                            <p id="flashcardEx" style="color:var(--color-on-tertiary-fixed);font-size:0.75rem;font-weight:500">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="flashcardActionButtons" class="flashcard-actions">
+                <button type="button" id="btnReviewAgain" class="flashcard-action-btn">
+                    <span class="material-symbols-outlined" aria-hidden="true" style="color:var(--color-danger);font-size:1.875rem;margin-bottom:0.5rem">skip_next</span>
+                    <span style="color:var(--color-danger);font-size:0.75rem;font-weight:500" data-i18n="s5.reviewAgain">Skip / not sure</span>
+                </button>
+                <button type="button" id="btnRemembered" class="flashcard-action-btn flashcard-action-btn--primary">
+                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.875rem;margin-bottom:0.5rem;font-variation-settings:'FILL' 1">check_circle</span>
+                    <span style="font-size:0.75rem;font-weight:500" data-i18n="s5.remembered">Got it / next</span>
+                </button>
+            </div>
+
+            <div id="flashcardSummaryButtons" class="flashcard-summary-actions">
+                <button type="button" id="btnRestartFlashcards" class="btn btn--ghost btn--block" style="flex-direction:column;padding:1.25rem;border-radius:var(--radius-2xl);font-weight:700;font-size:1.125rem">
+                    <span class="material-symbols-outlined" aria-hidden="true" style="margin-bottom:0.5rem;font-size:1.875rem">refresh</span>
+                    <span id="btnRestartText" data-i18n="s5.restartWrong">Review missed words</span>
+                </button>
+                <button type="button" id="btnReviewAllFlashcards" class="btn btn--pill-white btn--block" style="font-size:0.875rem;font-weight:700">
+                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem;margin-right:0.25rem">history</span> <span data-i18n="s5.reviewAll">Review whole deck</span>
+                </button>
+            </div>
+
+            <div id="flashcardTipContainer" class="flex items-center justify-center gap-2 text-outline" style="margin-top:2rem;opacity:0.6">
+                <span class="material-symbols-outlined" aria-hidden="true" style="font-size:1rem">info</span>
+                <p style="font-size:0.75rem" data-i18n="s5.tip">Tap the card to reveal the answer.</p>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- ============================== SCREEN 6 — Focus mode ============================== -->
+<div id="screen6" class="screen">
+    <header class="app-header">
+        <div class="app-header__inner">
+            <button class="app-header__brand js-back-to-setup">
+                <span class="material-symbols-outlined" aria-hidden="true">menu_book</span>
+                <h1 data-i18n="brand.short">Smart Study</h1>
+            </button>
+            <button type="button" class="icon-btn js-open-settings" data-i18n-attr='{"aria-label":"aria.openSettings"}' aria-label="Settings">
+                <span class="material-symbols-outlined" aria-hidden="true">settings</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="screen__main focus-shell">
+        <div class="text-center" style="margin-bottom:2.5rem">
+            <h1 data-screen-heading style="font-size:1.875rem;font-weight:600" data-i18n="s6.title">Focus mode</h1>
+            <p class="text-outline" style="font-weight:300" data-i18n="s6.subtitle">Cut distractions and get to work</p>
+        </div>
+
+        <div class="focus-ring-wrap">
+            <div class="focus-ring-glow"></div>
+            <svg class="focus-ring-svg" viewBox="0 0 200 200">
+                <circle cx="100" cy="100" r="92" fill="none" stroke="var(--color-surface-highest)" stroke-width="8"></circle>
+                <circle id="focusTimerRing" cx="100" cy="100" r="92" fill="none" stroke="var(--color-primary)" stroke-linecap="round" stroke-width="10" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" style="transition:stroke-dashoffset 1s linear"></circle>
+            </svg>
+            <div class="text-center" style="z-index:10;cursor:pointer" id="btnOpenSetTimerModal" title="Set your daily goal">
+                <div class="focus-phase-badge"><span id="focusPhaseLabel" data-i18n="s6.phaseFocus">Focus</span> · <span id="focusCycleLabel"></span></div>
+                <span id="focusTimerDisplay" class="focus-time-display" aria-live="polite">0:00:00</span>
+                <span class="focus-goal-label">
+                    <span id="focusModeLabel"><span data-i18n="s6.mainGoal">Main goal</span> <span id="displayFocusGoal" style="margin-left:0.25rem;font-weight:700">04:30</span></span>
+                </span>
+            </div>
+        </div>
+
+        <div class="focus-controls">
+            <div class="focus-controls__row">
+                <button type="button" id="focusResetBtn" class="focus-reset-btn" title="Reset" data-i18n-attr='{"aria-label":"s6.reset"}' aria-label="Reset">
+                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.5rem">refresh</span>
+                </button>
+                <button type="button" id="focusStartBtn" class="btn btn--primary flex-1">
+                    <span id="focusStartBtnIcon" class="material-symbols-outlined" aria-hidden="true" style="font-size:1.5rem;font-variation-settings:'FILL' 1">play_arrow</span>
+                    <span id="focusStartBtnText" data-i18n="s6.start">Start</span>
+                </button>
+            </div>
+
+            <button type="button" id="notifToggleBtn" class="toggle-row">
+                <span class="settings-row__left">
+                    <span class="settings-row__icon"><span class="material-symbols-outlined" aria-hidden="true" id="notifToggleIcon">notifications_active</span></span>
+                    <span style="font-weight:500" data-i18n="s6.soundToggleLabel">Play sound at time up</span>
+                </span>
+                <span id="notifToggleSwitch" class="switch"><span class="switch__knob"></span></span>
+            </button>
+
+            <div class="ambient-panel">
+                <div class="ambient-panel__row">
+                    <span class="settings-row__left">
+                        <span class="settings-row__icon"><span class="material-symbols-outlined" aria-hidden="true">graphic_eq</span></span>
+                        <span style="font-weight:500" data-i18n="s6.ambientLabel">Ambient sound</span>
+                    </span>
+                    <button type="button" id="ambientPlayBtn" class="icon-btn" style="background:var(--color-primary-fixed);color:var(--color-primary)" data-i18n-attr='{"aria-label":"aria.playAmbient"}' aria-label="Play ambient sound">
+                        <span class="material-symbols-outlined" aria-hidden="true" id="ambientPlayIcon">play_arrow</span>
+                    </button>
+                </div>
+                <div class="ambient-panel__row">
+                    <div class="ambient-panel__types">
+                        <button type="button" id="ambientTypeBrown" class="ambient-type-btn is-active" data-i18n="s6.ambientBrown">Brown noise</button>
+                        <button type="button" id="ambientTypeRain" class="ambient-type-btn" data-i18n="s6.ambientRain">Rain</button>
+                    </div>
+                    <div class="ambient-panel__volume">
+                        <span class="material-symbols-outlined text-outline" aria-hidden="true" style="font-size:1.1rem">volume_down</span>
+                        <label for="ambientVolumeSlider" class="sr-only" data-i18n-attr='{"aria-label":"aria.ambientVolume"}'>Volume</label>
+                        <input type="range" id="ambientVolumeSlider" min="0" max="1" step="0.01" value="0.5">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="focus-stats">
+            <div class="focus-stat-card">
+                <p class="text-outline" style="font-size:0.625rem;font-weight:600;margin-bottom:0.25rem" data-i18n="s6.today">Today</p>
+                <p style="font-size:1.5rem;font-weight:700"><span id="focusTodayHours">00:00</span></p>
+                <div class="focus-stat-card__accent"></div>
+            </div>
+            <div class="focus-stat-card">
+                <p class="text-outline" style="font-size:0.625rem;font-weight:600;margin-bottom:0.25rem" data-i18n="s6.goal">Goal</p>
+                <p style="font-size:1.5rem;font-weight:700"><span id="focusGoalHours">00:00</span></p>
+            </div>
+        </div>
+    </main>
+</div>
+
+</div><!-- /#mainContent -->
+
+<!-- ============================== Shared bottom navigation ============================== -->
+<nav id="bottomNav" class="bottom-nav" hidden aria-label="Main navigation">
+    <a href="#" class="nav-btn" data-page="home" id="navHomeBtn">
+        <span class="material-symbols-outlined" aria-hidden="true">home</span>
+        <p class="label" data-i18n="nav.home">Home</p>
+    </a>
+    <a href="#" class="nav-btn" data-page="sched" id="navSchedBtn">
+        <span class="material-symbols-outlined" aria-hidden="true">calendar_month</span>
+        <p class="label" data-i18n="nav.schedule">Schedule</p>
+    </a>
+    <a href="#" class="nav-btn" data-page="flash" id="navFlashBtn">
+        <span class="material-symbols-outlined" aria-hidden="true">style</span>
+        <p class="label" data-i18n="nav.flashcards">Flashcards</p>
+    </a>
+    <a href="#" class="nav-btn" data-page="focus" id="navFocusBtn">
+        <span class="material-symbols-outlined" aria-hidden="true">timer</span>
+        <p class="label" data-i18n="nav.focus">Focus</p>
+    </a>
+</nav>
+
+<!-- ============================== Modals ============================== -->
+
+<div id="customDatePickerModal" class="modal-overlay modal-overlay--nested hidden">
+    <div class="modal-panel modal-panel--sm" data-modal-panel>
+        <div class="modal-header">
+            <h2 class="modal-title"><span class="material-symbols-outlined" aria-hidden="true">calendar_month</span> <span id="datePickerTitle" data-i18n="datePicker.title">Choose date</span></h2>
+            <button type="button" id="closeDatePickerBtn" class="modal-close" data-i18n-attr='{"aria-label":"aria.closeDialog"}' aria-label="Close"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">close</span></button>
+        </div>
+        <div class="flex justify-between items-center" style="margin-bottom:1rem;padding:0 0.5rem">
+            <button type="button" id="pickerPrevMonth" class="icon-btn" data-i18n-attr='{"aria-label":"aria.prevMonth"}' aria-label="Previous month"><span class="material-symbols-outlined" aria-hidden="true">chevron_left</span></button>
+            <span id="pickerMonthYear" style="font-weight:700"></span>
+            <button type="button" id="pickerNextMonth" class="icon-btn" data-i18n-attr='{"aria-label":"aria.nextMonth"}' aria-label="Next month"><span class="material-symbols-outlined" aria-hidden="true">chevron_right</span></button>
+        </div>
+        <div class="calendar__weekdays" id="pickerWeekdays"></div>
+        <div class="calendar__days" id="pickerCalendarDays"></div>
+    </div>
+</div>
+
+<div id="setTimerModal" class="modal-overlay hidden">
+    <div class="modal-panel modal-panel--sm" data-modal-panel>
+        <h2 class="modal-title" style="margin-bottom:1rem"><span class="material-symbols-outlined" aria-hidden="true">timer</span> <span data-i18n="settings.dailyGoal">Daily goal</span></h2>
+        <div class="wheel-picker-frame">
+            <div class="picker-highlight"></div>
+            <div class="wheel-picker" style="width:33%" id="hoursWheel"><div style="height:76px"></div><div style="height:76px"></div></div>
+            <div class="text-primary" style="font-weight:700;z-index:10;padding:0 0.25rem" data-i18n="common.hours">hrs</div>
+            <div class="wheel-picker" style="width:33%" id="minutesWheel"><div style="height:76px"></div><div style="height:76px"></div></div>
+            <div class="text-primary" style="font-weight:700;z-index:10;padding:0 0.25rem" data-i18n="common.minutes">min</div>
+            <div class="wheel-fade-top"></div><div class="wheel-fade-bottom"></div>
+        </div>
+        <div class="modal-actions">
+            <button type="button" id="closeSetTimerBtn" class="btn btn--ghost btn--flex" data-i18n="common.cancel">Cancel</button>
+            <button type="button" id="saveSetTimerBtn" class="btn btn--primary btn--flex" data-i18n="common.save">Save</button>
+        </div>
+    </div>
+</div>
+
+<div id="deckSelectorModal" class="modal-overlay hidden">
+    <div class="modal-panel modal-panel--sheet" data-modal-panel>
+        <div class="modal-header">
+            <h2 class="modal-title"><span class="material-symbols-outlined" aria-hidden="true">folder_copy</span> <span data-i18n="modalDeckSelector.title">Choose a deck</span></h2>
+            <button type="button" id="closeDeckSelectorBtn" class="modal-close" data-i18n-attr='{"aria-label":"aria.closeDialog"}' aria-label="Close"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">close</span></button>
+        </div>
+        <div id="deckListContainer" class="flex flex-col gap-2 custom-scroll" style="max-height:15rem;overflow-y:auto;margin-bottom:1.25rem"></div>
+        <button type="button" id="btnOpenAddDeckModalFromSelector" class="btn btn--outline btn--block">
+            <span class="material-symbols-outlined" aria-hidden="true">add_circle</span> <span data-i18n="modalDeckSelector.createNew">Create new deck</span>
+        </button>
+    </div>
+</div>
+
+<div id="deleteFlashcardMenuModal" class="modal-overlay hidden">
+    <div class="modal-panel modal-panel--sm" data-modal-panel>
+        <h2 class="modal-title" style="color:var(--color-danger);margin-bottom:1.25rem"><span class="material-symbols-outlined" aria-hidden="true">delete</span> <span data-i18n="modalDeleteCard.title">Delete word</span></h2>
+        <div class="field">
+            <label class="field__label" for="deleteWordSelect" data-i18n="modalDeleteCard.selectLabel">Choose word</label>
+            <select id="deleteWordSelect" class="select"></select>
+        </div>
+        <p class="text-outline text-center" style="font-size:0.625rem;margin-top:0.75rem" data-i18n="modalDeleteCard.warning">This cannot be undone.</p>
+        <div class="modal-actions">
+            <button type="button" id="closeDeleteMenuBtn" class="btn btn--ghost btn--flex" data-i18n="common.cancel">Cancel</button>
+            <button type="button" id="confirmDeleteMenuBtn" class="btn btn--danger btn--flex" data-i18n="modalDeleteCard.ok">Delete</button>
+        </div>
+    </div>
+</div>
+
+<div id="addClassModal" class="modal-overlay hidden">
+    <div class="modal-panel" data-modal-panel>
+        <h2 class="modal-title" style="margin-bottom:1rem"><span class="material-symbols-outlined" aria-hidden="true">edit_calendar</span> <span data-i18n="modalAddClass.title">Add session</span></h2>
+        <div class="flex flex-col gap-4">
+            <div class="field">
+                <label class="field__label" for="modalTopic" data-i18n="modalAddClass.topicLabel">Topic</label>
+                <select id="modalTopic" class="select"></select>
+            </div>
+            <div class="field">
+                <label class="field__label" data-i18n="modalAddClass.colorLabel">Color</label>
+                <div class="flex flex-wrap gap-3" id="colorSwatchGroup" role="radiogroup"></div>
+            </div>
+            <div class="field">
+                <label class="field__label" for="modalDate" data-i18n="modalAddClass.dateLabel">Date</label>
+                <input type="date" id="modalDate" class="input">
+            </div>
+            <div class="grid" style="grid-template-columns:1fr 1fr;gap:0.75rem">
+                <div class="field">
+                    <label class="field__label" id="startTimeLabel" data-i18n="modalAddClass.startLabel">Start</label>
+                    <button type="button" id="btnOpenStartTime" class="time-trigger" aria-labelledby="startTimeLabel">
+                        <span id="displayStartTime">09:00</span>
+                        <span class="material-symbols-outlined text-outline" aria-hidden="true" style="font-size:1.1rem">schedule</span>
+                    </button>
+                    <input type="hidden" id="modalStart" value="09:00">
+                </div>
+                <div class="field">
+                    <label class="field__label" id="endTimeLabel" data-i18n="modalAddClass.endLabel">End</label>
+                    <button type="button" id="btnOpenEndTime" class="time-trigger" aria-labelledby="endTimeLabel">
+                        <span id="displayEndTime">11:00</span>
+                        <span class="material-symbols-outlined text-outline" aria-hidden="true" style="font-size:1.1rem">schedule</span>
+                    </button>
+                    <input type="hidden" id="modalEnd" value="11:00">
+                </div>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button type="button" id="closeModalBtn" class="btn btn--ghost btn--flex" data-i18n="common.cancel">Cancel</button>
+            <button type="button" id="saveClassBtn" class="btn btn--primary btn--flex" data-i18n="modalAddClass.save">Save</button>
+        </div>
+    </div>
+</div>
+
+<div id="customDeleteModal" class="modal-overlay hidden">
+    <div class="modal-panel modal-panel--sm text-center" data-modal-panel>
+        <div class="modal-panel__icon modal-panel__icon--warn"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.875rem">delete</span></div>
+        <h2 style="font-size:1.25rem;font-weight:700;margin-bottom:0.5rem" data-i18n="modalDeleteClass.title">Delete session</h2>
+        <p id="deleteTargetName" class="text-outline" style="font-size:0.875rem;margin-bottom:1.5rem;font-weight:700"></p>
+        <div class="modal-actions" style="margin-top:1rem">
+            <button type="button" id="cancelDeleteBtn" class="btn btn--ghost btn--flex" data-i18n="common.cancel">Cancel</button>
+            <button type="button" id="confirmDeleteBtn" class="btn btn--danger btn--flex" data-i18n="modalDeleteClass.ok">Delete</button>
+        </div>
+    </div>
+</div>
+
+<div id="congratsModal" class="modal-overlay hidden">
+    <div class="modal-panel modal-panel--sm text-center" data-modal-panel>
+        <div class="modal-panel__icon modal-panel__icon--success"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:2.5rem;font-variation-settings:'FILL' 1">workspace_premium</span></div>
+        <h2 style="font-size:1.5rem;font-weight:700;margin-bottom:0.5rem" data-i18n="congrats.title">Congratulations! 🎉</h2>
+        <p class="text-outline" style="font-size:0.875rem;margin-bottom:1.5rem" data-i18n="congrats.message">You did it!</p>
+        <button type="button" id="closeCongratsBtn" class="btn btn--primary btn--block" data-i18n="congrats.close">Awesome!</button>
+    </div>
+</div>
+
+<div id="addDeckModal" class="modal-overlay hidden">
+    <div class="modal-panel modal-panel--sm" data-modal-panel>
+        <h2 class="modal-title" style="margin-bottom:1rem"><span class="material-symbols-outlined" aria-hidden="true">create_new_folder</span> <span data-i18n="modalAddDeck.title">Create deck</span></h2>
+        <div class="field" style="margin-bottom:1.5rem">
+            <label class="field__label" for="deckNameInput" data-i18n="modalAddDeck.nameLabel">Deck name</label>
+            <input type="text" id="deckNameInput" class="input" data-i18n-attr='{"placeholder":"modalAddDeck.namePlaceholder"}'>
+        </div>
+        <div class="modal-actions" style="margin-top:0">
+            <button type="button" id="closeAddDeckBtn" class="btn btn--ghost btn--flex" data-i18n="common.cancel">Cancel</button>
+            <button type="button" id="saveAddDeckBtn" class="btn btn--primary btn--flex" data-i18n="common.save">Save</button>
+        </div>
+    </div>
+</div>
+
+<div id="addFlashcardModal" class="modal-overlay hidden">
+    <div class="modal-panel modal-panel--sm" data-modal-panel>
+        <h2 class="modal-title" style="margin-bottom:1rem"><span class="material-symbols-outlined" aria-hidden="true">post_add</span> <span data-i18n="modalAddCard.title">Add word</span></h2>
+        <div class="flex flex-col gap-4" style="margin-bottom:1.5rem">
+            <div class="field">
+                <label class="field__label" for="fcInputTerm" data-i18n="modalAddCard.termLabel">Term</label>
+                <input type="text" id="fcInputTerm" class="input">
+            </div>
+            <div class="field">
+                <label class="field__label" for="fcInputDef" data-i18n="modalAddCard.defLabel">Definition</label>
+                <textarea id="fcInputDef" rows="2" class="textarea"></textarea>
+            </div>
+            <div class="field">
+                <label class="field__label" for="fcInputEx"><span data-i18n="modalAddCard.exampleLabel">Example</span> (<span data-i18n="common.optional">optional</span>)</label>
+                <input type="text" id="fcInputEx" class="input">
+            </div>
+        </div>
+        <div class="modal-actions" style="margin-top:0">
+            <button type="button" id="closeAddFcBtn" class="btn btn--ghost btn--flex" data-i18n="common.cancel">Cancel</button>
+            <button type="button" id="saveAddFcBtn" class="btn btn--primary btn--flex" data-i18n="modalAddCard.save">Add</button>
+        </div>
+    </div>
+</div>
+
+<div id="iosTimePickerModal" class="modal-overlay modal-overlay--nested hidden">
+    <div class="modal-panel modal-panel--sheet" data-modal-panel>
+        <div class="modal-header">
+            <h2 class="modal-title"><span class="material-symbols-outlined" aria-hidden="true">schedule</span> <span data-i18n="modalTimePicker.title">Choose time</span></h2>
+            <button type="button" id="cancelIosTime" class="modal-close" data-i18n-attr='{"aria-label":"aria.closeDialog"}' aria-label="Close"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">close</span></button>
+        </div>
+        <div class="wheel-picker-frame" style="height:14rem">
+            <div class="picker-highlight"></div>
+            <div class="wheel-picker" style="width:6rem" id="wheelHoursClass"><div style="height:92px"></div><div style="height:92px"></div></div>
+            <div class="text-primary" style="font-size:1.25rem;font-weight:700;z-index:10;padding:0 0.5rem">:</div>
+            <div class="wheel-picker" style="width:6rem" id="wheelMinutesClass"><div style="height:92px"></div><div style="height:92px"></div></div>
+            <div class="wheel-fade-top"></div><div class="wheel-fade-bottom"></div>
+        </div>
+        <div style="margin-top:2rem">
+            <button type="button" id="confirmIosTime" class="btn btn--primary btn--block" data-i18n="modalTimePicker.confirm">Confirm</button>
+        </div>
+    </div>
+</div>
+
+<div id="settingsModal" class="modal-overlay hidden">
+    <div class="modal-panel" data-modal-panel style="max-width:30rem">
+        <div class="modal-header">
+            <h2 class="modal-title"><span class="material-symbols-outlined" aria-hidden="true">tune</span> <span data-i18n="settings.title">Settings</span></h2>
+            <button type="button" id="closeSettingsBtn" class="modal-close" data-i18n-attr='{"aria-label":"aria.closeDialog"}' aria-label="Close"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">close</span></button>
+        </div>
+
+        <div class="settings-section">
+            <span class="settings-section__title" data-i18n="settings.language">Language</span>
+            <div class="settings-lang-toggle">
+                <button type="button" id="langBtnTh" data-lang="th">ไทย</button>
+                <button type="button" id="langBtnEn" data-lang="en">English</button>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <span class="settings-section__title" data-i18n="settings.theme">Theme</span>
+            <div class="settings-theme-toggle">
+                <button type="button" id="themeBtnLight" data-theme="light"><span class="material-symbols-outlined" aria-hidden="true">light_mode</span><span data-i18n="settings.themeLight">Light</span></button>
+                <button type="button" id="themeBtnDark" data-theme="dark"><span class="material-symbols-outlined" aria-hidden="true">dark_mode</span><span data-i18n="settings.themeDark">Dark</span></button>
+                <button type="button" id="themeBtnSystem" data-theme="system"><span class="material-symbols-outlined" aria-hidden="true">contrast</span><span data-i18n="settings.themeSystem">System</span></button>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <label class="settings-section__title" for="settingsDailyGoalHours" data-i18n="settings.dailyGoal">Daily goal (hours)</label>
+            <input type="number" id="settingsDailyGoalHours" class="input" min="0.5" max="16" step="0.5">
+        </div>
+
+        <div class="settings-section">
+            <span class="settings-section__title" data-i18n="settings.examDate">Exam date</span>
+            <button type="button" id="settingsExamDateBtn" class="date-trigger" style="padding:0.85rem 1rem">
+                <span class="date-trigger__row"><span id="settingsExamDateDisplay" class="date-trigger__value" style="font-size:1rem">-</span><span class="material-symbols-outlined text-primary" aria-hidden="true">event_note</span></span>
+            </button>
+        </div>
+
+        <div class="settings-section">
+            <span class="settings-section__title" data-i18n="settings.pomodoroSection">Pomodoro</span>
+            <div class="settings-grid-2">
+                <div class="field"><label class="field__label" for="settingsFocusMin" data-i18n="settings.focusMin">Focus (min)</label><input type="number" id="settingsFocusMin" class="input" min="1" max="180"></div>
+                <div class="field"><label class="field__label" for="settingsShortBreakMin" data-i18n="settings.shortBreakMin">Short break (min)</label><input type="number" id="settingsShortBreakMin" class="input" min="1" max="60"></div>
+                <div class="field"><label class="field__label" for="settingsLongBreakMin" data-i18n="settings.longBreakMin">Long break (min)</label><input type="number" id="settingsLongBreakMin" class="input" min="1" max="120"></div>
+                <div class="field"><label class="field__label" for="settingsCycles" data-i18n="settings.cycles">Cycles</label><input type="number" id="settingsCycles" class="input" min="1" max="12"></div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <span class="settings-section__title" data-i18n="settings.soundSection">Sound</span>
+            <button type="button" id="settingsSoundToggle" class="toggle-row">
+                <span style="font-weight:500" data-i18n="settings.soundEnabled">Enable notification sound</span>
+                <span class="switch"><span class="switch__knob"></span></span>
+            </button>
+        </div>
+
+        <div class="settings-section">
+            <span class="settings-section__title" data-i18n="settings.dataSection">Data</span>
+            <div class="flex flex-col gap-2">
+                <button type="button" id="settingsExportBtn" class="btn btn--ghost btn--block" style="justify-content:flex-start"><span class="material-symbols-outlined" aria-hidden="true">download</span><span data-i18n="settings.exportBtn">Export</span></button>
+                <button type="button" id="settingsImportBtn" class="btn btn--ghost btn--block" style="justify-content:flex-start"><span class="material-symbols-outlined" aria-hidden="true">upload</span><span data-i18n="settings.importBtn">Import</span></button>
+                <input type="file" id="settingsImportFile" class="settings-file-input" accept="application/json">
+                <button type="button" id="settingsResetBtn" class="btn btn--block" style="justify-content:flex-start;background:color-mix(in srgb, var(--color-danger) 10%, transparent);color:var(--color-danger)"><span class="material-symbols-outlined" aria-hidden="true">delete_forever</span><span data-i18n="settings.resetAllBtn">Reset all data</span></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="js/utils.js"></script>
+<script src="js/storage.js"></script>
+<script src="data/subjects.js"></script>
+<script src="js/state.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/toast.js"></script>
+<script src="js/modal.js"></script>
+<script src="js/router.js"></script>
+<script src="js/datepicker.js"></script>
+<script src="js/wheelpicker.js"></script>
+<script src="js/onboarding.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/schedule.js"></script>
+<script src="js/flashcards.js"></script>
+<script src="js/focus.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

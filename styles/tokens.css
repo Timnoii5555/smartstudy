@@ -1,0 +1,123 @@
+/**
+ * tokens.css
+ * Design tokens as CSS custom properties. Light values live on :root; dark
+ * values are redeclared under html.dark (Part 3.2 — Tailwind's "class"
+ * strategy re-created by hand since Part 4 replaces the Tailwind CDN build
+ * with hand-written CSS — see README notes in the final report for why).
+ * Every other stylesheet consumes these tokens instead of literal colors,
+ * so theming and future rebranding both stay a one-file change.
+ */
+
+:root {
+    color-scheme: light;
+
+    /* Brand */
+    --color-primary: #0058bc;
+    --color-primary-container: #0070eb;
+    --color-secondary: #405e96;
+    --color-tertiary: #9e3d00;
+    --color-danger: #d92d20;
+    --color-success: #17803d;
+    --color-warning: #b45309;
+
+    /* "Solid fill" variants: used specifically where a token colors a full-
+       opacity background with white/light text or icons on top (buttons,
+       banners, active pills, the exam-date calendar cell). In light mode
+       these equal the base color; in dark mode the base colors above are
+       deliberately light (so they read well as *text* on a dark surface),
+       which is too light for white text to sit on top of at WCAG AA — so
+       dark mode redeclares darker, more saturated "solid" values below. */
+    --color-primary-solid: var(--color-primary);
+    --color-primary-solid-container: var(--color-primary-container);
+    --color-tertiary-solid: var(--color-tertiary);
+    --color-danger-solid: var(--color-danger);
+
+    /* Tinted fixed containers (icon badges, callouts) */
+    --color-primary-fixed: #d8e2ff;
+    --color-secondary-fixed: #adc6ff;
+    --color-tertiary-fixed: #ffdbcc;
+    --color-on-primary-fixed: #001a41;
+    --color-on-tertiary-fixed: #3a1400;
+
+    /* Surfaces */
+    --color-bg: #f9f9fc;
+    --color-surface: #f9f9fc;
+    --color-surface-low: #f3f3f6;
+    --color-surface-lowest: #ffffff;
+    --color-surface-high: #eceef2;
+    --color-surface-highest: #e2e2e5;
+
+    /* Text & borders */
+    --color-on-surface: #1a1c1e;
+    --color-on-surface-variant: #44474a;
+    --color-outline: #717786;
+    --color-outline-variant: #c4c7ce;
+    --color-border: #e5e7eb;
+
+    /* Elevation */
+    --shadow-sm: 0 2px 8px rgba(16, 24, 40, 0.04);
+    --shadow-md: 0 16px 32px rgba(0, 88, 188, 0.06);
+    --shadow-lg: 0 20px 40px rgba(0, 88, 188, 0.10);
+    --shadow-ring: 0 0 0 3px rgba(0, 88, 188, 0.35);
+
+    /* Shape */
+    --radius-sm: 0.5rem;
+    --radius-md: 0.75rem;
+    --radius-lg: 1rem;
+    --radius-xl: 1.5rem;
+    --radius-2xl: 2rem;
+    --radius-full: 999px;
+
+    /* Type */
+    --font-headline: 'Plus Jakarta Sans', 'Noto Sans Thai', system-ui, sans-serif;
+    --font-body: 'Kanit', 'Noto Sans Thai', system-ui, sans-serif;
+
+    --z-header: 50;
+    --z-modal: 130;
+    --z-toast: 400;
+}
+
+html.dark {
+    color-scheme: dark;
+
+    --color-primary: #7fb2ff;
+    --color-primary-container: #4c8fef;
+    --color-secondary: #a9c2f0;
+    --color-tertiary: #ffb27a;
+    --color-danger: #ff6b6b;
+    --color-success: #4ade80;
+    --color-warning: #fbbf24;
+
+    /* Darker than the base colors above on purpose — see the comment on
+       these tokens under :root. White text/icons on these pass WCAG AA
+       (contrast ratio ≈ 4.8–7.7:1); on the light --color-primary/-danger
+       above it would only be ≈ 2.2–2.8:1. */
+    --color-primary-solid: #2760c0;
+    --color-primary-solid-container: #1f4fa8;
+    --color-tertiary-solid: #a8480d;
+    --color-danger-solid: #c62f2f;
+
+    --color-primary-fixed: rgba(127, 178, 255, 0.18);
+    --color-secondary-fixed: rgba(169, 194, 240, 0.18);
+    --color-tertiary-fixed: rgba(255, 178, 122, 0.18);
+    --color-on-primary-fixed: #dce8ff;
+    --color-on-tertiary-fixed: #ffe1c7;
+
+    --color-bg: #101317;
+    --color-surface: #101317;
+    --color-surface-low: #171b21;
+    --color-surface-lowest: #1c2129;
+    --color-surface-high: #232833;
+    --color-surface-highest: #2c323e;
+
+    --color-on-surface: #eef1f6;
+    --color-on-surface-variant: #c3c9d3;
+    --color-outline: #9aa1ad;
+    --color-outline-variant: #3a4150;
+    --color-border: #2a303b;
+
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.28);
+    --shadow-md: 0 16px 32px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.45);
+    --shadow-ring: 0 0 0 3px rgba(127, 178, 255, 0.45);
+}
