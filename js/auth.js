@@ -1,8 +1,9 @@
 /**
  * auth.js
- * Real accounts (email/password sign-up & log-in), photo avatar uploads, and
- * a cross-user leaderboard — all via Firebase (Auth + Firestore + Storage).
- * Every function here is safe to call even when Firebase isn't configured
+ * Real accounts (email/password sign-up & log-in), photo avatars, and a
+ * cross-user leaderboard — all via Firebase Auth + Firestore (no Firebase
+ * Storage — see the avatar note below for why). Every function here is
+ * safe to call even when Firebase isn't configured
  * yet (see js/firebaseConfig.js): `isEnabled()` returns false and the app
  * keeps working entirely offline through the local profile system
  * (js/profile.js) either way.
@@ -14,6 +15,16 @@
  * to this device/profile, exactly as before. Syncing *all* of that across
  * devices would be a much bigger project than "let people log in for real
  * and see how they stack up against others."
+ *
+ * Avatar photos deliberately do NOT use Firebase Storage: as of late 2024,
+ * new Firebase projects must be on the paid "Blaze" plan (a billing card on
+ * file) before Storage will even turn on, purely-free "Spark" projects
+ * can't use it at all. Requiring a linked card just to show a small profile
+ * picture isn't worth that trade-off, so instead the photo is resized down
+ * to a small square and compressed client-side (see resizeImageToDataURL)
+ * into a compact base64 JPEG stored directly as a string field on the same
+ * Firestore document everything else already lives in — comfortably under
+ * Firestore's 1MB-per-document limit, and free on every Firebase plan.
  */
 (function (global) {
     'use strict';
@@ -21,7 +32,7 @@
     const TFS = global.TFS = global.TFS || {};
     const Storage = TFS.Storage;
 
-    let auth = null, db = null, storageRef = null;
+    let auth = null, db = null;
     let currentUser = null;
     let initialAuthResolved = false;
     const listeners = new Set();
@@ -36,7 +47,6 @@
             const app = global.firebase.initializeApp(TFS.FIREBASE_CONFIG);
             auth = app.auth();
             db = app.firestore();
-            storageRef = app.storage();
 
             auth.onAuthStateChanged(user => {
                 currentUser = user;
@@ -91,10 +101,31 @@
         return map[e && e.code] || 'modalAuth.errGeneric';
     }
 
-    async function uploadAvatar(uid, file) {
-        const ref = storageRef.ref().child('avatars/' + uid);
-        await ref.put(file);
-        return ref.getDownloadURL();
+    /** Downscales `file` to at most `size`×`size` (cropped to a centered
+     *  square) and re-encodes it as a JPEG, returning a `data:` URL small
+     *  enough to store directly as a Firestore string field — see the file
+     *  header comment for why this exists instead of Firebase Storage. */
+    function resizeImageToDataURL(file, size = 128, quality = 0.7) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            const objectUrl = URL.createObjectURL(file);
+            img.onload = () => {
+                URL.revokeObjectURL(objectUrl);
+                const canvas = document.createElement('canvas');
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d');
+                // Center-crop to a square before scaling, so a non-square photo
+                // doesn't come out squished.
+                const srcSize = Math.min(img.naturalWidth, img.naturalHeight);
+                const srcX = (img.naturalWidth - srcSize) / 2;
+                const srcY = (img.naturalHeight - srcSize) / 2;
+                ctx.drawImage(img, srcX, srcY, srcSize, srcSize, 0, 0, size, size);
+                resolve(canvas.toDataURL('image/jpeg', quality));
+            };
+            img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('image_decode_failed')); };
+            img.src = objectUrl;
+        });
     }
 
     async function signUp({ email, password, displayName, avatarFile }) {
@@ -102,10 +133,10 @@
         const uid = cred.user.uid;
         let avatarURL = null;
         if (avatarFile) {
-            try { avatarURL = await uploadAvatar(uid, avatarFile); }
-            catch (e) { console.warn('[auth] Avatar upload failed — signing up without a photo.', e); }
+            try { avatarURL = await resizeImageToDataURL(avatarFile); }
+            catch (e) { console.warn('[auth] Avatar processing failed — signing up without a photo.', e); }
         }
-        await cred.user.updateProfile({ displayName, photoURL: avatarURL || undefined });
+        await cred.user.updateProfile({ displayName });
         await db.collection('users').doc(uid).set({
             displayName, avatarURL: avatarURL || null, points: 0,
             createdAt: global.firebase.firestore.FieldValue.serverTimestamp(),

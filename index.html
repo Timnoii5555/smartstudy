@@ -967,13 +967,13 @@
 <script src="js/toast.js"></script>
 <script src="js/quests.js"></script>
 <script src="js/customSounds.js"></script>
-<!-- Firebase is entirely optional — see js/firebaseConfig.js. If these fail
-     to load (offline, or blocked) js/auth.js catches it and the app runs on
-     local-only profiles exactly as it did before real accounts existed. -->
+<!-- Firebase (Auth + Firestore only — no Storage, see js/auth.js) is entirely
+     optional: see js/firebaseConfig.js. If these fail to load (offline, or
+     blocked) js/auth.js catches it and the app runs on local-only profiles
+     exactly as it did before real accounts existed. -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 <script src="js/firebaseConfig.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/modal.js"></script>
