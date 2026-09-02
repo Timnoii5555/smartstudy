@@ -36,9 +36,21 @@
         return selected ? parseInt(selected.dataset.val, 10) : 0;
     }
 
-    function setValue(wheelEl, val) {
+    /** `opts.smooth` animates the roll to the target value (the little "spin"
+     *  feel wheel pickers are expected to have) instead of jumping instantly —
+     *  used by attachWheelStep below. Instant (the default) is still right for
+     *  the initial value set when a modal first opens. */
+    function setValue(wheelEl, val, opts = {}) {
         const target = Array.from(wheelEl.querySelectorAll('.wheel-item')).find(i => parseInt(i.dataset.val, 10) === val);
-        if (target) wheelEl.scrollTop = target.offsetTop - (wheelEl.clientHeight / 2) + (target.clientHeight / 2);
+        if (target) {
+            const top = target.offsetTop - (wheelEl.clientHeight / 2) + (target.clientHeight / 2);
+            if (opts.smooth) wheelEl.scrollTo({ top, behavior: 'smooth' });
+            else wheelEl.scrollTop = top;
+        }
+        // Tracked separately from the DOM so attachWheelStep always knows the
+        // *intended* value even mid-animation, rather than reading whatever
+        // `.is-selected` happens to be at the halfway point of a smooth scroll.
+        wheelEl._wheelTargetValue = val;
         updateSelection(wheelEl);
     }
 
@@ -51,8 +63,10 @@
      * mouse-wheel notch (deltaY often 100-120px) into several items at once —
      * on a 40px-tall `.wheel-item` that flies past 2-3 values per notch, making
      * it impossible to stop on the exact hour/minute you want. This normalizes
-     * every wheel gesture (mouse notch or trackpad) to move exactly one step,
-     * with a short cooldown so a single big-delta notch can't double-fire.
+     * every wheel gesture (mouse notch or trackpad) to move exactly one step —
+     * animated smoothly (the classic "spin to the next value" feel) — with a
+     * cooldown roughly matching that animation so a single big-delta notch
+     * can't double-fire or race the in-flight scroll.
      */
     function attachWheelStep(wheelEl, max) {
         let cooldown = false;
@@ -61,9 +75,10 @@
             if (cooldown) return;
             cooldown = true;
             const dir = e.deltaY > 0 ? 1 : -1;
-            const next = Math.min(max, Math.max(0, getValue(wheelEl) + dir));
-            setValue(wheelEl, next);
-            setTimeout(() => { cooldown = false; }, 90);
+            const current = (typeof wheelEl._wheelTargetValue === 'number') ? wheelEl._wheelTargetValue : getValue(wheelEl);
+            const next = Math.min(max, Math.max(0, current + dir));
+            setValue(wheelEl, next, { smooth: true });
+            setTimeout(() => { cooldown = false; }, 220);
         }, { passive: false });
     }
 

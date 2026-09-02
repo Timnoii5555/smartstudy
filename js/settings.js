@@ -103,6 +103,29 @@
         TFS.Router.show('screen0');
     });
 
+    // ---------------------------------------------------------------- Bug/feedback report
+    // No backend to receive this, so it hands off to the user's own email client
+    // via a mailto: link — zero infrastructure, works offline-authored, and the
+    // learner can review/edit the message before it actually sends anything.
+    const REPORT_EMAIL = 'pupe15625@gmail.com';
+    const reportModal = document.getElementById('reportModal');
+    const reportTextarea = document.getElementById('reportTextarea');
+
+    document.getElementById('settingsReportBtn').addEventListener('click', () => {
+        TFS.Modal.close(settingsModal);
+        reportTextarea.value = '';
+        setTimeout(() => TFS.Modal.open(reportModal), 200);
+    });
+    document.getElementById('closeReportBtn').addEventListener('click', () => TFS.Modal.close(reportModal));
+    document.getElementById('sendReportBtn').addEventListener('click', () => {
+        const body = reportTextarea.value.trim();
+        if (!body) { TFS.Toast.warn(I18n.t('modalReport.errEmpty')); return; }
+        const subject = encodeURIComponent('SmartStudy — Bug report / suggestion');
+        const mailto = `mailto:${REPORT_EMAIL}?subject=${subject}&body=${encodeURIComponent(body)}`;
+        global.location.href = mailto;
+        TFS.Modal.close(reportModal);
+    });
+
     exportBtn.addEventListener('click', () => {
         State.flushNow();
         const filename = `smart-study-backup-${U.formatDateISO(new Date())}.json`;

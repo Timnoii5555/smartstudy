@@ -23,19 +23,23 @@
     const QUEST_DEFS = [
         {
             id: 'complete-topic', icon: 'menu_book', points: 15, target: 1,
-            label: { th: 'อ่านเนื้อหาให้จบอย่างน้อย 1 บทวันนี้', en: 'Finish at least 1 topic today' }
+            label: { th: 'อ่านเนื้อหาให้จบอย่างน้อย 1 บทวันนี้', en: 'Finish at least 1 topic today' },
+            hint: { th: 'ไปที่ "หัวข้อที่ต้องอ่านวันนี้" ด้านล่าง แล้วติ๊กหัวข้อที่อ่านจบ 1 อัน', en: 'Go to "Today\'s reading topics" below and tick off one topic you finished.' }
         },
         {
             id: 'focus-session', icon: 'timer', points: 15, target: 1,
-            label: { th: 'ทำ Focus Session ให้ครบ 1 รอบ', en: 'Complete 1 focus session' }
+            label: { th: 'ทำ Focus Session ให้ครบ 1 รอบ', en: 'Complete 1 focus session' },
+            hint: { th: 'ไปที่แท็บ "โฟกัส" กดเริ่มจับเวลา แล้วปล่อยให้ครบรอบโฟกัส 1 ครั้ง', en: 'Go to the Focus tab, press Start, and let one focus phase run to completion.' }
         },
         {
             id: 'flashcard-review', icon: 'style', points: 10, target: 10,
-            label: { th: 'ทบทวนคำศัพท์ 10 คำ', en: 'Review 10 flashcards' }
+            label: { th: 'ทบทวนคำศัพท์ 10 คำ', en: 'Review 10 flashcards' },
+            hint: { th: 'ไปที่แท็บ "แฟลชการ์ด" แล้วกด "จำได้แล้ว" หรือ "ข้าม" ให้ครบ 10 ครั้ง', en: 'Go to the Flashcards tab and tap "Got it" or "Skip" 10 times.' }
         },
         {
             id: 'daily-goal', icon: 'flag_circle', points: 25, target: 1,
-            label: { th: 'ถึงเป้าหมายชั่วโมงอ่านของวันนี้', en: "Hit today's study-hour goal" }
+            label: { th: 'ถึงเป้าหมายชั่วโมงอ่านของวันนี้', en: "Hit today's study-hour goal" },
+            hint: { th: 'สะสมเวลาโฟกัสในแท็บ "โฟกัส" ให้ครบตามเป้าหมายที่ตั้งไว้', en: 'Rack up focus time on the Focus tab until it reaches your daily goal.' }
         }
     ];
 
@@ -127,6 +131,20 @@
 
         container.appendChild(U.el('h3', { className: 'quests-card__title', text: I18n.t('quests.cardTitle') }));
 
+        // Shown once per profile until dismissed — a first-timer has no idea
+        // yet what "quests" even means here, so spell it out plainly before
+        // they've had to guess from the list alone.
+        if (!State.get().ui.hasSeenQuestIntro) {
+            container.appendChild(U.el('div', { className: 'quests-intro' }, [
+                U.el('span', { className: 'material-symbols-outlined quests-intro__icon', attrs: { 'aria-hidden': 'true' }, text: 'auto_awesome' }),
+                U.el('p', { className: 'quests-intro__text', text: I18n.t('quests.introText') }),
+                U.el('button', {
+                    className: 'btn btn--pill-white btn--sm', attrs: { type: 'button' }, text: I18n.t('quests.introDismiss'),
+                    on: { click: () => { State.commit({ ui: { hasSeenQuestIntro: true } }); renderIfMounted(); } }
+                })
+            ]));
+        }
+
         const header = U.el('div', { className: 'quests-card__header' }, [
             U.el('div', { className: 'quests-card__level' }, [
                 U.el('span', { className: 'material-symbols-outlined quests-card__level-icon', attrs: { 'aria-hidden': 'true' }, text: level.current.icon }),
@@ -154,6 +172,7 @@
                 ]),
                 U.el('div', { className: 'quest-row__body' }, [
                     U.el('p', { className: 'quest-row__label', text: I18n.pick(def.label) }),
+                    U.el('p', { className: 'quest-row__hint', text: I18n.pick(def.hint) }),
                     U.el('div', { className: 'quest-row__track' }, [
                         U.el('div', { className: 'quest-row__fill', attrs: { style: `width:${pct}%` } })
                     ])

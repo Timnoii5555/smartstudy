@@ -128,7 +128,8 @@
                 lastActiveDateISO: null
             },
             ui: {
-                lastScreen: 'screen1'
+                lastScreen: 'screen1',
+                hasSeenQuestIntro: false
             },
             quests: {
                 dateISO: null, // set to today's date the first time quests.js touches it

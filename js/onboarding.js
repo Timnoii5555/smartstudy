@@ -29,10 +29,15 @@
                 attrs: {
                     type: 'button', role: 'radio', 'aria-checked': isSelected ? 'true' : 'false',
                     tabindex: (isSelected || (!selectedSubjectId && index === 0)) ? '0' : '-1',
-                    'data-subject-id': subject.id
+                    'data-subject-id': subject.id,
+                    disabled: isCompleted || undefined,
+                    title: isCompleted ? I18n.t('s1.completedDisabledHint') : undefined
                 },
                 on: {
-                    click: () => selectSubject(subject.id),
+                    // Completed subjects are shown (so progress stays visible) but are
+                    // a dead end on purpose — re-selecting one you already finished
+                    // would silently start overwriting its finished reading plan.
+                    click: () => { if (!isCompleted) selectSubject(subject.id); },
                     keydown: (e) => handleGridKeydown(e, subjects)
                 }
             }, [

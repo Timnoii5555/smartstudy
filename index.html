@@ -700,6 +700,31 @@
     </div>
 </div>
 
+<div id="historyModal" class="modal-overlay hidden">
+    <div class="modal-panel modal-panel--sheet" data-modal-panel>
+        <div class="modal-header">
+            <h2 class="modal-title"><span class="material-symbols-outlined" aria-hidden="true">history_edu</span> <span data-i18n="modalHistory.title">Reading history</span></h2>
+            <button type="button" id="closeHistoryBtn" class="modal-close" data-i18n-attr='{"aria-label":"aria.closeDialog"}' aria-label="Close"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">close</span></button>
+        </div>
+        <div id="historyListContainer" class="flex flex-col gap-4 custom-scroll" style="max-height:24rem;overflow-y:auto"></div>
+    </div>
+</div>
+
+<div id="reportModal" class="modal-overlay hidden">
+    <div class="modal-panel modal-panel--sm" data-modal-panel>
+        <h2 class="modal-title" style="margin-bottom:0.5rem"><span class="material-symbols-outlined" aria-hidden="true">flag</span> <span data-i18n="modalReport.title">Report a bug / suggestion</span></h2>
+        <p class="text-outline" style="font-size:0.8125rem;margin-bottom:1rem" data-i18n="modalReport.hint">Opens your email app with this pre-filled, addressed to the developer.</p>
+        <div class="field">
+            <label class="field__label" for="reportTextarea" data-i18n="modalReport.label">What happened, or what would you like to see?</label>
+            <textarea id="reportTextarea" rows="5" class="textarea" data-i18n-attr='{"placeholder":"modalReport.placeholder"}'></textarea>
+        </div>
+        <div class="modal-actions">
+            <button type="button" id="closeReportBtn" class="btn btn--ghost btn--flex" data-i18n="common.cancel">Cancel</button>
+            <button type="button" id="sendReportBtn" class="btn btn--primary btn--flex" data-i18n="modalReport.send">Open email</button>
+        </div>
+    </div>
+</div>
+
 <div id="congratsModal" class="modal-overlay hidden">
     <div class="modal-panel modal-panel--sm text-center" data-modal-panel>
         <div class="modal-panel__icon modal-panel__icon--success"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:2.5rem;font-variation-settings:'FILL' 1">workspace_premium</span></div>
@@ -831,6 +856,20 @@
         </div>
 
         <div class="settings-section">
+            <span class="settings-section__title" data-i18n="settings.historySection">Reading history</span>
+            <button type="button" id="settingsHistoryBtn" class="btn btn--ghost btn--block" style="justify-content:flex-start">
+                <span class="material-symbols-outlined" aria-hidden="true">history_edu</span><span data-i18n="settings.historyBtn">See what you've finished</span>
+            </button>
+        </div>
+
+        <div class="settings-section">
+            <span class="settings-section__title" data-i18n="settings.feedbackSection">Feedback</span>
+            <button type="button" id="settingsReportBtn" class="btn btn--ghost btn--block" style="justify-content:flex-start">
+                <span class="material-symbols-outlined" aria-hidden="true">flag</span><span data-i18n="settings.reportBtn">Report a bug / suggestion</span>
+            </button>
+        </div>
+
+        <div class="settings-section">
             <span class="settings-section__title" data-i18n="settings.dataSection">Data</span>
             <div class="flex flex-col gap-2">
                 <button type="button" id="settingsExportBtn" class="btn btn--ghost btn--block" style="justify-content:flex-start"><span class="material-symbols-outlined" aria-hidden="true">download</span><span data-i18n="settings.exportBtn">Export</span></button>
@@ -863,6 +902,7 @@
 <script src="js/flashcards.js"></script>
 <script src="js/focus.js"></script>
 <script src="js/settings.js"></script>
+<script src="js/history.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

@@ -42,7 +42,9 @@
         const topicMap = { ...(allProgress[subjectId] || {}) };
         const wasDone = !!topicMap[topicId];
         if (wasDone) delete topicMap[topicId];
-        else topicMap[topicId] = true;
+        // Stores a completion timestamp (not just `true`) so js/history.js can
+        // show a "what did I finish and when" view across every subject.
+        else topicMap[topicId] = { completedAt: new Date().toISOString() };
         allProgress[subjectId] = topicMap;
         // No explicit render() call here: this screen is subscribed to state
         // changes below and re-renders itself whenever it is the active screen.

@@ -277,6 +277,84 @@
                 { id: 'alevel-japanese-kana-kanji', label: { th: 'ฮิรางานะ คาตากานะ และคันจิพื้นฐาน', en: 'Hiragana, katakana & basic kanji' }, difficulty: 3, estMinutes: 210 },
                 { id: 'alevel-japanese-reading', label: { th: 'การอ่านจับใจความภาษาญี่ปุ่น', en: 'Japanese reading comprehension' }, difficulty: 2, estMinutes: 180 }
             ]
+        },
+        {
+            id: 'alevel-french',
+            code: 'A-Level ฝรั่งเศส',
+            name: { th: 'A-Level ภาษาฝรั่งเศส', en: 'A-Level French' },
+            description: { th: 'ไวยากรณ์ คำศัพท์ และการอ่าน-ฟังภาษาฝรั่งเศส', en: 'French grammar, vocabulary, reading & listening' },
+            icon: 'language',
+            colorToken: 'tertiary',
+            topics: [
+                { id: 'alevel-french-grammar', label: { th: 'ไวยากรณ์ฝรั่งเศสพื้นฐาน (Conjugaison)', en: 'Basic French grammar (conjugation)' }, difficulty: 2, estMinutes: 180 },
+                { id: 'alevel-french-vocab', label: { th: 'คำศัพท์ในชีวิตประจำวัน', en: 'Everyday vocabulary' }, difficulty: 2, estMinutes: 150 },
+                { id: 'alevel-french-reading', label: { th: 'การอ่านจับใจความภาษาฝรั่งเศส', en: 'French reading comprehension' }, difficulty: 2, estMinutes: 180 }
+            ]
+        },
+        {
+            id: 'alevel-german',
+            code: 'A-Level เยอรมัน',
+            name: { th: 'A-Level ภาษาเยอรมัน', en: 'A-Level German' },
+            description: { th: 'ไวยากรณ์ คำศัพท์ และการอ่าน-ฟังภาษาเยอรมัน', en: 'German grammar, vocabulary, reading & listening' },
+            icon: 'language',
+            colorToken: 'primary',
+            topics: [
+                { id: 'alevel-german-grammar', label: { th: 'ไวยากรณ์เยอรมันพื้นฐาน (Kasus, Verben)', en: 'Basic German grammar (cases, verbs)' }, difficulty: 3, estMinutes: 210 },
+                { id: 'alevel-german-vocab', label: { th: 'คำศัพท์ในชีวิตประจำวัน', en: 'Everyday vocabulary' }, difficulty: 2, estMinutes: 150 },
+                { id: 'alevel-german-reading', label: { th: 'การอ่านจับใจความภาษาเยอรมัน', en: 'German reading comprehension' }, difficulty: 2, estMinutes: 180 }
+            ]
+        },
+        {
+            id: 'alevel-korean',
+            code: 'A-Level เกาหลี',
+            name: { th: 'A-Level ภาษาเกาหลี', en: 'A-Level Korean' },
+            description: { th: 'ไวยากรณ์ คำศัพท์ และการอ่าน-ฟังภาษาเกาหลี', en: 'Korean grammar, vocabulary, reading & listening' },
+            icon: 'language',
+            colorToken: 'secondary',
+            topics: [
+                { id: 'alevel-korean-hangeul', label: { th: 'ฮันกึลและการออกเสียงพื้นฐาน', en: 'Hangeul & basic pronunciation' }, difficulty: 2, estMinutes: 150 },
+                { id: 'alevel-korean-grammar', label: { th: 'ไวยากรณ์เกาหลีพื้นฐาน', en: 'Basic Korean grammar' }, difficulty: 3, estMinutes: 210 },
+                { id: 'alevel-korean-reading', label: { th: 'การอ่านจับใจความภาษาเกาหลี', en: 'Korean reading comprehension' }, difficulty: 2, estMinutes: 180 }
+            ]
+        },
+        {
+            id: 'alevel-spanish',
+            code: 'A-Level สเปน',
+            name: { th: 'A-Level ภาษาสเปน', en: 'A-Level Spanish' },
+            description: { th: 'ไวยากรณ์ คำศัพท์ และการอ่าน-ฟังภาษาสเปน', en: 'Spanish grammar, vocabulary, reading & listening' },
+            icon: 'language',
+            colorToken: 'tertiary',
+            topics: [
+                { id: 'alevel-spanish-grammar', label: { th: 'ไวยากรณ์สเปนพื้นฐาน (Conjugación)', en: 'Basic Spanish grammar (conjugation)' }, difficulty: 2, estMinutes: 180 },
+                { id: 'alevel-spanish-vocab', label: { th: 'คำศัพท์ในชีวิตประจำวัน', en: 'Everyday vocabulary' }, difficulty: 2, estMinutes: 150 },
+                { id: 'alevel-spanish-reading', label: { th: 'การอ่านจับใจความภาษาสเปน', en: 'Spanish reading comprehension' }, difficulty: 2, estMinutes: 180 }
+            ]
+        },
+        {
+            id: 'alevel-arabic',
+            code: 'A-Level อาหรับ',
+            name: { th: 'A-Level ภาษาอาหรับ', en: 'A-Level Arabic' },
+            description: { th: 'ไวยากรณ์ คำศัพท์ และการอ่าน-ฟังภาษาอาหรับ', en: 'Arabic grammar, vocabulary, reading & listening' },
+            icon: 'language',
+            colorToken: 'primary',
+            topics: [
+                { id: 'alevel-arabic-script', label: { th: 'ตัวอักษรอาหรับและการออกเสียง', en: 'Arabic script & pronunciation' }, difficulty: 3, estMinutes: 180 },
+                { id: 'alevel-arabic-grammar', label: { th: 'ไวยากรณ์อาหรับพื้นฐาน', en: 'Basic Arabic grammar' }, difficulty: 3, estMinutes: 210 },
+                { id: 'alevel-arabic-reading', label: { th: 'การอ่านจับใจความภาษาอาหรับ', en: 'Arabic reading comprehension' }, difficulty: 2, estMinutes: 180 }
+            ]
+        },
+        {
+            id: 'alevel-pali',
+            code: 'A-Level บาลี',
+            name: { th: 'A-Level ภาษาบาลี', en: 'A-Level Pali' },
+            description: { th: 'ไวยากรณ์และการแปลภาษาบาลี', en: 'Pali grammar & translation' },
+            icon: 'language',
+            colorToken: 'secondary',
+            topics: [
+                { id: 'alevel-pali-grammar', label: { th: 'หลักไวยากรณ์บาลีพื้นฐาน', en: 'Basic Pali grammar' }, difficulty: 3, estMinutes: 180 },
+                { id: 'alevel-pali-vocab', label: { th: 'คำศัพท์และธาตุศัพท์', en: 'Vocabulary & word roots' }, difficulty: 2, estMinutes: 150 },
+                { id: 'alevel-pali-translate', label: { th: 'การแปลบาลีเป็นไทย', en: 'Translating Pali to Thai' }, difficulty: 3, estMinutes: 180 }
+            ]
         }
     ];
 

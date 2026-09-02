@@ -47,7 +47,8 @@
                 topicsHeading: 'เนื้อหาที่ต้องอ่าน:',
                 next: 'ถัดไป',
                 errSelectSubject: 'กรุณาเลือกวิชาที่จะสอบก่อนครับ',
-                completedTag: '✓ เรียนจบแล้ว'
+                completedTag: '✓ เรียนจบแล้ว',
+                completedDisabledHint: 'คุณเรียนวิชานี้จบไปแล้ว เลือกวิชาอื่นได้เลย'
             },
             s2: {
                 title: 'กำหนดวันสอบและเวลาที่คุณมี',
@@ -78,7 +79,7 @@
                 subjectLoading: 'เตรียมโหลดวิชา...',
                 subjectPrefix: 'วิชา {subject}',
                 progressCaption: 'ลุยเก็บเนื้อหาให้ครบ 100%',
-                todoTitle: 'รายการสิ่งที่ต้องทำวันนี้',
+                todoTitle: 'หัวข้อที่ต้องอ่านวันนี้',
                 lessonsUnit: 'บท',
                 tickHint: 'ติ๊กเมื่อเรียนจบ',
                 emptyChecklist: 'ยังไม่มีวิชาที่เลือก กลับไปเลือกวิชาที่หน้าแรกก่อนนะครับ'
@@ -119,6 +120,19 @@
             modalTimePicker: { title: 'เลือกเวลา', confirm: 'ยืนยันเวลา' },
             modalDeckSelector: { title: 'เลือกชุดคำศัพท์', createNew: 'สร้างชุดคำศัพท์ใหม่', wordsCount: '{n} คำศัพท์' },
             modalDeleteCard: { title: 'ลบคำศัพท์', selectLabel: 'เลือกคำศัพท์ที่ต้องการลบ', warning: '*การลบคำศัพท์จะไม่สามารถกู้คืนได้', ok: 'ลบคำศัพท์' },
+            modalHistory: {
+                title: 'ประวัติการอ่าน',
+                empty: 'ยังไม่มีหัวข้อที่อ่านจบเลย เริ่มติ๊กจากหน้าแรกได้เลยครับ',
+                countLabel: 'อ่านจบแล้ว {n}/{total} บท'
+            },
+            modalReport: {
+                title: 'รายงานบัค / ข้อเสนอแนะ',
+                hint: 'จะเปิดแอปอีเมลของคุณพร้อมข้อความนี้ ส่งถึงผู้พัฒนาโดยตรง',
+                label: 'เจอปัญหาอะไร หรืออยากให้เพิ่มอะไร?',
+                placeholder: 'พิมพ์รายละเอียดที่นี่...',
+                send: 'เปิดอีเมล',
+                errEmpty: 'กรุณาพิมพ์ข้อความก่อนส่งครับ'
+            },
             modalAddCard: { title: 'เพิ่มคำศัพท์ใหม่', termLabel: 'คำศัพท์', defLabel: 'ความหมาย', exampleLabel: 'ตัวอย่างประโยค', save: 'เพิ่มคำศัพท์', errRequired: 'กรุณากรอกคำศัพท์และความหมายให้ครบครับ' },
             modalAddDeck: { title: 'สร้างชุดคำศัพท์', nameLabel: 'ชื่อชุดคำศัพท์', namePlaceholder: 'เช่น สังคมศึกษา, ชีววิทยา', errRequired: 'กรุณาตั้งชื่อชุดคำศัพท์ครับ', errExists: 'ชื่อชุดคำศัพท์นี้มีอยู่แล้วครับ' },
             s5: {
@@ -159,6 +173,8 @@
                 longBreakMin: 'พักยาว (นาที)', cycles: 'จำนวนรอบก่อนพักยาว',
                 soundSection: 'เสียง', soundEnabled: 'เปิดเสียงแจ้งเตือน',
                 accountSection: 'บัญชี', switchProfile: 'สลับโปรไฟล์ผู้ใช้',
+                historySection: 'ประวัติการอ่าน', historyBtn: 'ดูสิ่งที่อ่านจบไปแล้ว',
+                feedbackSection: 'ความคิดเห็น', reportBtn: 'รายงานบัค / ข้อเสนอแนะ',
                 dataSection: 'ข้อมูล',
                 exportBtn: 'ส่งออกข้อมูล (JSON)', importBtn: 'นำเข้าข้อมูล (JSON)',
                 resetAllBtn: 'ล้างข้อมูลทั้งหมด',
@@ -170,6 +186,8 @@
             },
             quests: {
                 cardTitle: 'เควสประจำวัน',
+                introText: 'ทำภารกิจแต่ละอันให้ครบตามเป้า แล้วกด "รับ" เพื่อรับคะแนนสะสม ยิ่งสะสมเยอะ เลเวลก็ยิ่งสูงขึ้น!',
+                introDismiss: 'เข้าใจแล้ว',
                 pointsTotal: '{n} คะแนนสะสม',
                 pointsBadge: '⭐ {n} · {level}',
                 claim: 'รับ +{points}',
@@ -219,7 +237,8 @@
                 topicsHeading: 'Topics to cover:',
                 next: 'Next',
                 errSelectSubject: 'Please choose a subject to continue.',
-                completedTag: '✓ Completed'
+                completedTag: '✓ Completed',
+                completedDisabledHint: "You've already finished this subject — pick another one."
             },
             s2: {
                 title: 'Set your exam date & available time',
@@ -250,7 +269,7 @@
                 subjectLoading: 'Loading subject...',
                 subjectPrefix: 'Subject: {subject}',
                 progressCaption: 'Push to 100% coverage',
-                todoTitle: "Today's to-do list",
+                todoTitle: "Today's reading topics",
                 lessonsUnit: 'topics',
                 tickHint: 'Tap to mark as done',
                 emptyChecklist: 'No subject selected yet. Go back to the first screen to choose one.'
@@ -291,6 +310,19 @@
             modalTimePicker: { title: 'Choose time', confirm: 'Confirm time' },
             modalDeckSelector: { title: 'Choose a deck', createNew: 'Create new deck', wordsCount: '{n} words' },
             modalDeleteCard: { title: 'Delete word', selectLabel: 'Choose a word to delete', warning: '*This cannot be undone.', ok: 'Delete word' },
+            modalHistory: {
+                title: 'Reading history',
+                empty: "You haven't finished any topics yet — start ticking them off on the first screen.",
+                countLabel: '{n}/{total} topics finished'
+            },
+            modalReport: {
+                title: 'Report a bug / suggestion',
+                hint: 'Opens your email app with this pre-filled, addressed to the developer.',
+                label: 'What happened, or what would you like to see?',
+                placeholder: 'Type details here...',
+                send: 'Open email',
+                errEmpty: 'Please type a message before sending.'
+            },
             modalAddCard: { title: 'Add new word', termLabel: 'Term', defLabel: 'Definition', exampleLabel: 'Example sentence', save: 'Add word', errRequired: 'Please fill in both the term and the definition.' },
             modalAddDeck: { title: 'Create deck', nameLabel: 'Deck name', namePlaceholder: 'e.g. Social Studies, Biology', errRequired: 'Please name your deck.', errExists: 'A deck with this name already exists.' },
             s5: {
@@ -331,6 +363,8 @@
                 longBreakMin: 'Long break (min)', cycles: 'Cycles before long break',
                 soundSection: 'Sound', soundEnabled: 'Enable notification sound',
                 accountSection: 'Account', switchProfile: 'Switch profile',
+                historySection: 'Reading history', historyBtn: "See what you've finished",
+                feedbackSection: 'Feedback', reportBtn: 'Report a bug / suggestion',
                 dataSection: 'Data',
                 exportBtn: 'Export data (JSON)', importBtn: 'Import data (JSON)',
                 resetAllBtn: 'Reset all data',
@@ -342,6 +376,8 @@
             },
             quests: {
                 cardTitle: 'Daily quests',
+                introText: 'Complete each quest to its target, then tap "Claim" for points. The more you stack up, the higher your level!',
+                introDismiss: 'Got it',
                 pointsTotal: '{n} points',
                 pointsBadge: '⭐ {n} · {level}',
                 claim: 'Claim +{points}',
