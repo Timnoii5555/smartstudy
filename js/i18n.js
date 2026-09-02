@@ -86,7 +86,7 @@
                 subjectLoading: 'เตรียมโหลดวิชา...',
                 subjectPrefix: 'วิชา {subject}',
                 progressCaption: 'ลุยเก็บเนื้อหาให้ครบ 100%',
-                todoTitle: 'หัวข้อที่ต้องอ่านวันนี้',
+                todoTitle: 'หัวข้อที่ต้องอ่าน',
                 lessonsUnit: 'บท',
                 tickHint: 'ติ๊กเมื่อเรียนจบ',
                 emptyChecklist: 'ยังไม่มีวิชาที่เลือก กลับไปเลือกวิชาที่หน้าแรกก่อนนะครับ'
@@ -301,7 +301,7 @@
                 subjectLoading: 'Loading subject...',
                 subjectPrefix: 'Subject: {subject}',
                 progressCaption: 'Push to 100% coverage',
-                todoTitle: "Today's reading topics",
+                todoTitle: "Topics to read",
                 lessonsUnit: 'topics',
                 tickHint: 'Tap to mark as done',
                 emptyChecklist: 'No subject selected yet. Go back to the first screen to choose one.'
