@@ -167,6 +167,25 @@
         await db.collection('users').doc(currentUser.uid).set({ displayName: name }, { merge: true });
     }
 
+    /** Replaces the account's avatar after sign-up, using the same resize/
+     *  compress-to-Firestore approach as signUp() (see the file header for
+     *  why there's no Firebase Storage involved). */
+    async function updateAvatar(file) {
+        if (!currentUser) throw new Error('not_logged_in');
+        const avatarURL = await resizeImageToDataURL(file);
+        await db.collection('users').doc(currentUser.uid).set({ avatarURL }, { merge: true });
+        return avatarURL;
+    }
+
+    /** The current user's own Firestore doc (display name, avatar, points) —
+     *  used to prefill the "edit profile" modal, since Firebase Auth's own
+     *  user object doesn't carry the avatar (only Firestore does here). */
+    async function getOwnProfile() {
+        if (!currentUser || !db) return null;
+        const doc = await db.collection('users').doc(currentUser.uid).get();
+        return doc.exists ? doc.data() : null;
+    }
+
     /** One-way mirror: local points (computed by quests.js) → cloud. The
      *  cloud copy is read-only from the app's own point of view — it exists
      *  only so the leaderboard query has something to read across users. */
@@ -185,7 +204,7 @@
 
     TFS.Auth = {
         isEnabled, isCloudProfileId, cloudProfileId, init, onAuthChange, getCurrentUser,
-        signUp, logIn, logOut, resetPassword, updateDisplayName, syncPoints, fetchLeaderboard, errorKey
+        signUp, logIn, logOut, resetPassword, updateDisplayName, updateAvatar, getOwnProfile, syncPoints, fetchLeaderboard, errorKey
     };
 
 })(window);

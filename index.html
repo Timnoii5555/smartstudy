@@ -813,6 +813,17 @@
 <div id="renameModal" class="modal-overlay hidden">
     <div class="modal-panel modal-panel--sm" data-modal-panel>
         <h2 class="modal-title" style="margin-bottom:1rem"><span class="material-symbols-outlined" aria-hidden="true">edit</span> <span data-i18n="modalRename.title">Change name / nickname</span></h2>
+        <div id="renameAvatarField" class="field" style="margin-bottom:1rem" hidden>
+            <label class="field__label" data-i18n="s0.avatarLabel">Avatar</label>
+            <div class="flex items-center gap-3">
+                <button type="button" id="renameAvatarPickBtn" class="avatar-upload-btn">
+                    <img id="renameAvatarPreview" hidden alt="">
+                    <span id="renameAvatarPlaceholder" class="material-symbols-outlined" aria-hidden="true">add_a_photo</span>
+                </button>
+                <span class="text-outline" style="font-size:0.75rem" data-i18n="s0.avatarHint">Optional — tap to choose a photo</span>
+                <input type="file" id="renameAvatarInput" class="settings-file-input" accept="image/*">
+            </div>
+        </div>
         <div class="field">
             <label class="field__label" for="renameInput" data-i18n="s0.nameLabel">Your name</label>
             <input type="text" id="renameInput" class="input" maxlength="24">

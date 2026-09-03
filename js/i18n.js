@@ -144,8 +144,8 @@
                 errTopics: 'กรุณาเพิ่มอย่างน้อย 1 หัวข้อ'
             },
             modalRename: {
-                title: 'เปลี่ยนชื่อ / นามแฝง',
-                success: 'เปลี่ยนชื่อเรียบร้อยแล้ว'
+                title: 'แก้ไขโปรไฟล์',
+                success: 'บันทึกโปรไฟล์เรียบร้อยแล้ว'
             },
             modalForgotPassword: {
                 title: 'ตั้งรหัสผ่านใหม่',
@@ -223,7 +223,7 @@
                 focusMin: 'ช่วงโฟกัส (นาที)', shortBreakMin: 'พักสั้น (นาที)',
                 longBreakMin: 'พักยาว (นาที)', cycles: 'จำนวนรอบก่อนพักยาว',
                 soundSection: 'เสียง', soundEnabled: 'เปิดเสียงแจ้งเตือน',
-                accountSection: 'บัญชี', renameBtn: 'เปลี่ยนชื่อ / นามแฝง',
+                accountSection: 'บัญชี', renameBtn: 'แก้ไขโปรไฟล์ (ชื่อ/รูป)',
                 switchProfile: 'สลับโปรไฟล์ผู้ใช้', logout: 'ออกจากระบบ',
                 historySection: 'ประวัติการอ่าน', historyBtn: 'ดูสิ่งที่อ่านจบไปแล้ว',
                 feedbackSection: 'ความคิดเห็น', reportBtn: 'รายงานบัค / ข้อเสนอแนะ'
@@ -378,8 +378,8 @@
                 errTopics: 'Please add at least one topic.'
             },
             modalRename: {
-                title: 'Change name / nickname',
-                success: 'Your name has been updated.'
+                title: 'Edit profile',
+                success: 'Profile saved.'
             },
             modalForgotPassword: {
                 title: 'Reset your password',
@@ -457,7 +457,7 @@
                 focusMin: 'Focus length (min)', shortBreakMin: 'Short break (min)',
                 longBreakMin: 'Long break (min)', cycles: 'Cycles before long break',
                 soundSection: 'Sound', soundEnabled: 'Enable notification sound',
-                accountSection: 'Account', renameBtn: 'Change name / nickname',
+                accountSection: 'Account', renameBtn: 'Edit profile (name/photo)',
                 switchProfile: 'Switch profile', logout: 'Log out',
                 historySection: 'Reading history', historyBtn: "See what you've finished",
                 feedbackSection: 'Feedback', reportBtn: 'Report a bug / suggestion'

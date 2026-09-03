@@ -103,6 +103,12 @@
     // its entry in storage.js's profiles index) — whichever is active.
     const renameModal = document.getElementById('renameModal');
     const renameInput = document.getElementById('renameInput');
+    const renameAvatarField = document.getElementById('renameAvatarField');
+    const renameAvatarPickBtn = document.getElementById('renameAvatarPickBtn');
+    const renameAvatarInput = document.getElementById('renameAvatarInput');
+    const renameAvatarPreview = document.getElementById('renameAvatarPreview');
+    const renameAvatarPlaceholder = document.getElementById('renameAvatarPlaceholder');
+    let pendingRenameAvatarFile = null;
 
     function currentDisplayName() {
         const activeId = TFS.Storage.getActiveProfileId();
@@ -114,10 +120,38 @@
         return profile ? profile.name : '';
     }
 
-    document.getElementById('settingsRenameBtn').addEventListener('click', () => {
+    renameAvatarPickBtn.addEventListener('click', () => renameAvatarInput.click());
+    renameAvatarInput.addEventListener('change', () => {
+        const file = renameAvatarInput.files[0];
+        if (!file) return;
+        pendingRenameAvatarFile = file;
+        renameAvatarPreview.src = URL.createObjectURL(file);
+        renameAvatarPreview.hidden = false;
+        renameAvatarPlaceholder.hidden = true;
+    });
+
+    document.getElementById('settingsRenameBtn').addEventListener('click', async () => {
         TFS.Modal.close(settingsModal);
+        const isCloud = TFS.Auth && TFS.Auth.isEnabled() && TFS.Auth.isCloudProfileId(TFS.Storage.getActiveProfileId());
         renameInput.value = currentDisplayName();
+        pendingRenameAvatarFile = null;
+        renameAvatarField.hidden = !isCloud;
+        renameAvatarPreview.hidden = true;
+        renameAvatarPlaceholder.hidden = false;
         setTimeout(() => TFS.Modal.open(renameModal), 200);
+        // Firestore is the only place the avatar lives (Firebase Auth's own
+        // profile isn't used for it here) — fetch it after opening so the
+        // modal doesn't wait on a network round-trip to appear.
+        if (isCloud) {
+            try {
+                const profile = await TFS.Auth.getOwnProfile();
+                if (profile && profile.avatarURL && !pendingRenameAvatarFile) {
+                    renameAvatarPreview.src = profile.avatarURL;
+                    renameAvatarPreview.hidden = false;
+                    renameAvatarPlaceholder.hidden = true;
+                }
+            } catch (e) { console.warn('[settings] Could not load current avatar', e); }
+        }
     });
     document.getElementById('closeRenameBtn').addEventListener('click', () => TFS.Modal.close(renameModal));
     document.getElementById('saveRenameBtn').addEventListener('click', async () => {
@@ -127,6 +161,7 @@
         try {
             if (TFS.Auth && TFS.Auth.isEnabled() && TFS.Auth.isCloudProfileId(activeId)) {
                 await TFS.Auth.updateDisplayName(name);
+                if (pendingRenameAvatarFile) await TFS.Auth.updateAvatar(pendingRenameAvatarFile);
             } else {
                 TFS.Storage.renameProfile(activeId, name);
             }
