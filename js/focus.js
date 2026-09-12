@@ -305,6 +305,10 @@
     const flightOriginCodeEl = document.getElementById('flightOriginCode');
     const flightPickerRow = document.getElementById('flightPickerRow');
     const flightPickerLabel = document.getElementById('flightPickerLabel');
+    const openRealDestBtn = document.getElementById('openRealDestBtn');
+    const realDestModal = document.getElementById('realDestModal');
+    const realDestList = document.getElementById('realDestList');
+    const closeRealDestBtn = document.getElementById('closeRealDestBtn');
 
     const BKK_LATLNG = [13.6900, 100.7501]; // fallback if data/airports.js ever fails to load
     const WINDOW_COUNT = 6;
@@ -474,7 +478,7 @@
      *  the "traveled" trail behind it. */
     function renderFlightPlane() {
         const total = durationForMode(mode);
-        const flight = nearestFlight(Math.round(total / 60));
+        const flight = activeFlight(Math.round(total / 60));
         if (flightDestCodeEl) flightDestCodeEl.textContent = flight.code;
         if (flightOriginCodeEl) flightOriginCodeEl.textContent = originAirport().code;
         renderFlightWindows(knownFlightPassengerCount);
@@ -514,6 +518,7 @@
         const show = mode === 'focus' && !isRunning();
         flightPickerRow.hidden = !show;
         if (flightPickerLabel) flightPickerLabel.hidden = !show;
+        if (openRealDestBtn) openRealDestBtn.hidden = !show;
         if (!show) return;
 
         const currentMinutes = pomodoroSettings().focusMin;
@@ -541,7 +546,11 @@
 
     function selectFlight(flight) {
         if (isRunning()) return;
-        State.commit({ settings: { pomodoro: { focusMin: flight.minutes } } });
+        // Picking a curated flight always wins over a previously-explored
+        // real destination (see activeFlight() below) — one ticket at a
+        // time, and this is the more discoverable/default of the two ways
+        // to get one.
+        State.commit({ settings: { pomodoro: { focusMin: flight.minutes }, customDestinationId: null } });
         if (mode === 'focus') { accumulatedMs = 0; persistRuntime(); }
         render();
         refreshFlightPassengerCount(); // this flight's passenger count may differ from the previous one
@@ -553,6 +562,83 @@
      *  join (see js/presence.js's file header for why matching has to be
      *  exact rather than nearest-match). */
     function currentFocusFlight() { return flightForMinutes(pomodoroSettings().focusMin); }
+
+    /** The flight actually being flown, for anywhere that needs one
+     *  concrete answer (the map, the boarding pass, the flight log): an
+     *  explicitly-picked real destination (see "Explore real destinations"
+     *  below) if one is set, otherwise the exactly-matching curated
+     *  flight, otherwise the curated flight whose duration is closest —
+     *  the same fallback nearestFlight() already provided. Never null. */
+    function activeFlight(minutesHint) {
+        const customId = State.get().settings.customDestinationId;
+        const airport = customId && TFS.Geo && TFS.Geo.airportById(customId);
+        if (airport) {
+            return { id: 'custom:' + airport.id, code: airport.code, name: airport.name, latlng: airport.latlng, minutes: pomodoroSettings().focusMin };
+        }
+        return currentFocusFlight() || nearestFlight(minutesHint !== undefined ? minutesHint : pomodoroSettings().focusMin);
+    }
+
+    // ---------------------------------------------------------------- Explore real destinations
+    //
+    // An alternative to the curated flight-picker chips above: browse every
+    // real airport in data/airports.js by how long that route would
+    // actually take from the current departure airport, and fly it for
+    // real instead of picking a round Pomodoro number. Never the default —
+    // round session lengths matter more for actually studying than
+    // geographic realism does — just here for whoever wants it anyway.
+
+    /** ~540 km/h cruise speed (9 km/min) plus a flat 12 minutes for taxi,
+     *  climb and descent — not a real airline's numbers, just a formula
+     *  that lands in the right neighborhood for a short domestic hop
+     *  without ever going below what a landing alone realistically takes. */
+    function computeRealMinutes(km) {
+        return U.clamp(Math.round(12 + km / 9), 10, 180);
+    }
+
+    function renderRealDestList() {
+        if (!realDestList || !TFS.Geo) return;
+        realDestList.innerHTML = '';
+        const origin = originAirport();
+        const sorted = (TFS.AIRPORTS || [])
+            .filter((a) => a.id !== origin.id)
+            .map((a) => ({ airport: a, km: U.haversineKm(origin.latlng, a.latlng) }))
+            .sort((a, b) => a.km - b.km);
+        sorted.forEach(({ airport, km }) => {
+            const minutes = computeRealMinutes(km);
+            realDestList.appendChild(U.el('button', {
+                className: 'search-result-item w-full', attrs: { type: 'button' },
+                on: { click: () => selectRealDestination(airport) }
+            }, [
+                U.el('span', { className: 'flex items-center gap-3' }, [
+                    U.el('span', { className: 'material-symbols-outlined text-primary', attrs: { 'aria-hidden': 'true' }, text: 'flight_takeoff' }),
+                    U.el('span', {}, [
+                        U.el('h3', { attrs: { style: 'font-weight:700;font-size:0.875rem' }, text: `${I18n.pick(airport.name)} (${airport.code})` }),
+                        U.el('p', { className: 'text-outline', attrs: { style: 'font-size:0.6875rem' }, text: `${Math.round(km)} km` })
+                    ])
+                ]),
+                U.el('span', { attrs: { style: 'font-weight:700;color:var(--color-primary);white-space:nowrap' }, text: I18n.t('s6.flightMinutes', { n: minutes }) })
+            ]));
+        });
+    }
+
+    function selectRealDestination(airport) {
+        if (isRunning()) return;
+        const minutes = computeRealMinutes(U.haversineKm(originAirport().latlng, airport.latlng));
+        State.commit({ settings: { pomodoro: { focusMin: minutes }, customDestinationId: airport.id } });
+        if (mode === 'focus') { accumulatedMs = 0; persistRuntime(); }
+        TFS.Modal.close(realDestModal);
+        render();
+        refreshFlightPassengerCount();
+    }
+
+    if (openRealDestBtn) {
+        openRealDestBtn.addEventListener('click', () => {
+            if (!TFS.Geo) { TFS.Toast.warn(I18n.t('modalRealDest.unavailable')); return; }
+            renderRealDestList();
+            TFS.Modal.open(realDestModal);
+        });
+    }
+    if (closeRealDestBtn) closeRealDestBtn.addEventListener('click', () => TFS.Modal.close(realDestModal));
 
     /** Joins this flight's shared presence room whenever we're actually in
      *  the focus phase (not a break) and the current duration exactly
@@ -636,7 +722,7 @@
      *  meant anything. */
     function logFlight(minutes) {
         if (!minutes || minutes < 1) return;
-        const flight = currentFocusFlight() || nearestFlight(minutes);
+        const flight = activeFlight(minutes);
         const origin = originAirport();
         const entry = {
             dateISO: U.formatDateISO(new Date()),
@@ -873,7 +959,7 @@
      *  is only a defensive fallback if the seat picker's elements are ever
      *  missing for some reason. */
     function showBoardingPass(seat) {
-        const flight = currentFocusFlight() || nearestFlight(pomodoroSettings().focusMin);
+        const flight = activeFlight();
         const origin = originAirport();
         activeSeat = seat || randomSeat();
         if (boardingPassOriginCode) boardingPassOriginCode.textContent = origin.code;
@@ -1023,7 +1109,7 @@
      *  never block starting a session outright. */
     function showSeatPicker() {
         if (!seatPickerModal || !seatPickerGrid) { showBoardingPass(randomSeat()); return; }
-        const flight = currentFocusFlight() || nearestFlight(pomodoroSettings().focusMin);
+        const flight = activeFlight();
         if (seatPickerOriginCode) seatPickerOriginCode.textContent = originAirport().code;
         if (seatPickerDestCode) seatPickerDestCode.textContent = flight.code;
         // Only a curated flight (an exact duration match) has a real shared

@@ -222,6 +222,12 @@
                 locationDenied: 'ไม่สามารถเข้าถึงตำแหน่งได้ ลองค้นหาหรือเลือกจากรายการแทนได้ครับ',
                 selectedToast: 'เปลี่ยนต้นทางเป็น {code} แล้ว'
             },
+            modalRealDest: {
+                title: 'สำรวจปลายทางจริง',
+                openBtn: 'สำรวจปลายทางจริง',
+                hint: 'เรียงตามเวลาบินจริงจากสนามบินต้นทางปัจจุบันของคุณ',
+                unavailable: 'ฟีเจอร์นี้ยังไม่พร้อมใช้งานในตอนนี้'
+            },
             modalGroups: {
                 title: 'กลุ่มเรียน',
                 codePlaceholder: 'รหัสเข้ากลุ่ม',
@@ -621,6 +627,12 @@
                 searchPlaceholder: 'Search airport / city',
                 locationDenied: "Couldn't access your location — try searching or picking from the list instead.",
                 selectedToast: 'Departure set to {code}'
+            },
+            modalRealDest: {
+                title: 'Explore real destinations',
+                openBtn: 'Explore real destinations',
+                hint: 'Sorted by real flight time from your current departure airport.',
+                unavailable: "This feature isn't available right now"
             },
             modalGroups: {
                 title: 'Study groups',

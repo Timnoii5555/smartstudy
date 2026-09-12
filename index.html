@@ -758,6 +758,10 @@
              sets settings.pomodoro.focusMin directly. -->
         <p class="flight-picker__label text-outline" id="flightPickerLabel" hidden data-i18n="s6.flightPickerLabel">Choose your flight</p>
         <div class="flight-picker custom-scroll" id="flightPickerRow" role="radiogroup" aria-labelledby="flightPickerLabel" hidden></div>
+        <button type="button" id="openRealDestBtn" class="btn btn--ghost" style="margin:-0.5rem auto 0.5rem;display:flex" hidden>
+            <span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">travel_explore</span>
+            <span data-i18n="modalRealDest.openBtn">Explore real destinations</span>
+        </button>
 
         <div class="focus-controls">
             <div class="focus-controls__row">
@@ -1449,6 +1453,24 @@
         </div>
         <input type="text" id="airportSearchInput" class="input" style="margin-bottom:0.75rem" data-i18n-attr='{"placeholder":"modalAirportPicker.searchPlaceholder"}' placeholder="Search airport / city">
         <div id="airportListContainer" class="flex flex-col gap-2 custom-scroll" style="max-height:18rem;overflow-y:auto"></div>
+    </div>
+</div>
+
+<!-- Picking a real airport here (js/focus.js) sets the session length to
+     however long that route actually takes (real distance ÷ an assumed
+     cruise speed + ground-ops overhead) instead of one of the curated
+     round Pomodoro lengths — an alternative, not a replacement: the
+     curated flight-picker chips stay the default because round numbers
+     matter more for an actual study session than realism does, but this
+     is here for whoever wants the realism anyway. -->
+<div id="realDestModal" class="modal-overlay hidden">
+    <div class="modal-panel modal-panel--sheet custom-scroll" data-modal-panel style="max-height:85vh">
+        <div class="modal-header">
+            <h2 class="modal-title"><span class="material-symbols-outlined" aria-hidden="true">travel_explore</span> <span data-i18n="modalRealDest.title">Explore real destinations</span></h2>
+            <button type="button" id="closeRealDestBtn" class="modal-close" data-i18n-attr='{"aria-label":"aria.closeDialog"}' aria-label="Close"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">close</span></button>
+        </div>
+        <p class="text-outline" style="font-size:0.8125rem;margin-bottom:1rem" data-i18n="modalRealDest.hint">Sorted by real flight time from your current departure airport.</p>
+        <div id="realDestList" class="flex flex-col gap-2 custom-scroll" style="max-height:24rem;overflow-y:auto"></div>
     </div>
 </div>
 

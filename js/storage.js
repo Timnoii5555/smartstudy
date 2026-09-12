@@ -125,6 +125,11 @@
                 // The flight map's tile style (js/focus.js's MAP_STYLES) —
                 // 'satellite' | 'standard' | 'monochrome'.
                 mapStyle: 'satellite',
+                // An explicitly-picked real airport (data/airports.js) from
+                // "Explore real destinations", overriding the curated
+                // FLIGHTS lookup until a curated flight chip is picked
+                // again — see js/focus.js's activeFlight().
+                customDestinationId: null,
                 // Off by default, one reminder a day at most (js/reminder.js)
                 // — matches this app's own notification rule. null = off;
                 // "HH:MM" = fire (at most) once, the first time the app is
