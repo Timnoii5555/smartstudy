@@ -32,6 +32,9 @@
     const soundToggle = document.getElementById('settingsSoundToggle');
     const settingsAirportBtn = document.getElementById('settingsAirportBtn');
     const settingsAirportDisplay = document.getElementById('settingsAirportDisplay');
+    const settingsReminderToggle = document.getElementById('settingsReminderToggle');
+    const settingsReminderTimeField = document.getElementById('settingsReminderTimeField');
+    const settingsReminderTime = document.getElementById('settingsReminderTime');
 
     function render() {
         const s = State.get();
@@ -59,6 +62,14 @@
 
         const airport = (TFS.Geo && TFS.Geo.airportById(s.settings.departureAirportId)) || (TFS.AIRPORTS && TFS.AIRPORTS[0]);
         if (settingsAirportDisplay && airport) settingsAirportDisplay.textContent = `${I18n.pick(airport.name)} (${airport.code})`;
+
+        const reminderOn = !!s.settings.dailyReminderTime;
+        if (settingsReminderToggle) {
+            settingsReminderToggle.querySelector('.switch').classList.toggle('is-on', reminderOn);
+            settingsReminderToggle.setAttribute('aria-pressed', String(reminderOn));
+        }
+        if (settingsReminderTimeField) settingsReminderTimeField.hidden = !reminderOn;
+        if (settingsReminderTime) settingsReminderTime.value = s.settings.dailyReminderTime || '09:00';
 
         const onCloudAccount = TFS.Auth && TFS.Auth.isEnabled() && TFS.Auth.isCloudProfileId(TFS.Storage.getActiveProfileId());
         document.getElementById('settingsLogoutBtn').hidden = !onCloudAccount;
@@ -117,6 +128,30 @@
         State.commit({ settings: { soundEnabled: !State.get().settings.soundEnabled } });
         render();
     });
+
+    // ---------------------------------------------------------------- Daily reminder (js/reminder.js)
+
+    if (settingsReminderToggle) {
+        settingsReminderToggle.addEventListener('click', async () => {
+            const turningOn = !State.get().settings.dailyReminderTime;
+            if (turningOn) {
+                // Must be requested from this click — a real user gesture —
+                // or the browser refuses the permission prompt outright.
+                const result = TFS.Reminder ? await TFS.Reminder.requestPermission() : 'unsupported';
+                if (result === 'denied') { TFS.Toast.warn(I18n.t('settings.reminderDenied')); return; }
+                State.commit({ settings: { dailyReminderTime: settingsReminderTime.value || '09:00' } });
+            } else {
+                State.commit({ settings: { dailyReminderTime: null } });
+            }
+            render();
+        });
+    }
+    if (settingsReminderTime) {
+        settingsReminderTime.addEventListener('change', () => {
+            if (!State.get().settings.dailyReminderTime) return; // only meaningful once actually enabled
+            State.commit({ settings: { dailyReminderTime: settingsReminderTime.value || '09:00' } });
+        });
+    }
 
     // ---------------------------------------------------------------- Change name / nickname
     // Works for both a real account (Firebase Auth profile + the mirrored

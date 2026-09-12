@@ -210,6 +210,10 @@
                 tail: 'ท้ายเครื่อง',
                 scenarioQuestion: 'อยากโฟกัสเรื่องอะไร?'
             },
+            modalReminder: {
+                notifTitle: '🤗 ได้เวลาโฟกัสแล้ว!',
+                notifBody: 'มาเริ่มติดปีกบินไปกับการอ่านหนังสือกันเถอะ'
+            },
             modalAirportPicker: {
                 title: 'สนามบินต้นทาง',
                 useLocation: 'ใช้ตำแหน่งของฉัน',
@@ -355,6 +359,9 @@
                 departureSection: 'ต้นทางเที่ยวบิน',
                 flashcardsSection: 'แฟลชการ์ด', newCardsPerDay: 'คำศัพท์ใหม่สูงสุดต่อวัน',
                 soundSection: 'เสียง', soundEnabled: 'เปิดเสียงแจ้งเตือน',
+                reminderSection: 'เตือนความจำประจำวัน',
+                reminderEnabled: 'เตือนให้มาโฟกัสทุกวัน', reminderTime: 'เวลาที่จะเตือน',
+                reminderDenied: 'เบราว์เซอร์ไม่อนุญาตให้แจ้งเตือน ลองเปิดสิทธิ์แจ้งเตือนให้เว็บนี้ในตั้งค่าเบราว์เซอร์ดูนะครับ',
                 accountSection: 'บัญชี', renameBtn: 'แก้ไขโปรไฟล์ (ชื่อ/รูป)',
                 switchProfile: 'สลับโปรไฟล์ผู้ใช้', logout: 'ออกจากระบบ',
                 historySection: 'ประวัติการอ่าน', historyBtn: 'ดูสิ่งที่อ่านจบไปแล้ว',
@@ -570,6 +577,10 @@
                 tail: 'Tail',
                 scenarioQuestion: 'What do you want to focus on?'
             },
+            modalReminder: {
+                notifTitle: '🤗 Time to focus!',
+                notifBody: "Let's get those wings up and start reading."
+            },
             modalAirportPicker: {
                 title: 'Departure airport',
                 useLocation: 'Use my location',
@@ -715,6 +726,9 @@
                 departureSection: 'Flight origin',
                 flashcardsSection: 'Flashcards', newCardsPerDay: 'New cards per day',
                 soundSection: 'Sound', soundEnabled: 'Enable notification sound',
+                reminderSection: 'Daily reminder',
+                reminderEnabled: 'Remind me to focus every day', reminderTime: 'Reminder time',
+                reminderDenied: "Your browser blocked notifications — try allowing them for this site in your browser settings.",
                 accountSection: 'Account', renameBtn: 'Edit profile (name/photo)',
                 switchProfile: 'Switch profile', logout: 'Log out',
                 historySection: 'Reading history', historyBtn: "See what you've finished",

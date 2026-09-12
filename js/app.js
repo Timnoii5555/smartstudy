@@ -104,6 +104,7 @@
 
         Router.show(resolveInitialScreen());
         registerServiceWorker();
+        if (TFS.Reminder) TFS.Reminder.init();
 
         if (TFS.Storage.isBroken()) TFS.Toast.warn(I18n.t('errors.storageUnavailable'), 7000);
         else if (TFS.Storage.wasCorrupt()) TFS.Toast.warn(I18n.t('errors.corruptData'), 7000);

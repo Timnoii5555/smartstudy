@@ -1377,6 +1377,22 @@
             </button>
         </div>
 
+        <!-- Off by default, at most one a day (js/reminder.js) — matches
+             this app's own notification rule. Only fires while the app is
+             actually open (no server here to push a real background one);
+             js/reminder.js's own header explains why, honestly. -->
+        <div class="settings-section">
+            <span class="settings-section__title" data-i18n="settings.reminderSection">Daily reminder</span>
+            <button type="button" id="settingsReminderToggle" class="toggle-row">
+                <span style="font-weight:500" data-i18n="settings.reminderEnabled">Remind me to focus every day</span>
+                <span class="switch"><span class="switch__knob"></span></span>
+            </button>
+            <div class="field" id="settingsReminderTimeField" hidden style="margin-top:0.75rem">
+                <label class="field__label" for="settingsReminderTime" data-i18n="settings.reminderTime">Reminder time</label>
+                <input type="time" id="settingsReminderTime" class="input">
+            </div>
+        </div>
+
         <div class="settings-section">
             <span class="settings-section__title" data-i18n="settings.accountSection">Account</span>
             <div class="flex flex-col gap-2">
@@ -1440,6 +1456,7 @@
 <script src="js/i18n.js"></script>
 <script src="js/theme.js"></script>
 <script src="js/toast.js"></script>
+<script src="js/reminder.js"></script>
 <script src="js/streak.js"></script>
 <!-- Firebase (Auth + Firestore only — no Storage, see js/auth.js) is entirely
      optional: see js/firebaseConfig.js. If these fail to load (offline, or

@@ -122,6 +122,12 @@
                 // js/geo.js) — Bangkok Suvarnabhumi by default, changeable
                 // any time from Settings.
                 departureAirportId: 'bkk',
+                // Off by default, one reminder a day at most (js/reminder.js)
+                // — matches this app's own notification rule. null = off;
+                // "HH:MM" = fire (at most) once, the first time the app is
+                // open on or after that time each day.
+                dailyReminderTime: null,
+                dailyReminderLastFiredISO: null,
                 pomodoro: { focusMin: 25, shortBreakMin: 5, longBreakMin: 15, cyclesBeforeLongBreak: 4 }
             },
             plan: {
