@@ -207,7 +207,8 @@
                 seatLabel: 'ที่นั่ง {seat}',
                 seatTakenLabel: 'ที่นั่ง {seat} ไม่ว่าง',
                 nose: 'หัวเครื่อง',
-                tail: 'ท้ายเครื่อง'
+                tail: 'ท้ายเครื่อง',
+                scenarioQuestion: 'อยากโฟกัสเรื่องอะไร?'
             },
             modalAirportPicker: {
                 title: 'สนามบินต้นทาง',
@@ -566,7 +567,8 @@
                 seatLabel: 'Seat {seat}',
                 seatTakenLabel: 'Seat {seat}, unavailable',
                 nose: 'Nose',
-                tail: 'Tail'
+                tail: 'Tail',
+                scenarioQuestion: 'What do you want to focus on?'
             },
             modalAirportPicker: {
                 title: 'Departure airport',

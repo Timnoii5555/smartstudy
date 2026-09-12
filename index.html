@@ -1115,7 +1115,18 @@
                 </div>
             </div>
 
-            <p class="seat-picker__hint text-outline" data-i18n="modalSeatPicker.hint">Tap an available seat to pick it</p>
+            <p class="seat-picker__hint text-outline" id="seatPickerHint" data-i18n="modalSeatPicker.hint">Tap an available seat to pick it</p>
+
+            <!-- Shown once a seat is actually picked (see js/focus.js's
+                 selectSeat()) — a lightweight, no-pressure extra touch:
+                 defaults to "Focus" either way, so skipping it never blocks
+                 confirming. -->
+            <div class="seat-picker__scenario-prompt" id="seatPickerScenarioPrompt" hidden>
+                <p class="seat-picker__scenario-seat" id="seatPickerScenarioSeatLabel">Seat: 02D</p>
+                <p class="seat-picker__scenario-question" data-i18n="modalSeatPicker.scenarioQuestion">What do you want to focus on?</p>
+                <div class="seat-picker__scenarios" id="seatPickerScenarios" role="radiogroup" aria-label="Focus scenario"></div>
+            </div>
+
             <button type="button" id="confirmSeatBtn" class="btn btn--primary btn--block" disabled>
                 <span class="material-symbols-outlined" aria-hidden="true">check</span>
                 <span data-i18n="modalSeatPicker.confirmBtn">Confirm seat</span>
@@ -1143,6 +1154,7 @@
                     <span class="boarding-pass__code" id="boardingPassDestCode">CNX</span>
                 </div>
                 <p class="boarding-pass__city" id="boardingPassDestName">Chiang Mai</p>
+                <p class="boarding-pass__scenario" id="boardingPassScenario" aria-hidden="true"><span class="material-symbols-outlined" aria-hidden="true" id="boardingPassScenarioIcon" style="font-size:0.8rem">hub</span> <span id="boardingPassScenarioLabel">Focus</span></p>
                 <div class="boarding-pass__divider" aria-hidden="true"></div>
                 <div class="boarding-pass__grid">
                     <div class="boarding-pass__field">

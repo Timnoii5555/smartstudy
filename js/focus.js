@@ -668,6 +668,8 @@
     const boardingPassModal = document.getElementById('boardingPassModal');
     const boardingPassCard = document.getElementById('boardingPassCard');
     const boardingPassOriginCode = document.getElementById('boardingPassOriginCode');
+    const boardingPassScenarioIcon = document.getElementById('boardingPassScenarioIcon');
+    const boardingPassScenarioLabel = document.getElementById('boardingPassScenarioLabel');
     const boardingPassDestCode = document.getElementById('boardingPassDestCode');
     const boardingPassDestName = document.getElementById('boardingPassDestName');
     const boardingPassSeat = document.getElementById('boardingPassSeat');
@@ -818,6 +820,8 @@
         if (boardingPassSeat) boardingPassSeat.textContent = activeSeat;
         if (boardingPassDuration) boardingPassDuration.textContent = I18n.t('s6.flightMinutes', { n: flight.minutes });
         if (boardingPassDistance) boardingPassDistance.textContent = I18n.t('s6.distanceKm', { n: Math.round(U.haversineKm(origin.latlng, flight.latlng)) });
+        if (boardingPassScenarioIcon) boardingPassScenarioIcon.textContent = activeScenario.icon;
+        if (boardingPassScenarioLabel) boardingPassScenarioLabel.textContent = I18n.pick(activeScenario.label);
         if (boardingPassDate) {
             const today = new Date();
             // Thai (Buddhist) calendar year, matching how a Thai-audience
@@ -838,11 +842,45 @@
     const seatPickerGrid = document.getElementById('seatPickerGrid');
     const seatPickerOriginCode = document.getElementById('seatPickerOriginCode');
     const seatPickerDestCode = document.getElementById('seatPickerDestCode');
+    const seatPickerHint = document.getElementById('seatPickerHint');
+    const seatPickerScenarioPrompt = document.getElementById('seatPickerScenarioPrompt');
+    const seatPickerScenarioSeatLabel = document.getElementById('seatPickerScenarioSeatLabel');
+    const seatPickerScenarios = document.getElementById('seatPickerScenarios');
     const confirmSeatBtn = document.getElementById('confirmSeatBtn');
     const closeSeatPickerBtn = document.getElementById('closeSeatPickerBtn');
     const SEAT_LETTERS = ['A', 'C', 'D', 'F']; // a small regional-jet 2+2 cabin, matching these short domestic routes
     const SEAT_ROWS = 10;
     let pickedSeat = null;
+
+    // A light, skippable extra touch once a seat is picked (see selectSeat
+    // below) — "what are you here to do", purely flavor/future-stats, never
+    // required (always defaults to "Focus", this app's actual purpose).
+    const SCENARIOS = [
+        { id: 'focus', icon: 'hub', label: { th: 'โฟกัส', en: 'Focus' } },
+        { id: 'work', icon: 'laptop_mac', label: { th: 'ทำงาน', en: 'Work' } },
+        { id: 'meditate', icon: 'self_improvement', label: { th: 'ทำสมาธิ', en: 'Meditate' } },
+        { id: 'read', icon: 'menu_book', label: { th: 'อ่านหนังสือ', en: 'Read' } },
+        { id: 'exercise', icon: 'directions_run', label: { th: 'ออกกำลังกาย', en: 'Exercise' } }
+    ];
+    let activeScenario = SCENARIOS[0];
+
+    function scenarioById(id) { return SCENARIOS.find((s) => s.id === id) || SCENARIOS[0]; }
+
+    function renderScenarioRow() {
+        if (!seatPickerScenarios) return;
+        seatPickerScenarios.innerHTML = '';
+        SCENARIOS.forEach((sc) => {
+            const isSelected = sc.id === activeScenario.id;
+            seatPickerScenarios.appendChild(U.el('button', {
+                className: 'scenario-chip' + (isSelected ? ' is-selected' : ''),
+                attrs: { type: 'button', role: 'radio', 'aria-checked': String(isSelected) },
+                on: { click: () => { activeScenario = sc; renderScenarioRow(); } }
+            }, [
+                U.el('span', { className: 'material-symbols-outlined', attrs: { 'aria-hidden': 'true' }, text: sc.icon }),
+                U.el('span', { text: I18n.pick(sc.label) })
+            ]));
+        });
+    }
 
     /** Rebuilds the whole seat grid with every seat available, then — if a
      *  real flight and presence are both available — asynchronously marks
@@ -855,7 +893,10 @@
         seatPickerGrid.innerHTML = '';
         seatPickerGrid.dataset.flightId = flightId || '';
         pickedSeat = null;
+        activeScenario = SCENARIOS[0];
         if (confirmSeatBtn) confirmSeatBtn.disabled = true;
+        if (seatPickerScenarioPrompt) seatPickerScenarioPrompt.hidden = true;
+        if (seatPickerHint) seatPickerHint.hidden = false;
 
         const seatButtons = new Map();
         for (let r = 1; r <= SEAT_ROWS; r++) {
@@ -905,6 +946,12 @@
         btnEl.setAttribute('aria-checked', 'true');
         pickedSeat = seatId;
         if (confirmSeatBtn) confirmSeatBtn.disabled = false;
+        if (seatPickerHint) seatPickerHint.hidden = true;
+        if (seatPickerScenarioPrompt) {
+            seatPickerScenarioPrompt.hidden = false;
+            if (seatPickerScenarioSeatLabel) seatPickerScenarioSeatLabel.textContent = I18n.t('modalSeatPicker.seatLabel', { seat: seatId });
+            renderScenarioRow();
+        }
     }
 
     /** Only meaningful right before a genuinely fresh focus phase — see the
