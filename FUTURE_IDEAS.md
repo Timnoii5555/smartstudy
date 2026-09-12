@@ -77,15 +77,26 @@ block. If real-time contact between learners is ever wanted, matched preset
 reactions (no free text) would be the smallest step that doesn't cross back
 into the same territory.
 
-## Full per-session focus log
+## Full per-session focus log — partially reconsidered
 
-"Best time of day" in `js/stats.js` reads from a running 4-bucket tally
-(`state.focus.timeOfDayMinutes`) rather than a timestamped log of every
-individual session. A real log would let "best time of day" account for
-recency (e.g. weighting the last 30 days more than months-old data) or
-support a proper histogram — the bucket tally can't do either, it only
-ever answers "which bucket has the most cumulative minutes, ever." Traded
-for never needing to bound or prune a growing array.
+"Best time of day" in `js/stats.js` still reads from a running 4-bucket
+tally (`state.focus.timeOfDayMinutes`) rather than a timestamped log of
+every individual session, for the reason originally written here: a real
+log would let it account for recency or support a proper histogram, but
+the bucket tally can't, it only ever answers "which bucket has the most
+cumulative minutes, ever."
+
+A bounded version of the log this entry used to argue against did end up
+shipping, though, once "Mine"'s flight log (`js/pilotClub.js`) gave it a
+concrete reason to exist: `state.focus.flightLog` (`js/focus.js`'s
+logFlight()) keeps the most recent 20 completed-or-partial focus sessions,
+capped with the same `.slice(-20)` pattern `flashcards.js`'s `reviewLog`
+already used — proof the "never needing to bound or prune a growing array"
+concern was solvable by just bounding it, not only by avoiding logging
+altogether. Reusing this same log for "best time of day" (accounting for
+recency, or a real histogram) is still a reasonable follow-up, since the
+data's real timestamps would need capturing anyway if the cap were raised
+or the log's purpose broadened past what 20 entries can support.
 
 ## A full contrast/touch-target audit
 
