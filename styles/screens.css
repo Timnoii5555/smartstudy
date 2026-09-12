@@ -252,8 +252,10 @@ html.dark .schedule-block--teal { background: rgba(20,184,166,0.15); color: #5ee
    after boarding (see the boarding-pass tear animation), and exited any
    time via the minimize button without pausing the session. */
 .flight-viz__expand, .flight-viz__minimize {
-    position: absolute; top: 0.75rem; right: 0.75rem; z-index: 3;
-    width: 2.25rem; height: 2.25rem; border-radius: 50%; border: none;
+    /* 2.75rem = 44px, this app's minimum touch target (see .icon-btn) —
+       these were 2.25rem (36px) until an accessibility pass caught it. */
+    position: absolute; top: 0.5rem; right: 0.5rem; z-index: 3;
+    width: 2.75rem; height: 2.75rem; border-radius: 50%; border: none;
     background: rgba(0, 0, 0, 0.45); color: #fff; display: flex; align-items: center; justify-content: center;
     backdrop-filter: blur(2px);
 }

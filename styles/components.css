@@ -257,7 +257,11 @@ input[type=range]::-moz-range-track { height: 0.5rem; background: var(--color-su
 /* display:inline-block is required here — a bare <span> is inline by
    default, which makes a browser ignore width/height entirely and collapse
    this down to a thin sliver instead of a proper circular swatch. */
-.color-swatch__dot { display: inline-block; width: 2rem; height: 2rem; border-radius: 50%; border: 2px solid; transition: box-shadow 0.15s ease; }
+/* 2.75rem = 44px, this app's minimum touch target — the label's own
+   clickable area is exactly this dot's box (see .color-swatch above), so
+   the dot itself has to actually be that size, not just look like a
+   44px button around a smaller dot. */
+.color-swatch__dot { display: inline-block; width: 2.75rem; height: 2.75rem; border-radius: 50%; border: 2px solid; transition: box-shadow 0.15s ease; }
 .color-swatch input:checked + .color-swatch__dot { box-shadow: 0 0 0 2px var(--color-surface-lowest), 0 0 0 4px currentColor; }
 .color-swatch input:focus-visible + .color-swatch__dot { box-shadow: var(--shadow-ring); }
 
@@ -529,7 +533,10 @@ input[type=range]::-moz-range-track { height: 0.5rem; background: var(--color-su
 .seat-picker__scenario-question { font-size: 0.8125rem; font-weight: 700; color: #fff; text-align: center; margin-bottom: 0.6rem; }
 .seat-picker__scenarios { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; }
 .scenario-chip {
-    display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.5rem 0.85rem;
+    /* min-height: 2.75rem = 44px, this app's minimum touch target — the
+       padding alone (an inline-height chip) fell short of it, caught in
+       an accessibility pass. */
+    display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.5rem 0.85rem; min-height: 2.75rem; box-sizing: border-box;
     border-radius: var(--radius-full); border: 1.5px solid rgba(255, 255, 255, 0.2);
     background: rgba(255, 255, 255, 0.06); color: rgba(255, 255, 255, 0.75); font-size: 0.75rem; font-weight: 600;
 }
