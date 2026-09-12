@@ -26,6 +26,7 @@
     const shortBreakInput = document.getElementById('settingsShortBreakMin');
     const longBreakInput = document.getElementById('settingsLongBreakMin');
     const cyclesInput = document.getElementById('settingsCycles');
+    const newCardsPerDayInput = document.getElementById('settingsNewCardsPerDay');
     const soundToggle = document.getElementById('settingsSoundToggle');
 
     function render() {
@@ -45,6 +46,7 @@
         shortBreakInput.value = s.settings.pomodoro.shortBreakMin;
         longBreakInput.value = s.settings.pomodoro.longBreakMin;
         cyclesInput.value = s.settings.pomodoro.cyclesBeforeLongBreak;
+        newCardsPerDayInput.value = s.flashcards.newCardsPerDayLimit;
 
         soundToggle.querySelector('.switch').classList.toggle('is-on', s.settings.soundEnabled);
         soundToggle.setAttribute('aria-pressed', String(s.settings.soundEnabled));
@@ -91,6 +93,14 @@
     shortBreakInput.addEventListener('change', () => commitPomodoroField('shortBreakMin', shortBreakInput, 1, 60));
     longBreakInput.addEventListener('change', () => commitPomodoroField('longBreakMin', longBreakInput, 1, 120));
     cyclesInput.addEventListener('change', () => commitPomodoroField('cyclesBeforeLongBreak', cyclesInput, 1, 12));
+
+    newCardsPerDayInput.addEventListener('change', () => {
+        let val = parseInt(newCardsPerDayInput.value, 10);
+        if (!isFinite(val)) val = 20;
+        val = U.clamp(val, 1, 200);
+        State.commit({ flashcards: { newCardsPerDayLimit: val } });
+        render();
+    });
 
     soundToggle.addEventListener('click', () => {
         State.commit({ settings: { soundEnabled: !State.get().settings.soundEnabled } });

@@ -142,7 +142,13 @@
                 // Once anything is saved, the saved copy is authoritative (see
                 // Utils.ATOMIC_STATE_PATHS) — deleting a starter deck stays deleted.
                 const decks = (TFS.Data && TFS.Data.createStarterDecks) ? TFS.Data.createStarterDecks() : {};
-                return { decks, deckOrder: Object.keys(decks), currentDeckId: Object.keys(decks)[0] || null };
+                return {
+                    decks, deckOrder: Object.keys(decks), currentDeckId: Object.keys(decks)[0] || null,
+                    srs: {}, // cardId -> SM-2 scheduling state (js/srs.js) — see Utils.ATOMIC_STATE_PATHS
+                    newCardsPerDayLimit: 20,
+                    newCardsShownToday: { dateISO: null, cardIds: [] }, // resets daily; see js/flashcards.js
+                    reviewLog: [] // {dateISO, deckId, grade}[], trimmed to the last 35 days — powers the "weak decks" view
+                };
             })(),
             focus: {
                 totalSecondsByDate: {},     // 'YYYY-MM-DD' -> seconds

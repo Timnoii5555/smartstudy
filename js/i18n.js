@@ -175,6 +175,11 @@
             modalDeleteClass: { title: 'ลบคาบเรียน', confirm: 'คุณต้องการลบวิชา {name} ออกจากตารางใช่หรือไม่?', ok: 'ลบทิ้ง' },
             modalTimePicker: { title: 'เลือกเวลา', confirm: 'ยืนยันเวลา' },
             modalDeckSelector: { title: 'เลือกชุดคำศัพท์', createNew: 'สร้างชุดคำศัพท์ใหม่', wordsCount: '{n} คำศัพท์' },
+            modalWeakDecks: {
+                title: 'จุดอ่อน', hint: 'เรียงชุดคำศัพท์ตามความแม่นยำใน 30 วันล่าสุด จากน้อยไปมาก แตะเพื่อทบทวนได้เลย',
+                empty: 'ยังไม่มีข้อมูลการทบทวนพอที่จะวิเคราะห์ ลองทบทวนคำศัพท์สักชุดก่อนนะครับ',
+                reviewCount: 'ทบทวนไปแล้ว {n} ครั้ง'
+            },
             modalDeleteCard: { title: 'ลบคำศัพท์', selectLabel: 'เลือกคำศัพท์ที่ต้องการลบ', warning: '*การลบคำศัพท์จะไม่สามารถกู้คืนได้', ok: 'ลบคำศัพท์' },
             modalCustomSubject: {
                 title: 'สร้างวิชาของฉันเอง',
@@ -225,7 +230,9 @@
                 title: 'คลังศัพท์', deckLabel: 'ชุดคำศัพท์:', progressCount: '{current} / {total} คำ',
                 term: 'ศัพท์', hintTap: 'แตะเพื่อดูความหมาย', meaning: 'ความหมาย',
                 example: 'ตัวอย่าง: {ex}', noExample: 'ไม่มีตัวอย่างประโยค',
-                reviewAgain: 'ข้าม / ยังไม่แม่น', remembered: 'จำได้แล้ว / ไปต่อ',
+                gradeAgain: 'ยังไม่ได้', gradeHard: 'ยาก', gradeGood: 'ได้แล้ว', gradeEasy: 'ง่ายมาก',
+                nothingDueTitle: 'ไม่มีคำที่ต้องทบทวนตอนนี้', nothingDueHint: 'เก่งมาก! กลับมาใหม่ตามรอบทบทวนที่ระบบนัดไว้ หรือเลือกทบทวนทั้งชุดได้เลย',
+                newCardCapHint: 'ครบโควตาคำใหม่ของวันนี้แล้ว ({n} คำ) พรุ่งนี้มาต่อกันใหม่นะ',
                 emptyTitle: 'ชุดคำศัพท์นี้ยังว่างเปล่า', emptyHint: 'กด + มุมขวาบนเพื่อเพิ่มศัพท์ได้เลย',
                 perfectTitle: 'ยอดเยี่ยมมาก! 🎉', perfectHint: 'คุณจำคำศัพท์ได้ครบ 100% แล้วในรอบนี้',
                 summaryTitle: 'สรุปผลการทบทวน', summaryHint: 'ทบทวนต่ออีกนิดเพื่อความแม่นยำ!',
@@ -257,6 +264,7 @@
                 pomodoroSection: 'ตั้งเวลาโฟกัส (Pomodoro)',
                 focusMin: 'ช่วงโฟกัส (นาที)', shortBreakMin: 'พักสั้น (นาที)',
                 longBreakMin: 'พักยาว (นาที)', cycles: 'จำนวนรอบก่อนพักยาว',
+                flashcardsSection: 'แฟลชการ์ด', newCardsPerDay: 'คำศัพท์ใหม่สูงสุดต่อวัน',
                 soundSection: 'เสียง', soundEnabled: 'เปิดเสียงแจ้งเตือน',
                 accountSection: 'บัญชี', renameBtn: 'แก้ไขโปรไฟล์ (ชื่อ/รูป)',
                 switchProfile: 'สลับโปรไฟล์ผู้ใช้', logout: 'ออกจากระบบ',
@@ -273,7 +281,7 @@
                 stopTimerFirst: 'กรุณาหยุดเวลาก่อนแก้ไขเป้าหมายครับ'
             },
             aria: {
-                closeDialog: 'ปิดหน้าต่าง', openSettings: 'เปิดการตั้งค่า', openSearch: 'ค้นหา',
+                closeDialog: 'ปิดหน้าต่าง', openSettings: 'เปิดการตั้งค่า', openSearch: 'ค้นหา', openWeakDecks: 'จุดอ่อน',
                 closeSearch: 'ปิดการค้นหา', deleteWord: 'ลบคำศัพท์', addWord: 'เพิ่มคำศัพท์',
                 prevMonth: 'เดือนก่อนหน้า', nextMonth: 'เดือนถัดไป', prevWeek: 'สัปดาห์ก่อนหน้า', nextWeek: 'สัปดาห์ถัดไป',
                 playAmbient: 'เล่นเสียงบรรยากาศ', pauseAmbient: 'หยุดเสียงบรรยากาศ', ambientVolume: 'ระดับเสียงบรรยากาศ',
@@ -438,6 +446,11 @@
             modalDeleteClass: { title: 'Delete session', confirm: 'Remove {name} from your schedule?', ok: 'Delete' },
             modalTimePicker: { title: 'Choose time', confirm: 'Confirm time' },
             modalDeckSelector: { title: 'Choose a deck', createNew: 'Create new deck', wordsCount: '{n} words' },
+            modalWeakDecks: {
+                title: 'Weak spots', hint: 'Decks sorted by your accuracy over the last 30 days — lowest first. Tap one to review it now.',
+                empty: "Not enough review data yet to analyze — review a deck first.",
+                reviewCount: '{n} reviews'
+            },
             modalDeleteCard: { title: 'Delete word', selectLabel: 'Choose a word to delete', warning: '*This cannot be undone.', ok: 'Delete word' },
             modalCustomSubject: {
                 title: 'Create my own subject',
@@ -488,7 +501,9 @@
                 title: 'Vocabulary', deckLabel: 'Deck:', progressCount: '{current} / {total} words',
                 term: 'Term', hintTap: 'Tap to reveal meaning', meaning: 'Meaning',
                 example: 'Example: {ex}', noExample: 'No example sentence',
-                reviewAgain: 'Skip / not sure', remembered: 'Got it / next',
+                gradeAgain: 'Again', gradeHard: 'Hard', gradeGood: 'Good', gradeEasy: 'Easy',
+                nothingDueTitle: 'Nothing due for review right now', nothingDueHint: 'Nice work! Come back when the schedule says these are due again, or review the whole deck anyway.',
+                newCardCapHint: "You've hit today's new-card limit ({n}). More tomorrow!",
                 emptyTitle: 'This deck is empty', emptyHint: 'Tap + in the top right to add a word',
                 perfectTitle: 'Amazing! 🎉', perfectHint: "You remembered 100% of this deck this round",
                 summaryTitle: 'Review summary', summaryHint: 'Review a bit more for full accuracy!',
@@ -520,6 +535,7 @@
                 pomodoroSection: 'Focus timer (Pomodoro)',
                 focusMin: 'Focus length (min)', shortBreakMin: 'Short break (min)',
                 longBreakMin: 'Long break (min)', cycles: 'Cycles before long break',
+                flashcardsSection: 'Flashcards', newCardsPerDay: 'New cards per day',
                 soundSection: 'Sound', soundEnabled: 'Enable notification sound',
                 accountSection: 'Account', renameBtn: 'Edit profile (name/photo)',
                 switchProfile: 'Switch profile', logout: 'Log out',
@@ -536,7 +552,7 @@
                 stopTimerFirst: 'Please stop the timer before editing the goal.'
             },
             aria: {
-                closeDialog: 'Close dialog', openSettings: 'Open settings', openSearch: 'Search',
+                closeDialog: 'Close dialog', openSettings: 'Open settings', openSearch: 'Search', openWeakDecks: 'Weak spots',
                 closeSearch: 'Close search', deleteWord: 'Delete word', addWord: 'Add word',
                 prevMonth: 'Previous month', nextMonth: 'Next month', prevWeek: 'Previous week', nextWeek: 'Next week',
                 playAmbient: 'Play ambient sound', pauseAmbient: 'Pause ambient sound', ambientVolume: 'Ambient volume',

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>srs.js self-test</title>
+<style>
+    body { font-family: -apple-system, sans-serif; max-width: 40rem; margin: 2rem auto; padding: 0 1rem; }
+    .pass { color: #15803d; }
+    .fail { color: #d92d20; font-weight: 700; }
+    li { margin-bottom: 0.4rem; font-size: 0.9rem; }
+</style>
+</head>
+<body>
+<h1>js/srs.js — self-test</h1>
+<p>
+    This project has no build step or package manager (see js/utils.js's file
+    header for why — it is meant to run straight from disk or a static host
+    with zero tooling), so pulling in a Node-based runner like Vitest would
+    mean introducing exactly the kind of build machinery the whole codebase
+    deliberately avoids. This page is the pragmatic equivalent for this
+    project: open it directly in a browser to verify js/srs.js's scheduling
+    logic in isolation, the same way a unit test would, without needing
+    Node/npm installed at all.
+</p>
+<ul id="results"></ul>
+<p id="summary" style="font-weight:700"></p>
+
+<script src="js/utils.js"></script>
+<script src="js/srs.js"></script>
+<script>
+(function () {
+    const SRS = TFS.SRS;
+    const results = document.getElementById('results');
+    let pass = 0, fail = 0;
+
+    function assert(name, cond, detail) {
+        const li = document.createElement('li');
+        li.className = cond ? 'pass' : 'fail';
+        li.textContent = (cond ? '✓ ' : '✗ ') + name + (detail ? ' — ' + detail : '');
+        results.appendChild(li);
+        cond ? pass++ : fail++;
+    }
+
+    const TODAY = '2025-06-01';
+    function addDaysISO(iso, n) { return TFS.Utils.formatDateISO(TFS.Utils.addDays(TFS.Utils.parseISODate(iso), n)); }
+
+    // ---- New card starts due immediately ----
+    let card = SRS.newCardState();
+    assert('a brand-new card is due', SRS.isDue(card, TODAY));
+
+    // ---- Interval progression on repeated "good" grades ----
+    card = SRS.gradeCard(card, 'good', TODAY);
+    assert('1st good -> interval 1 day', card.intervalDays === 1, 'got ' + card.intervalDays);
+    assert('1st good -> due tomorrow', card.dueDateISO === addDaysISO(TODAY, 1));
+
+    card = SRS.gradeCard(card, 'good', TODAY);
+    assert('2nd good -> interval 3 days', card.intervalDays === 3, 'got ' + card.intervalDays);
+
+    const intervalAfter2 = card.intervalDays;
+    card = SRS.gradeCard(card, 'good', TODAY);
+    assert('3rd good -> interval grows past the 2nd (geometric growth)', card.intervalDays > intervalAfter2, 'got ' + card.intervalDays);
+
+    const intervalAfter3 = card.intervalDays;
+    card = SRS.gradeCard(card, 'good', TODAY);
+    assert('4th good -> interval keeps growing', card.intervalDays > intervalAfter3, 'got ' + card.intervalDays);
+
+    // ---- "Easy" grows faster than "good", "hard" grows slower ----
+    let easyCard = SRS.newCardState();
+    easyCard = SRS.gradeCard(easyCard, 'easy', TODAY);
+    easyCard = SRS.gradeCard(easyCard, 'easy', TODAY);
+    let hardCard = SRS.newCardState();
+    hardCard = SRS.gradeCard(hardCard, 'hard', TODAY);
+    hardCard = SRS.gradeCard(hardCard, 'hard', TODAY);
+    assert('"easy" reaches a longer 2nd interval than "hard"', easyCard.intervalDays > hardCard.intervalDays,
+        `easy=${easyCard.intervalDays} hard=${hardCard.intervalDays}`);
+
+    // ---- "Again" fully resets, regardless of prior progress ----
+    const resetFrom = card; // has repetitions=4, a grown interval, from above
+    const afterAgain = SRS.gradeCard(resetFrom, 'again', TODAY);
+    assert('"again" resets repetitions to 0', afterAgain.repetitions === 0);
+    assert('"again" resets interval to 0', afterAgain.intervalDays === 0);
+    assert('"again" makes the card due today (same session)', afterAgain.dueDateISO === TODAY);
+    assert('"again" lowers the ease factor', afterAgain.easeFactor < resetFrom.easeFactor);
+
+    // ---- Ease factor never drops below the floor, even after many "hard"s ----
+    let flooring = SRS.newCardState();
+    for (let i = 0; i < 30; i++) flooring = SRS.gradeCard(flooring, 'hard', TODAY);
+    assert('ease factor never drops below MIN_EASE (' + SRS.MIN_EASE + ')', flooring.easeFactor >= SRS.MIN_EASE, 'got ' + flooring.easeFactor);
+
+    // ---- isDue respects future due dates ----
+    const futureCard = { easeFactor: 2.5, intervalDays: 10, repetitions: 3, dueDateISO: addDaysISO(TODAY, 5) };
+    assert('a card due 5 days from now is NOT due today', !SRS.isDue(futureCard, TODAY));
+    const pastCard = { ...futureCard, dueDateISO: addDaysISO(TODAY, -1) };
+    assert('a card due yesterday IS due today (overdue still counts)', SRS.isDue(pastCard, TODAY));
+
+    document.getElementById('summary').textContent = `${pass} passed, ${fail} failed`;
+    document.getElementById('summary').className = fail ? 'fail' : 'pass';
+})();
+</script>
+</body>
+</html>

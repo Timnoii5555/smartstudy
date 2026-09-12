@@ -131,9 +131,27 @@ html.dark .schedule-block--teal { background: rgba(20,184,166,0.15); color: #5ee
 @media (min-width: 768px) { .flip-card__term { font-size: 3rem; } }
 .flip-card__def { font-size: 1.5rem; font-weight: 500; line-height: 1.6; }
 .flip-card__example-box { margin-top: 2rem; padding: 1rem; border-radius: var(--radius-lg); background: var(--color-tertiary-fixed); width: 100%; }
-.flashcard-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; width: 100%; max-width: 28rem; margin-top: 2.5rem; }
-.flashcard-action-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.25rem; border-radius: var(--radius-2xl); border: 1px solid var(--color-border); background: var(--color-surface-high); }
-.flashcard-action-btn--primary { background: linear-gradient(to bottom right, var(--color-primary-solid), var(--color-primary-solid-container)); color: #fff; border: none; }
+/* 4 SM-2 grading buttons, sized well past the 44px touch-target minimum
+   even on a narrow phone. Kept as one row down to a fairly narrow width —
+   splitting into two rows would put "Good"/"Easy" further from the thumb's
+   natural resting position on some grips — and only wraps to 2x2 below that. */
+.flashcard-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.625rem; width: 100%; max-width: 32rem; margin-top: 2.5rem; }
+@media (max-width: 26rem) {
+    .flashcard-actions { grid-template-columns: repeat(2, 1fr); }
+}
+.flashcard-action-btn {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 3.5rem; padding: 0.875rem 0.5rem; border-radius: var(--radius-xl);
+    border: 1px solid var(--color-border); background: var(--color-surface-high);
+    font-size: 0.75rem; font-weight: 600; color: var(--color-on-surface);
+}
+.flashcard-action-btn--again { color: var(--color-danger); }
+.flashcard-action-btn--again .material-symbols-outlined { color: var(--color-danger); }
+.flashcard-action-btn--hard { color: #b45309; }
+.flashcard-action-btn--hard .material-symbols-outlined { color: #b45309; }
+.flashcard-action-btn--good { background: linear-gradient(to bottom right, var(--color-primary-solid), var(--color-primary-solid-container)); color: #fff; border: none; }
+.flashcard-action-btn--easy { color: var(--color-success, #15803d); }
+.flashcard-action-btn--easy .material-symbols-outlined { color: var(--color-success, #15803d); }
 .flashcard-summary-actions { display: none; flex-direction: column; gap: 0.75rem; width: 100%; max-width: 28rem; margin-top: 2.5rem; align-items: center; }
 
 /* ---------- Screen 6: focus timer ---------- */

@@ -546,6 +546,9 @@
                 <h1 data-i18n="brand.short">Smart Study</h1>
             </button>
             <div class="app-header__actions">
+                <button type="button" id="btnOpenWeakDecks" class="icon-btn" data-i18n-attr='{"aria-label":"aria.openWeakDecks"}' aria-label="Weak spots">
+                    <span class="material-symbols-outlined" aria-hidden="true">trending_down</span>
+                </button>
                 <button type="button" id="btnOpenDeleteFlashcard" class="icon-btn icon-btn--danger" hidden data-i18n-attr='{"aria-label":"aria.deleteWord"}' aria-label="Delete word">
                     <span class="material-symbols-outlined" aria-hidden="true">delete</span>
                 </button>
@@ -601,14 +604,26 @@
                 </div>
             </div>
 
+            <!-- 4-grade spaced-repetition scoring (js/srs.js's SM-2). Order
+                 left-to-right is deliberately "worst to best" so the two
+                 most-tapped buttons (Good/Easy) land closest to the thumb's
+                 natural resting side on a phone held one-handed. -->
             <div id="flashcardActionButtons" class="flashcard-actions">
-                <button type="button" id="btnReviewAgain" class="flashcard-action-btn">
-                    <span class="material-symbols-outlined" aria-hidden="true" style="color:var(--color-danger);font-size:1.875rem;margin-bottom:0.5rem">skip_next</span>
-                    <span style="color:var(--color-danger);font-size:0.75rem;font-weight:500" data-i18n="s5.reviewAgain">Skip / not sure</span>
+                <button type="button" id="btnGradeAgain" class="flashcard-action-btn flashcard-action-btn--again">
+                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.5rem;margin-bottom:0.35rem">replay</span>
+                    <span data-i18n="s5.gradeAgain">Again</span>
                 </button>
-                <button type="button" id="btnRemembered" class="flashcard-action-btn flashcard-action-btn--primary">
-                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.875rem;margin-bottom:0.5rem;font-variation-settings:'FILL' 1">check_circle</span>
-                    <span style="font-size:0.75rem;font-weight:500" data-i18n="s5.remembered">Got it / next</span>
+                <button type="button" id="btnGradeHard" class="flashcard-action-btn flashcard-action-btn--hard">
+                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.5rem;margin-bottom:0.35rem">sentiment_neutral</span>
+                    <span data-i18n="s5.gradeHard">Hard</span>
+                </button>
+                <button type="button" id="btnGradeGood" class="flashcard-action-btn flashcard-action-btn--good">
+                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.5rem;margin-bottom:0.35rem">check_circle</span>
+                    <span data-i18n="s5.gradeGood">Good</span>
+                </button>
+                <button type="button" id="btnGradeEasy" class="flashcard-action-btn flashcard-action-btn--easy">
+                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.5rem;margin-bottom:0.35rem">bolt</span>
+                    <span data-i18n="s5.gradeEasy">Easy</span>
                 </button>
             </div>
 
@@ -788,6 +803,17 @@
         <button type="button" id="btnOpenAddDeckModalFromSelector" class="btn btn--outline btn--block">
             <span class="material-symbols-outlined" aria-hidden="true">add_circle</span> <span data-i18n="modalDeckSelector.createNew">Create new deck</span>
         </button>
+    </div>
+</div>
+
+<div id="weakDecksModal" class="modal-overlay hidden">
+    <div class="modal-panel modal-panel--sheet" data-modal-panel>
+        <div class="modal-header">
+            <h2 class="modal-title"><span class="material-symbols-outlined" aria-hidden="true">trending_down</span> <span data-i18n="modalWeakDecks.title">Weak spots</span></h2>
+            <button type="button" id="closeWeakDecksBtn" class="modal-close" data-i18n-attr='{"aria-label":"aria.closeDialog"}' aria-label="Close"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">close</span></button>
+        </div>
+        <p class="text-outline" style="font-size:0.8125rem;margin-bottom:1rem" data-i18n="modalWeakDecks.hint">Decks sorted by your accuracy over the last 30 days — lowest first. Tap one to review it now.</p>
+        <div id="weakDecksBody" class="flex flex-col gap-2 custom-scroll" style="max-height:22rem;overflow-y:auto"></div>
     </div>
 </div>
 
@@ -1065,6 +1091,14 @@
         </div>
 
         <div class="settings-section">
+            <span class="settings-section__title" data-i18n="settings.flashcardsSection">Flashcards</span>
+            <div class="field">
+                <label class="field__label" for="settingsNewCardsPerDay" data-i18n="settings.newCardsPerDay">New cards per day</label>
+                <input type="number" id="settingsNewCardsPerDay" class="input" min="1" max="200">
+            </div>
+        </div>
+
+        <div class="settings-section">
             <span class="settings-section__title" data-i18n="settings.soundSection">Sound</span>
             <button type="button" id="settingsSoundToggle" class="toggle-row">
                 <span style="font-weight:500" data-i18n="settings.soundEnabled">Enable notification sound</span>
@@ -1108,6 +1142,7 @@
 <script src="js/storage.js"></script>
 <script src="data/subjects.js"></script>
 <script src="js/planner.js"></script>
+<script src="js/srs.js"></script>
 <script src="js/state.js"></script>
 <script src="js/i18n.js"></script>
 <script src="js/theme.js"></script>
