@@ -2,15 +2,19 @@
  * sw.js
  * A minimal service worker so the app installs like a real app (PWA) and
  * keeps working — app shell included — on a bad or missing connection,
- * which matters a lot for a study app used on the go. Two strategies:
+ * which matters a lot for a study app used on the go.
  *
- * - The HTML shell (navigation requests) is network-first: always try to
- *   fetch the latest index.html when online, so an actively-developed app
- *   never gets stuck showing stale markup/routing to someone who has a
- *   connection; only fall back to the cached copy when the network fails.
- * - Everything else same-origin (JS/CSS/data/icons) is cache-first: these
- *   rarely change moment-to-moment, and bumping CACHE_VERSION below
- *   invalidates all of them at once on the next deploy anyway.
+ * Every same-origin GET request is network-first: always try to fetch the
+ * freshest copy when online, and only fall back to whatever's cached when
+ * the network fails outright. This app has no version number a client can
+ * check against and ships new commits constantly, so a cache-first
+ * strategy for JS/CSS (an earlier version of this file used one) is
+ * actively dangerous here: a returning visitor's browser would keep
+ * serving old cached scripts forever after the very first install, even
+ * once a fresh index.html referencing new element ids/behavior had loaded
+ * — the two go stale relative to each other and things silently break.
+ * Network-first means the cache only ever matters when there's truly no
+ * connection, which is exactly the case it exists for.
  *
  * Cross-origin requests (Google Fonts, Firebase) are deliberately left
  * alone — intercepting those means dealing with opaque cross-origin
@@ -19,7 +23,10 @@
  */
 'use strict';
 
-const CACHE_VERSION = 'tfs-v1';
+// Bump this on any change to this file (or to the strategy above) so every
+// previously-installed service worker discards its old cache on its next
+// activate — see the comment on activate() below.
+const CACHE_VERSION = 'tfs-v2';
 
 const PRECACHE_URLS = [
     './',
@@ -75,10 +82,15 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
+    // Deletes every cache from a previous CACHE_VERSION, not just stale
+    // entries within the current one — this is the actual fix for the
+    // "old cached JS + new HTML" desync described above: any visitor whose
+    // browser already has a service worker installed gets a fully clean
+    // slate the moment this new version activates, rather than merging old
+    // and new cached files together.
     event.waitUntil(
-        caches.keys().then((keys) =>
-            Promise.all(keys.filter((k) => k !== CACHE_VERSION).map((k) => caches.delete(k)))
-        )
+        caches.keys()
+            .then((keys) => Promise.all(keys.filter((k) => k !== CACHE_VERSION).map((k) => caches.delete(k))))
     );
     self.clients.claim();
 });
@@ -89,27 +101,13 @@ self.addEventListener('fetch', (event) => {
     const url = new URL(req.url);
     if (url.origin !== self.location.origin) return; // leave cross-origin requests alone entirely
 
-    if (req.mode === 'navigate') {
-        event.respondWith(
-            fetch(req)
-                .then((res) => {
-                    const copy = res.clone();
-                    caches.open(CACHE_VERSION).then((cache) => cache.put(req, copy));
-                    return res;
-                })
-                .catch(() => caches.match(req).then((cached) => cached || caches.match('./index.html')))
-        );
-        return;
-    }
-
     event.respondWith(
-        caches.match(req).then((cached) => {
-            if (cached) return cached;
-            return fetch(req).then((res) => {
+        fetch(req)
+            .then((res) => {
                 const copy = res.clone();
                 caches.open(CACHE_VERSION).then((cache) => cache.put(req, copy));
                 return res;
-            });
-        })
+            })
+            .catch(() => caches.match(req).then((cached) => cached || (req.mode === 'navigate' ? caches.match('./index.html') : undefined)))
     );
 });

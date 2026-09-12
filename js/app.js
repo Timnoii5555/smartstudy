@@ -77,10 +77,24 @@
      *  leading slash) so the scope resolves correctly under GitHub Pages'
      *  …/smartstudy/ subpath rather than the domain root. Silently skipped
      *  under file:// or any browser without support — this is a pure
-     *  enhancement, never something the app depends on to function. */
+     *  enhancement, never something the app depends on to function.
+     *
+     *  Also reloads once, automatically, the moment a newly-activated
+     *  service worker takes over an already-open tab — otherwise a visitor
+     *  who already had this app open when a new version shipped would keep
+     *  running whatever JS was in memory from the old page load until they
+     *  happened to refresh on their own. `hasReloadedForNewSw` guards
+     *  against a reload loop; this event only fires once per real update. */
     function registerServiceWorker() {
         if (!('serviceWorker' in navigator) || global.location.protocol === 'file:') return;
         navigator.serviceWorker.register('sw.js').catch((e) => console.warn('[app] Service worker registration failed', e));
+
+        let hasReloadedForNewSw = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (hasReloadedForNewSw) return;
+            hasReloadedForNewSw = true;
+            global.location.reload();
+        });
     }
 
     function boot() {
