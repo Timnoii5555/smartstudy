@@ -566,7 +566,69 @@
         render();
     }
 
-    focusStartBtn.addEventListener('click', () => { isRunning() ? pause() : start(); });
+    // ---------------------------------------------------------------- Boarding pass ("check in" ritual)
+
+    const boardingPassModal = document.getElementById('boardingPassModal');
+    const boardingPassDestCode = document.getElementById('boardingPassDestCode');
+    const boardingPassDestName = document.getElementById('boardingPassDestName');
+    const boardingPassSeat = document.getElementById('boardingPassSeat');
+    const boardingPassDuration = document.getElementById('boardingPassDuration');
+    const boardingPassDate = document.getElementById('boardingPassDate');
+    const boardingPassBarcode = document.getElementById('boardingPassBarcode');
+
+    function randomSeat() {
+        const row = 1 + Math.floor(Math.random() * 32);
+        const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+        return `${row}${letters[Math.floor(Math.random() * letters.length)]}`;
+    }
+
+    /** A purely decorative barcode — a row of bars with randomized widths,
+     *  regenerated fresh each time the pass is shown. Never anything to
+     *  actually scan; it's set dressing for the "real ticket" feel, the
+     *  same spirit as the seat number next to it. */
+    function renderBarcode() {
+        if (!boardingPassBarcode) return;
+        boardingPassBarcode.innerHTML = '';
+        for (let i = 0; i < 46; i++) {
+            const bar = document.createElement('span');
+            bar.style.width = (1 + Math.floor(Math.random() * 3)) + 'px';
+            boardingPassBarcode.appendChild(bar);
+        }
+    }
+
+    /** Only meaningful right before a genuinely fresh focus phase — see the
+     *  focusStartBtn handler below, which is the only caller. */
+    function showBoardingPass() {
+        const flight = currentFocusFlight() || nearestFlight(pomodoroSettings().focusMin);
+        if (boardingPassDestCode) boardingPassDestCode.textContent = flight.code;
+        if (boardingPassDestName) boardingPassDestName.textContent = I18n.pick(flight.name);
+        if (boardingPassSeat) boardingPassSeat.textContent = randomSeat();
+        if (boardingPassDuration) boardingPassDuration.textContent = I18n.t('s6.flightMinutes', { n: flight.minutes });
+        if (boardingPassDate) {
+            const today = new Date();
+            // Thai (Buddhist) calendar year, matching how a Thai-audience
+            // app would actually print a date on a ticket like this.
+            boardingPassDate.textContent = `${today.getFullYear() + 543}/${U.pad2(today.getMonth() + 1)}/${U.pad2(today.getDate())}`;
+        }
+        renderBarcode();
+        TFS.Modal.open(boardingPassModal);
+    }
+
+    document.getElementById('closeBoardingPassBtn').addEventListener('click', () => TFS.Modal.close(boardingPassModal));
+    document.getElementById('confirmBoardingBtn').addEventListener('click', () => {
+        TFS.Modal.close(boardingPassModal);
+        start();
+    });
+
+    focusStartBtn.addEventListener('click', () => {
+        if (isRunning()) { pause(); return; }
+        // Only for a genuinely fresh focus phase — not resuming a paused
+        // one, and not for a break — matching the same condition render()
+        // already uses to decide between "Start" and "Resume" wording.
+        const freshFocusStart = mode === 'focus' && getRemainingSeconds() >= durationForMode(mode);
+        if (freshFocusStart) showBoardingPass();
+        else start();
+    });
     focusResetBtn.addEventListener('click', reset);
 
     function playNotificationSound() {

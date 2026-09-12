@@ -192,6 +192,12 @@
                 hint: 'เป็นผลงานของคุณคนเดียวเท่านั้น ไม่มีการเทียบกับใครทั้งนั้น',
                 shareBtn: 'แชร์', downloadBtn: 'ดาวน์โหลดรูปภาพ'
             },
+            modalBoardingPass: {
+                title: 'ตั๋วโดยสารของคุณ',
+                seatLabel: 'ที่นั่ง', durationLabel: 'ระยะเวลา', boardingLabel: 'ขึ้นเครื่อง', now: 'ตอนนี้', dateLabel: 'วันที่',
+                tip: '📵 เคล็ดลับ: เปิดโหมดห้ามรบกวนหรือโหมดเครื่องบินก่อนขึ้นเครื่อง เพื่อโฟกัสได้เต็มที่',
+                checkInBtn: 'เช็คอินและเริ่มบิน'
+            },
             recap: {
                 streakLabel: 'วันติดต่อกัน',
                 weekLabel: 'เวลาโฟกัสสัปดาห์นี้',
@@ -520,6 +526,12 @@
                 title: 'Your progress card',
                 hint: "Just your own progress — nothing here compares you to anyone else.",
                 shareBtn: 'Share', downloadBtn: 'Download image'
+            },
+            modalBoardingPass: {
+                title: 'Your boarding pass',
+                seatLabel: 'Seat', durationLabel: 'Duration', boardingLabel: 'Boarding', now: 'Now', dateLabel: 'Date',
+                tip: '📵 Tip: turn on Do Not Disturb or Airplane Mode before boarding, for full focus.',
+                checkInBtn: 'Check in & start flying'
             },
             recap: {
                 streakLabel: 'day streak',

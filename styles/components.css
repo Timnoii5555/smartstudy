@@ -367,6 +367,26 @@ input[type=range]::-moz-range-track { height: 0.5rem; background: var(--color-su
 .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
 .modal-title { font-size: 1.25rem; font-weight: 700; color: var(--color-primary); display: flex; align-items: center; gap: 0.5rem; }
 .modal-text { font-size: 0.875rem; color: var(--color-outline); margin-bottom: 1rem; white-space: pre-line; }
+
+/* ---------- Boarding pass (screen 6's "check in" ritual, see js/focus.js) ---------- */
+/* Deliberately fixed dark colors, not tokens: a boarding pass reads as a
+   physical dark-card object regardless of which of the 4 app themes is
+   active, the same reasoning as the flight map's plane/pins elsewhere. */
+.boarding-pass { background: #17181c; border-radius: var(--radius-xl); padding: 1.25rem 1.5rem; color: #fff; }
+.boarding-pass__route { display: flex; align-items: center; justify-content: center; gap: 0.75rem; }
+.boarding-pass__code { font-family: var(--font-headline); font-size: 1.75rem; font-weight: 800; letter-spacing: 0.02em; }
+.boarding-pass__plane { color: rgba(255, 255, 255, 0.5); font-size: 1.25rem; }
+.boarding-pass__city { text-align: center; font-size: 0.75rem; color: rgba(255, 255, 255, 0.6); margin-top: 0.15rem; }
+.boarding-pass__divider { margin: 1rem 0; border-top: 1px dashed rgba(255, 255, 255, 0.25); }
+.boarding-pass__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem 1rem; }
+.boarding-pass__field { display: flex; flex-direction: column; gap: 0.15rem; }
+.boarding-pass__label { font-size: 0.625rem; color: rgba(255, 255, 255, 0.5); text-transform: uppercase; letter-spacing: 0.06em; }
+.boarding-pass__value { font-size: 0.9375rem; font-weight: 700; }
+/* A decorative barcode: a row of thin bars with pre-set (not random —
+   see js/focus.js's renderBarcode, generated once per open) varying
+   widths/gaps, purely for the "real ticket" feel. */
+.boarding-pass__barcode { display: flex; align-items: stretch; height: 2.25rem; margin-top: 1.25rem; gap: 1px; }
+.boarding-pass__barcode span { background: #fff; flex-shrink: 0; }
 .modal-actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
 .modal-panel__icon { width: 4rem; height: 4rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; }
 .modal-panel__icon--warn { background: color-mix(in srgb, var(--color-danger) 12%, transparent); color: var(--color-danger); }
