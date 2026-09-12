@@ -522,10 +522,17 @@
         if (!show) return;
 
         const currentMinutes = pomodoroSettings().focusMin;
+        // An explicit real destination (see "Explore real destinations")
+        // always outranks a curated chip for display purposes — without
+        // this, a real destination whose computed duration happens to
+        // land on an exact curated number (e.g. 45) would show that
+        // chip as selected even though a different flight is actually
+        // active.
+        const hasCustomDestination = !!State.get().settings.customDestinationId;
         const originCode = originAirport().code;
         flightPickerRow.innerHTML = '';
         FLIGHTS.forEach((flight) => {
-            const isSelected = flight.minutes === currentMinutes;
+            const isSelected = !hasCustomDestination && flight.minutes === currentMinutes;
             flightPickerRow.appendChild(U.el('button', {
                 className: 'flight-chip' + (isSelected ? ' is-selected' : ''),
                 attrs: { type: 'button', role: 'radio', 'aria-checked': String(isSelected) },

@@ -67,7 +67,17 @@
     function startStudyingNowPolling(groupId) {
         stopStudyingNowPolling();
         refreshStudyingNow(groupId);
-        studyingCountIntervalId = setInterval(() => refreshStudyingNow(groupId), 30000);
+        // Explicit close/leave already call stopStudyingNowPolling()
+        // directly for an immediate stop, but the modal can also close via
+        // its own backdrop click, Escape, or a screen change (see
+        // js/app.js's Router.onChange) — none of which this file hears
+        // about. Checking isOpen() here too is the safety net: within one
+        // tick of any of those, polling stops on its own instead of
+        // continuing to hit Firestore in the background indefinitely.
+        studyingCountIntervalId = setInterval(() => {
+            if (!TFS.Modal.isOpen(studyGroupsModal)) { stopStudyingNowPolling(); return; }
+            refreshStudyingNow(groupId);
+        }, 30000);
     }
     function stopStudyingNowPolling() {
         if (studyingCountIntervalId !== null) { clearInterval(studyingCountIntervalId); studyingCountIntervalId = null; }
