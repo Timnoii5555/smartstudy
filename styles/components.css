@@ -308,6 +308,26 @@ input[type=range]::-moz-range-track { height: 0.5rem; background: var(--color-su
     padding: 0.35rem 0.75rem; border-radius: var(--radius-full); white-space: nowrap;
 }
 
+.streak-badge {
+    display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.75rem; font-weight: 700;
+    color: #b45309; background: color-mix(in srgb, #b45309 12%, transparent);
+    padding: 0.35rem 0.75rem; border-radius: var(--radius-full); white-space: nowrap;
+}
+
+/* ---------- Composite readiness score (screen 3) ---------- */
+
+.readiness-score-card { padding: 1.25rem 1.5rem; }
+.readiness-score__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; }
+.readiness-score__title { font-size: 0.9375rem; font-weight: 700; margin-bottom: 0.2rem; }
+.readiness-score__hint { font-size: 0.75rem; color: var(--color-outline); }
+.readiness-score__big { font-family: var(--font-headline); font-size: 2rem; font-weight: 800; color: var(--color-primary); flex-shrink: 0; }
+.readiness-score__rows { display: flex; flex-direction: column; gap: 0.7rem; }
+.readiness-score__row { display: flex; align-items: center; gap: 0.75rem; }
+.readiness-score__row-label { flex: 0 0 9.5rem; font-size: 0.75rem; color: var(--color-outline); }
+.readiness-score__row-track { flex: 1; height: 0.4rem; border-radius: var(--radius-full); background: var(--color-surface-highest); overflow: hidden; }
+.readiness-score__row-fill { height: 100%; background: var(--color-primary); border-radius: inherit; transition: width 0.3s ease; }
+.readiness-score__row-value { flex: 0 0 2.5rem; text-align: right; font-size: 0.75rem; font-weight: 700; }
+
 /* ---------- Quests card (screen 3) ---------- */
 
 .quests-card { padding: 1.25rem 1.5rem; }

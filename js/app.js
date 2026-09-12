@@ -51,7 +51,9 @@
     });
 
     function resolveInitialScreen() {
-        if (!TFS.Storage.getActiveProfileId()) return 'screen0';
+        if (!TFS.Storage.getActiveProfileId()) {
+            return TFS.Storage.hasSeenLanding() ? 'screen0' : 'screenLanding';
+        }
         const s = State.get();
         if (!s.plan.subject) return 'screen1';
         if (!s.plan.examDateISO) return 'screen2';

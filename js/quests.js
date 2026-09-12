@@ -72,6 +72,33 @@
         }
     }
 
+    /** Whether today counts as a "showed up and did real work" day — any one
+     *  of finishing a topic, running a focus session, hitting the daily
+     *  goal, or reviewing flashcards is enough. Deliberately not "opened the
+     *  app", so the streak reflects actual studying, not just a visit. */
+    function hasStudiedToday() {
+        ensureTodayReset();
+        return QUEST_DEFS.some(def => getProgress(def.id) >= def.target);
+    }
+
+    /** Advances the day-streak by at most one day per calendar day, called
+     *  from dashboard.js on every render. A streak continues if the last
+     *  counted day was yesterday, restarts at 1 if there's a gap (or this is
+     *  the first day), and does nothing at all until today's work actually
+     *  clears one of the quest targets above — so opening the app on a
+     *  slow day doesn't quietly keep a streak alive. */
+    function updateStreak() {
+        if (!hasStudiedToday()) return null;
+        const s = State.get().streak;
+        const today = todayISO();
+        if (s.lastActiveDateISO === today) return null; // already counted today
+        const yesterday = U.formatDateISO(U.addDays(new Date(), -1));
+        const nextCurrent = (s.lastActiveDateISO === yesterday) ? s.current + 1 : 1;
+        const next = { current: nextCurrent, longest: Math.max(s.longest, nextCurrent), lastActiveDateISO: today };
+        State.commit({ streak: next });
+        return next;
+    }
+
     function getProgress(questId) {
         return State.get().quests.progress[questId] || 0;
     }
@@ -198,6 +225,6 @@
     I18n.onChange(() => renderIfMounted());
     State.subscribe(() => { /* consumers re-render explicitly via bump()/claim() to avoid render storms during ticking timers */ });
 
-    TFS.Quests = { QUEST_DEFS, LEVELS, levelFor, ensureTodayReset, getProgress, isClaimed, bump, setProgress, claim, renderCard };
+    TFS.Quests = { QUEST_DEFS, LEVELS, levelFor, ensureTodayReset, getProgress, isClaimed, bump, setProgress, claim, renderCard, updateStreak };
 
 })(window);

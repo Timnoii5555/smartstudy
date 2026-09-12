@@ -23,7 +23,9 @@
     const checklistContainer = document.getElementById('syllabusChecklistContainer');
     const readAheadPrompt = document.getElementById('readAheadPrompt');
     const pointsBadge = document.getElementById('pointsBadge');
+    const streakBadge = document.getElementById('streakBadge');
     const questsCard = document.getElementById('questsCard');
+    const readinessScoreCard = document.getElementById('readinessScoreCard');
 
     const RING_CIRCUMFERENCE = 2 * Math.PI * 88; // matches the SVG circle's r="88"
 
@@ -157,6 +159,68 @@
         pointsBadge.appendChild(document.createTextNode(I18n.t('quests.pointsBadge', { n: points, level: I18n.pick(level.current.title) })));
     }
 
+    function renderStreakBadge() {
+        const streak = State.get().streak;
+        if (!streak.current) { streakBadge.hidden = true; return; }
+        streakBadge.hidden = false;
+        streakBadge.innerHTML = '';
+        streakBadge.appendChild(U.el('span', { className: 'material-symbols-outlined', attrs: { 'aria-hidden': 'true', style: "font-size:1rem;font-variation-settings:'FILL' 1" }, text: 'local_fire_department' }));
+        streakBadge.appendChild(document.createTextNode(I18n.t('s3.streakBadge', { n: streak.current })));
+    }
+
+    /** How many of the last 7 calendar days (today included) hit the daily
+     *  focus goal — the "consistency" leg of the readiness score below. */
+    function goalHitRateLast7Days() {
+        const goal = State.get().plan.dailyGoalSeconds;
+        if (!goal) return 0;
+        const totals = State.get().focus.totalSecondsByDate;
+        let hits = 0;
+        for (let i = 0; i < 7; i++) {
+            const dateISO = U.formatDateISO(U.addDays(new Date(), -i));
+            if ((totals[dateISO] || 0) >= goal) hits++;
+        }
+        return hits / 7;
+    }
+
+    /** A single "how ready am I really" number most planners don't attempt —
+     *  most just show raw % of content read. This blends three real signals
+     *  already tracked elsewhere in the app: how much of the syllabus is
+     *  actually done (the dominant factor), how consistently the daily goal
+     *  has been hit this past week, and how long the current study streak
+     *  is — so someone who crammed 100% of the content in one all-nighter
+     *  scores lower than someone who's been steadily consistent. */
+    function renderReadinessScore(topicPercent) {
+        const goalRate = goalHitRateLast7Days() * 100;
+        const streakFactor = Math.min(State.get().streak.current / 7, 1) * 100;
+        const composite = Math.round(0.5 * topicPercent + 0.3 * goalRate + 0.2 * streakFactor);
+
+        readinessScoreCard.innerHTML = '';
+        readinessScoreCard.appendChild(U.el('div', { className: 'readiness-score__head' }, [
+            U.el('div', {}, [
+                U.el('h3', { className: 'readiness-score__title', text: I18n.t('s3.readinessScoreTitle') }),
+                U.el('p', { className: 'readiness-score__hint', text: I18n.t('s3.readinessScoreHint') })
+            ]),
+            U.el('div', { className: 'readiness-score__big', text: composite + '%' })
+        ]));
+
+        const rows = [
+            { label: I18n.t('s3.readinessFactorContent'), value: Math.round(topicPercent) },
+            { label: I18n.t('s3.readinessFactorConsistency'), value: Math.round(goalRate) },
+            { label: I18n.t('s3.readinessFactorStreak'), value: Math.round(streakFactor) }
+        ];
+        const list = U.el('div', { className: 'readiness-score__rows' });
+        rows.forEach(r => {
+            list.appendChild(U.el('div', { className: 'readiness-score__row' }, [
+                U.el('span', { className: 'readiness-score__row-label', text: r.label }),
+                U.el('div', { className: 'readiness-score__row-track' }, [
+                    U.el('div', { className: 'readiness-score__row-fill', attrs: { style: `width:${r.value}%` } })
+                ]),
+                U.el('span', { className: 'readiness-score__row-value', text: r.value + '%' })
+            ]));
+        });
+        readinessScoreCard.appendChild(list);
+    }
+
     function markSubjectCompleted(subjectId) {
         const done = State.get().plan.completedSubjects || [];
         if (!done.includes(subjectId)) {
@@ -184,7 +248,12 @@
 
         renderChecklist(subject);
         renderPointsBadge();
-        if (TFS.Quests) TFS.Quests.renderCard(questsCard);
+        if (TFS.Quests) {
+            TFS.Quests.renderCard(questsCard);
+            TFS.Quests.updateStreak();
+        }
+        renderStreakBadge();
+        renderReadinessScore(percent);
 
         if (percent === 100 && total > 0) {
             if (subject) markSubjectCompleted(subject.id);

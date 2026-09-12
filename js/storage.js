@@ -24,6 +24,7 @@
     // must be readable before any profile's state has even been chosen.
     const PROFILES_INDEX_KEY = 'tfs:v1:profiles';
     const ACTIVE_PROFILE_KEY = 'tfs:v1:activeProfile';
+    const SEEN_LANDING_KEY = 'tfs:v1:hasSeenLanding';
 
     function profileStateKey(profileId) { return `tfs:v1:state:${profileId}`; }
 
@@ -65,6 +66,19 @@
     }
 
     function switchProfile(id) { setActiveProfileId(id); }
+
+    /** Whether this browser has already clicked past the marketing landing
+     *  screen once — kept outside any profile's own state (there may be no
+     *  profile yet at all when this is checked), so a half-finished signup
+     *  doesn't bounce back to the pitch on every reload, but a genuinely
+     *  fresh visitor still sees it first. */
+    function hasSeenLanding() {
+        try { return global.localStorage.getItem(SEEN_LANDING_KEY) === '1'; }
+        catch (e) { return false; }
+    }
+    function markLandingSeen() {
+        try { global.localStorage.setItem(SEEN_LANDING_KEY, '1'); } catch (e) { /* ignore */ }
+    }
 
     function renameProfile(id, newName) {
         writeJSON(PROFILES_INDEX_KEY, listProfiles().map(p => p.id === id ? { ...p, name: newName } : p));
@@ -140,6 +154,11 @@
             ui: {
                 lastScreen: 'screen1',
                 hasSeenQuestIntro: false
+            },
+            streak: {
+                current: 0,      // consecutive days with real study activity, ending today or yesterday
+                longest: 0,      // best streak ever, kept even after the current one breaks
+                lastActiveDateISO: null
             },
             quests: {
                 dateISO: null, // set to today's date the first time quests.js touches it
@@ -282,7 +301,8 @@
         isBroken: () => storageBroken,
         wasCorrupt: () => hadCorruptData,
         // Local profiles ("login") — see the block above.
-        listProfiles, getActiveProfileId, setActiveProfileId, createProfile, switchProfile, deleteProfile, renameProfile
+        listProfiles, getActiveProfileId, setActiveProfileId, createProfile, switchProfile, deleteProfile, renameProfile,
+        hasSeenLanding, markLandingSeen
     };
 
 })(window);

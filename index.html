@@ -50,6 +50,101 @@
 
 <div id="mainContent" tabindex="-1">
 
+<!-- ============================== SCREEN LANDING — Marketing / "why this app" ============================== -->
+<div id="screenLanding" class="screen">
+    <header class="app-header">
+        <div class="app-header__inner">
+            <div class="landing-brand">
+                <span class="landing-brand__mark"><span class="material-symbols-outlined" aria-hidden="true">auto_stories</span></span>
+                <h1 class="text-primary" style="font-size:1.125rem;font-weight:700" data-i18n="brand.full">The Focused Scholar</h1>
+            </div>
+            <button type="button" id="landingLoginLink" class="btn btn--ghost btn--sm" data-i18n="landing.loginLink">Log in</button>
+        </div>
+    </header>
+
+    <main class="screen__main container-wide">
+        <section class="landing-hero">
+            <span class="landing-eyebrow" data-i18n="landing.eyebrow">A free TCAS study platform</span>
+            <h2 data-screen-heading class="landing-hero__title" data-i18n="landing.heroTitle">Plan your TCAS reading smarter — not just another empty timetable.</h2>
+            <p class="landing-hero__subtitle" data-i18n="landing.heroSubtitle">SmartStudy builds your day-by-day reading plan automatically from your real exam date, and turns studying into something you actually want to open every day.</p>
+            <div class="landing-hero__actions">
+                <button type="button" id="landingCtaBtn" class="btn btn--primary" style="padding:1rem 1.75rem;font-size:1rem">
+                    <span data-i18n="landing.ctaBtn">Start for free</span><span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+                </button>
+                <span class="text-outline" style="font-size:0.8125rem" data-i18n="landing.ctaNote">No credit card · No ads · Free forever</span>
+            </div>
+        </section>
+
+        <section class="landing-section">
+            <h3 class="landing-section__title" data-i18n="landing.whyTitle">Why SmartStudy</h3>
+            <div class="landing-feature-grid">
+                <div class="landing-feature-card">
+                    <span class="landing-feature-card__icon material-symbols-outlined" aria-hidden="true">library_books</span>
+                    <h4 data-i18n="landing.feat1Title">The real TCAS curriculum, built in</h4>
+                    <p data-i18n="landing.feat1Desc">23+ real subjects — TGAT, TPAT1-5, every A-Level — or define your own subject and topics in seconds.</p>
+                </div>
+                <div class="landing-feature-card">
+                    <span class="landing-feature-card__icon material-symbols-outlined" aria-hidden="true">bolt</span>
+                    <h4 data-i18n="landing.feat2Title">A plan that actually adapts</h4>
+                    <p data-i18n="landing.feat2Desc">Tell it your exam date and how you like to sequence hard vs. easy topics — the day-by-day plan is generated for you, automatically.</p>
+                </div>
+                <div class="landing-feature-card landing-feature-card--new">
+                    <span class="landing-feature-card__badge" data-i18n="landing.newBadge">New</span>
+                    <span class="landing-feature-card__icon material-symbols-outlined" aria-hidden="true">insights</span>
+                    <h4 data-i18n="landing.feat3Title">One honest readiness score</h4>
+                    <p data-i18n="landing.feat3Desc">Not just "% of content read" — a composite score that also weighs how consistently you show up, so cramming everything the night before doesn't fake you out.</p>
+                </div>
+                <div class="landing-feature-card">
+                    <span class="landing-feature-card__icon material-symbols-outlined" aria-hidden="true">local_fire_department</span>
+                    <h4 data-i18n="landing.feat4Title">Quests, points, streaks &amp; a leaderboard</h4>
+                    <p data-i18n="landing.feat4Desc">Daily quests and a day-streak turn showing up into a habit, with points and a live leaderboard against other learners.</p>
+                </div>
+                <div class="landing-feature-card">
+                    <span class="landing-feature-card__icon material-symbols-outlined" aria-hidden="true">graphic_eq</span>
+                    <h4 data-i18n="landing.feat5Title">Focus sounds generated live</h4>
+                    <p data-i18n="landing.feat5Desc">Six ambient sounds synthesized in your browser in real time — not looping mp3 files — plus upload your own.</p>
+                </div>
+                <div class="landing-feature-card">
+                    <span class="landing-feature-card__icon material-symbols-outlined" aria-hidden="true">lock</span>
+                    <h4 data-i18n="landing.feat6Title">Your data stays yours</h4>
+                    <p data-i18n="landing.feat6Desc">Works fully offline, stores everything on your own device by default, and never shows you an ad.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="landing-section">
+            <h3 class="landing-section__title" data-i18n="landing.compareTitle">How this is different from a typical planner</h3>
+            <div class="landing-compare">
+                <div class="landing-compare__col landing-compare__col--them">
+                    <span class="landing-compare__label" data-i18n="landing.compareThemLabel">A typical planner app</span>
+                    <p data-i18n="landing.compareThem1">You type in your own schedule by hand.</p>
+                    <p data-i18n="landing.compareThem2">Progress is one flat "% done" bar.</p>
+                    <p data-i18n="landing.compareThem3">Ambient sound = a looping mp3 file.</p>
+                    <p data-i18n="landing.compareThem4">Studying alone, no sense of progress vs. others.</p>
+                </div>
+                <div class="landing-compare__col landing-compare__col--us">
+                    <span class="landing-compare__label" data-i18n="landing.compareUsLabel">SmartStudy</span>
+                    <p data-i18n="landing.compareUs1">The plan is generated for you from your exam date.</p>
+                    <p data-i18n="landing.compareUs2">A composite score that also rewards consistency.</p>
+                    <p data-i18n="landing.compareUs3">Sound synthesized live with Web Audio — zero files.</p>
+                    <p data-i18n="landing.compareUs4">Daily quests, points, streaks and a real leaderboard.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="landing-final-cta">
+            <h3 data-i18n="landing.finalTitle">Ready to plan your exam prep properly?</h3>
+            <button type="button" id="landingCtaBtn2" class="btn btn--primary" style="padding:1rem 1.75rem;font-size:1rem">
+                <span data-i18n="landing.ctaBtn">Start for free</span><span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+            </button>
+        </section>
+
+        <footer class="landing-footer">
+            <span data-i18n="brand.full">The Focused Scholar</span> · <span data-i18n="landing.footerNote">Built for students preparing for TCAS.</span>
+        </footer>
+    </main>
+</div>
+
 <!-- ============================== SCREEN 0 — Local profile picker ("login") ============================== -->
 <div id="screen0" class="screen">
     <header class="app-header">
@@ -284,12 +379,17 @@
         <section style="margin-bottom:2rem">
             <div class="flex items-center justify-between flex-wrap gap-2">
                 <h1 data-screen-heading style="font-size:1.75rem;font-weight:600" data-i18n="s3.greeting">Hi, here's today's summary</h1>
-                <span id="pointsBadge" class="points-badge"></span>
+                <div class="flex items-center gap-2">
+                    <span id="streakBadge" class="streak-badge" hidden></span>
+                    <span id="pointsBadge" class="points-badge"></span>
+                </div>
             </div>
             <p class="text-outline" style="font-size:0.875rem" data-i18n="s3.subtitle">Update your progress below 🚀</p>
         </section>
 
         <div id="questsCard" class="card quests-card" style="margin-bottom:1.5rem"></div>
+
+        <div id="readinessScoreCard" class="card readiness-score-card" style="margin-bottom:1.5rem"></div>
 
         <div class="dashboard-grid">
             <div class="card dashboard-card--wide progress-ring-card">
@@ -1042,6 +1142,7 @@
 <script src="js/modal.js"></script>
 <script src="js/router.js"></script>
 <script src="js/profile.js"></script>
+<script src="js/landing.js"></script>
 <script src="js/leaderboard.js"></script>
 <script src="js/datepicker.js"></script>
 <script src="js/wheelpicker.js"></script>
