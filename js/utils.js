@@ -28,6 +28,22 @@
         return Math.min(max, Math.max(min, n));
     }
 
+    /** Great-circle distance in km between two [lat, lng] points — used to
+     *  find the nearest real airport to a device location (js/geo.js) and
+     *  to show a real distance on the boarding pass (js/focus.js). Accurate
+     *  enough for both (off by well under 1% at these scales); an airliner
+     *  doesn't fly the literal straight line either. */
+    function haversineKm(a, b) {
+        const R = 6371;
+        const toRad = (d) => (d * Math.PI) / 180;
+        const dLat = toRad(b[0] - a[0]);
+        const dLng = toRad(b[1] - a[1]);
+        const lat1 = toRad(a[0]);
+        const lat2 = toRad(b[0]);
+        const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+        return 2 * R * Math.asin(Math.sqrt(h));
+    }
+
     function pad2(n) {
         return n.toString().padStart(2, '0');
     }
@@ -194,7 +210,7 @@
     }
 
     TFS.Utils = {
-        uuid, clamp, pad2, debounce,
+        uuid, clamp, pad2, debounce, haversineKm,
         formatDateISO, parseISODate, isSameDate, startOfDay, addDays, startOfWeekMonday,
         formatSecondsToHMS, formatSecondsToHHMM, timeStrToMinutes, minutesToTimeStr,
         qsa, el, downloadText, readFileAsText, isStorageAvailable, isAtomicPath

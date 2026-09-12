@@ -302,11 +302,22 @@
 
     const flightMapContainer = document.getElementById('flightMapContainer');
     const flightDestCodeEl = document.getElementById('flightDestCode');
+    const flightOriginCodeEl = document.getElementById('flightOriginCode');
     const flightPickerRow = document.getElementById('flightPickerRow');
     const flightPickerLabel = document.getElementById('flightPickerLabel');
 
-    const ORIGIN_LATLNG = [13.7563, 100.5018]; // Bangkok — every flight's departure point
+    const BKK_LATLNG = [13.6900, 100.7501]; // fallback if data/airports.js ever fails to load
     const WINDOW_COUNT = 6;
+
+    /** The real airport every flight departs from — Settings' "Flight
+     *  origin" (data/airports.js, js/geo.js), Bangkok Suvarnabhumi by
+     *  default. Falls back to a bare Bangkok coordinate if that data or
+     *  module didn't load, so a missing script can never blank the map. */
+    function originAirport() {
+        const id = State.get().settings.departureAirportId;
+        const found = TFS.Geo && TFS.Geo.airportById(id);
+        return found || { id: 'bkk', code: 'BKK', latlng: BKK_LATLNG };
+    }
 
     // A handful of curated study-session lengths, each tied to a real Thai
     // city (purely thematic — not a real flight schedule), the same
@@ -345,8 +356,9 @@
         return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
     }
 
-    let flightMap = null, flightRouteLine = null, flightTrailLine = null, flightPlaneMarker = null, flightDestMarker = null;
-    let mapDrawnFlightId = null; // which flight's route is currently on the map, so it's only redrawn/refit when that changes
+    let flightMap = null, flightRouteLine = null, flightTrailLine = null, flightPlaneMarker = null, flightDestMarker = null, flightOriginMarker = null;
+    let mapDrawnFlightId = null; // which flight's route is currently on the map
+    let mapDrawnOriginId = null; // which departure airport it's currently drawn from — either changing means a redraw
 
     function buildPlaneIcon() {
         const windows = new Array(WINDOW_COUNT).fill('<span class="flight-window-dot"></span>').join('');
@@ -366,21 +378,22 @@
         if (flightMap || !flightMapContainer) return flightMap;
         if (typeof L === 'undefined') return null; // Leaflet's CDN script didn't load — map area just stays blank
         try {
+            const origin = originAirport().latlng;
             flightMap = L.map(flightMapContainer, {
                 zoomControl: false, dragging: false, touchZoom: false, scrollWheelZoom: false,
                 doubleClickZoom: false, boxZoom: false, keyboard: false, tap: false
-            }).setView(ORIGIN_LATLNG, 6);
+            }).setView(origin, 6);
 
             L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
                 attribution: 'Imagery &copy; Esri',
                 maxZoom: 12
             }).addTo(flightMap);
 
-            flightRouteLine = L.polyline([ORIGIN_LATLNG, ORIGIN_LATLNG], { color: '#000', weight: 5, opacity: 0.22, interactive: false }).addTo(flightMap);
-            flightTrailLine = L.polyline([ORIGIN_LATLNG, ORIGIN_LATLNG], { color: '#fff', weight: 3, interactive: false }).addTo(flightMap);
-            L.circleMarker(ORIGIN_LATLNG, { radius: 5, weight: 1.5, color: 'rgba(0,0,0,0.35)', fillColor: '#fff', fillOpacity: 1, interactive: false }).addTo(flightMap);
-            flightDestMarker = L.circleMarker(ORIGIN_LATLNG, { radius: 5, weight: 1.5, color: 'rgba(0,0,0,0.35)', fillColor: '#fff', fillOpacity: 1, interactive: false }).addTo(flightMap);
-            flightPlaneMarker = L.marker(ORIGIN_LATLNG, { icon: buildPlaneIcon(), interactive: false }).addTo(flightMap);
+            flightRouteLine = L.polyline([origin, origin], { color: '#000', weight: 5, opacity: 0.22, interactive: false }).addTo(flightMap);
+            flightTrailLine = L.polyline([origin, origin], { color: '#fff', weight: 3, interactive: false }).addTo(flightMap);
+            flightOriginMarker = L.circleMarker(origin, { radius: 5, weight: 1.5, color: 'rgba(0,0,0,0.35)', fillColor: '#fff', fillOpacity: 1, interactive: false }).addTo(flightMap);
+            flightDestMarker = L.circleMarker(origin, { radius: 5, weight: 1.5, color: 'rgba(0,0,0,0.35)', fillColor: '#fff', fillOpacity: 1, interactive: false }).addTo(flightMap);
+            flightPlaneMarker = L.marker(origin, { icon: buildPlaneIcon(), interactive: false }).addTo(flightMap);
         } catch (e) {
             console.warn('[focus] Flight map failed to initialize; the map area will just stay blank.', e);
             flightMap = null;
@@ -389,14 +402,18 @@
     }
 
     /** (Re)draws the full route the first time a given flight is shown, or
-     *  whenever the selected flight changes — never every render tick,
-     *  which would otherwise reset the zoom/pan constantly. */
+     *  whenever the selected flight or the departure airport changes —
+     *  never every render tick, which would otherwise reset the zoom/pan
+     *  constantly. */
     function updateFlightRoute(flight) {
-        if (mapDrawnFlightId === flight.id) return;
+        const origin = originAirport();
+        if (mapDrawnFlightId === flight.id && mapDrawnOriginId === origin.id) return;
         mapDrawnFlightId = flight.id;
-        flightRouteLine.setLatLngs([ORIGIN_LATLNG, flight.latlng]);
+        mapDrawnOriginId = origin.id;
+        flightRouteLine.setLatLngs([origin.latlng, flight.latlng]);
+        if (flightOriginMarker) flightOriginMarker.setLatLng(origin.latlng);
         flightDestMarker.setLatLng(flight.latlng);
-        flightMap.fitBounds([ORIGIN_LATLNG, flight.latlng], { padding: [28, 28] });
+        flightMap.fitBounds([origin.latlng, flight.latlng], { padding: [28, 28] });
     }
 
     /** Lights up one cabin window per real learner currently on this exact
@@ -421,6 +438,7 @@
         const total = durationForMode(mode);
         const flight = nearestFlight(Math.round(total / 60));
         if (flightDestCodeEl) flightDestCodeEl.textContent = flight.code;
+        if (flightOriginCodeEl) flightOriginCodeEl.textContent = originAirport().code;
         renderFlightWindows(knownFlightPassengerCount);
 
         try {
@@ -430,9 +448,9 @@
 
             const remaining = getRemainingSeconds();
             const progress = total > 0 ? U.clamp(1 - remaining / total, 0, 1) : 0;
-            const current = interpolateLatLng(ORIGIN_LATLNG, flight.latlng, progress);
+            const current = interpolateLatLng(originAirport().latlng, flight.latlng, progress);
             flightPlaneMarker.setLatLng(current);
-            flightTrailLine.setLatLngs([ORIGIN_LATLNG, current]);
+            flightTrailLine.setLatLngs([originAirport().latlng, current]);
         } catch (e) {
             console.warn('[focus] Could not update the flight map this render (will retry next tick).', e);
         }
@@ -460,6 +478,7 @@
         if (!show) return;
 
         const currentMinutes = pomodoroSettings().focusMin;
+        const originCode = originAirport().code;
         flightPickerRow.innerHTML = '';
         FLIGHTS.forEach((flight) => {
             const isSelected = flight.minutes === currentMinutes;
@@ -470,7 +489,7 @@
             }, [
                 U.el('span', { className: 'flight-chip__flightno', text: flight.flightNo }),
                 U.el('span', { className: 'flight-chip__route' }, [
-                    U.el('span', { className: 'flight-chip__origin', text: 'BKK' }),
+                    U.el('span', { className: 'flight-chip__origin', text: originCode }),
                     U.el('span', { className: 'material-symbols-outlined', attrs: { 'aria-hidden': 'true' }, text: 'flight' }),
                     U.el('span', { className: 'flight-chip__code', text: flight.code })
                 ]),
@@ -648,11 +667,13 @@
 
     const boardingPassModal = document.getElementById('boardingPassModal');
     const boardingPassCard = document.getElementById('boardingPassCard');
+    const boardingPassOriginCode = document.getElementById('boardingPassOriginCode');
     const boardingPassDestCode = document.getElementById('boardingPassDestCode');
     const boardingPassDestName = document.getElementById('boardingPassDestName');
     const boardingPassSeat = document.getElementById('boardingPassSeat');
     const boardingPassDuration = document.getElementById('boardingPassDuration');
     const boardingPassDate = document.getElementById('boardingPassDate');
+    const boardingPassDistance = document.getElementById('boardingPassDistance');
     const boardingPassBarcode = document.getElementById('boardingPassBarcode');
     const boardingPassTear = document.getElementById('boardingPassTear');
     const boardingPassTearThumb = document.getElementById('boardingPassTearThumb');
@@ -789,11 +810,14 @@
      *  missing for some reason. */
     function showBoardingPass(seat) {
         const flight = currentFocusFlight() || nearestFlight(pomodoroSettings().focusMin);
+        const origin = originAirport();
         activeSeat = seat || randomSeat();
+        if (boardingPassOriginCode) boardingPassOriginCode.textContent = origin.code;
         if (boardingPassDestCode) boardingPassDestCode.textContent = flight.code;
         if (boardingPassDestName) boardingPassDestName.textContent = I18n.pick(flight.name);
         if (boardingPassSeat) boardingPassSeat.textContent = activeSeat;
         if (boardingPassDuration) boardingPassDuration.textContent = I18n.t('s6.flightMinutes', { n: flight.minutes });
+        if (boardingPassDistance) boardingPassDistance.textContent = I18n.t('s6.distanceKm', { n: Math.round(U.haversineKm(origin.latlng, flight.latlng)) });
         if (boardingPassDate) {
             const today = new Date();
             // Thai (Buddhist) calendar year, matching how a Thai-audience
@@ -812,6 +836,7 @@
 
     const seatPickerModal = document.getElementById('seatPickerModal');
     const seatPickerGrid = document.getElementById('seatPickerGrid');
+    const seatPickerOriginCode = document.getElementById('seatPickerOriginCode');
     const seatPickerDestCode = document.getElementById('seatPickerDestCode');
     const confirmSeatBtn = document.getElementById('confirmSeatBtn');
     const closeSeatPickerBtn = document.getElementById('closeSeatPickerBtn');
@@ -890,6 +915,7 @@
     function showSeatPicker() {
         if (!seatPickerModal || !seatPickerGrid) { showBoardingPass(randomSeat()); return; }
         const flight = currentFocusFlight() || nearestFlight(pomodoroSettings().focusMin);
+        if (seatPickerOriginCode) seatPickerOriginCode.textContent = originAirport().code;
         if (seatPickerDestCode) seatPickerDestCode.textContent = flight.code;
         // Only a curated flight (an exact duration match) has a real shared
         // room to check — see currentFocusFlight()'s own comment — so a

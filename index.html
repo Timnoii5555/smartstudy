@@ -710,7 +710,7 @@
                  which is rendered separately either way. -->
             <div id="flightMapContainer" class="flight-viz__map" aria-hidden="true"></div>
             <div class="flight-viz__route" aria-hidden="true">
-                <span class="flight-viz__code">BKK</span>
+                <span id="flightOriginCode" class="flight-viz__code">BKK</span>
                 <span class="material-symbols-outlined" aria-hidden="true" style="font-size:0.9rem">flight</span>
                 <span id="flightDestCode" class="flight-viz__code">CNX</span>
             </div>
@@ -1094,7 +1094,7 @@
                 <h2 class="seat-picker__title"><span class="material-symbols-outlined" aria-hidden="true">airline_seat_recline_normal</span> <span data-i18n="modalSeatPicker.title">Choose your seat</span></h2>
                 <button type="button" id="closeSeatPickerBtn" class="boarding-pass__close" data-i18n-attr='{"aria-label":"aria.closeDialog"}' aria-label="Close"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">close</span></button>
             </div>
-            <p class="seat-picker__route" aria-hidden="true">BKK <span class="material-symbols-outlined" aria-hidden="true" style="font-size:0.8rem">flight</span> <span id="seatPickerDestCode">CNX</span></p>
+            <p class="seat-picker__route" aria-hidden="true"><span id="seatPickerOriginCode">BKK</span> <span class="material-symbols-outlined" aria-hidden="true" style="font-size:0.8rem">flight</span> <span id="seatPickerDestCode">CNX</span></p>
 
             <div class="seat-picker__cabin custom-scroll">
                 <!-- An actual fuselage silhouette (dome nose + cockpit windows,
@@ -1138,7 +1138,7 @@
                     <button type="button" id="closeBoardingPassBtn" class="boarding-pass__close" data-i18n-attr='{"aria-label":"aria.closeDialog"}' aria-label="Close"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">close</span></button>
                 </div>
                 <div class="boarding-pass__route">
-                    <span class="boarding-pass__code">BKK</span>
+                    <span class="boarding-pass__code" id="boardingPassOriginCode">BKK</span>
                     <span class="material-symbols-outlined boarding-pass__plane" aria-hidden="true">flight</span>
                     <span class="boarding-pass__code" id="boardingPassDestCode">CNX</span>
                 </div>
@@ -1160,6 +1160,10 @@
                     <div class="boarding-pass__field">
                         <span class="boarding-pass__label" data-i18n="modalBoardingPass.dateLabel">Date</span>
                         <span class="boarding-pass__value" id="boardingPassDate">2569/06/24</span>
+                    </div>
+                    <div class="boarding-pass__field">
+                        <span class="boarding-pass__label" data-i18n="modalBoardingPass.distanceLabel">Distance</span>
+                        <span class="boarding-pass__value" id="boardingPassDistance">423 km</span>
                     </div>
                 </div>
                 <div class="boarding-pass__barcode" id="boardingPassBarcode" aria-hidden="true"></div>
@@ -1332,6 +1336,19 @@
             </div>
         </div>
 
+        <!-- The flight visual's departure point (js/geo.js + data/airports.js)
+             — a real Thai airport instead of always Bangkok. Purely cosmetic
+             (which real city the route/boarding-pass distance start from);
+             changing it any time is fine, unlike the reference video's
+             "locked once chosen" version, since nothing here depends on it
+             staying fixed. -->
+        <div class="settings-section">
+            <span class="settings-section__title" data-i18n="settings.departureSection">Flight origin</span>
+            <button type="button" id="settingsAirportBtn" class="date-trigger" style="padding:0.85rem 1rem">
+                <span class="date-trigger__row"><span id="settingsAirportDisplay" class="date-trigger__value" style="font-size:1rem">-</span><span class="material-symbols-outlined text-primary" aria-hidden="true">flight_takeoff</span></span>
+            </button>
+        </div>
+
         <div class="settings-section">
             <span class="settings-section__title" data-i18n="settings.flashcardsSection">Flashcards</span>
             <div class="field">
@@ -1380,10 +1397,31 @@
     </div>
 </div>
 
+<div id="airportPickerModal" class="modal-overlay hidden">
+    <div class="modal-panel modal-panel--sheet" data-modal-panel>
+        <div class="modal-header">
+            <h2 class="modal-title"><span class="material-symbols-outlined" aria-hidden="true">flight_takeoff</span> <span data-i18n="modalAirportPicker.title">Departure airport</span></h2>
+            <button type="button" id="closeAirportPickerBtn" class="modal-close" data-i18n-attr='{"aria-label":"aria.closeDialog"}' aria-label="Close"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">close</span></button>
+        </div>
+        <div class="modal-actions" style="margin-top:0;margin-bottom:1rem">
+            <button type="button" id="airportUseLocationBtn" class="btn btn--outline flex-1">
+                <span class="material-symbols-outlined" aria-hidden="true">my_location</span> <span data-i18n="modalAirportPicker.useLocation">Use my location</span>
+            </button>
+            <button type="button" id="airportUseRandomBtn" class="btn btn--outline flex-1">
+                <span class="material-symbols-outlined" aria-hidden="true">casino</span> <span data-i18n="modalAirportPicker.useRandom">Random</span>
+            </button>
+        </div>
+        <input type="text" id="airportSearchInput" class="input" style="margin-bottom:0.75rem" data-i18n-attr='{"placeholder":"modalAirportPicker.searchPlaceholder"}' placeholder="Search airport / city">
+        <div id="airportListContainer" class="flex flex-col gap-2 custom-scroll" style="max-height:18rem;overflow-y:auto"></div>
+    </div>
+</div>
+
 <script src="js/errorBoundary.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/storage.js"></script>
 <script src="data/subjects.js"></script>
+<script src="data/airports.js"></script>
+<script src="js/geo.js"></script>
 <script src="js/planner.js"></script>
 <script src="js/srs.js"></script>
 <script src="js/state.js"></script>

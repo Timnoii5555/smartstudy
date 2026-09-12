@@ -26,7 +26,7 @@
 // Bump this on any change to this file (or to the strategy above) so every
 // previously-installed service worker discards its old cache on its next
 // activate — see the comment on activate() below.
-const CACHE_VERSION = 'tfs-v4';
+const CACHE_VERSION = 'tfs-v5';
 
 const PRECACHE_URLS = [
     './',
@@ -37,8 +37,10 @@ const PRECACHE_URLS = [
     './styles/components.css',
     './styles/screens.css',
     './data/subjects.js',
+    './data/airports.js',
     './js/errorBoundary.js',
     './js/utils.js',
+    './js/geo.js',
     './js/storage.js',
     './js/planner.js',
     './js/srs.js',

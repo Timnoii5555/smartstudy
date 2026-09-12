@@ -118,6 +118,10 @@
                 // the public "how many people are focusing right now" count
                 // is never automatic.
                 coStudyPublicEnabled: false,
+                // The flight visual's departure point (data/airports.js,
+                // js/geo.js) — Bangkok Suvarnabhumi by default, changeable
+                // any time from Settings.
+                departureAirportId: 'bkk',
                 pomodoro: { focusMin: 25, shortBreakMin: 5, longBreakMin: 15, cyclesBeforeLongBreak: 4 }
             },
             plan: {

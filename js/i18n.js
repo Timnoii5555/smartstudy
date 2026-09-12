@@ -194,7 +194,7 @@
             },
             modalBoardingPass: {
                 title: 'ตั๋วโดยสารของคุณ',
-                seatLabel: 'ที่นั่ง', durationLabel: 'ระยะเวลา', boardingLabel: 'ขึ้นเครื่อง', now: 'ตอนนี้', dateLabel: 'วันที่',
+                seatLabel: 'ที่นั่ง', durationLabel: 'ระยะเวลา', boardingLabel: 'ขึ้นเครื่อง', now: 'ตอนนี้', dateLabel: 'วันที่', distanceLabel: 'ระยะทาง',
                 tip: '📵 เคล็ดลับ: เปิดโหมดห้ามรบกวนหรือโหมดเครื่องบินก่อนขึ้นเครื่อง เพื่อโฟกัสได้เต็มที่',
                 checkInBtn: 'เช็คอินและเริ่มบิน',
                 swipeHint: 'รูดเพื่อฉีกตั๋วและขึ้นเครื่อง',
@@ -208,6 +208,14 @@
                 seatTakenLabel: 'ที่นั่ง {seat} ไม่ว่าง',
                 nose: 'หัวเครื่อง',
                 tail: 'ท้ายเครื่อง'
+            },
+            modalAirportPicker: {
+                title: 'สนามบินต้นทาง',
+                useLocation: 'ใช้ตำแหน่งของฉัน',
+                useRandom: 'สุ่ม',
+                searchPlaceholder: 'ค้นหาสนามบิน / เมือง',
+                locationDenied: 'ไม่สามารถเข้าถึงตำแหน่งได้ ลองค้นหาหรือเลือกจากรายการแทนได้ครับ',
+                selectedToast: 'เปลี่ยนต้นทางเป็น {code} แล้ว'
             },
             recap: {
                 streakLabel: 'วันติดต่อกัน',
@@ -333,7 +341,8 @@
                 phaseCompleteBreak: 'พักครบแล้ว กลับมาโฟกัสกันต่อ!',
                 sessionSettingsLabel: 'การตั้งค่าเซสชัน',
                 expandMap: 'ดูแผนที่เต็มจอ',
-                minimizeMap: 'ย่อแผนที่'
+                minimizeMap: 'ย่อแผนที่',
+                distanceKm: '{n} กม.'
             },
             settings: {
                 title: 'ตั้งค่า', language: 'ภาษา', theme: 'ธีม',
@@ -342,6 +351,7 @@
                 pomodoroSection: 'ตั้งเวลาโฟกัส (Pomodoro)',
                 focusMin: 'ช่วงโฟกัส (นาที)', shortBreakMin: 'พักสั้น (นาที)',
                 longBreakMin: 'พักยาว (นาที)', cycles: 'จำนวนรอบก่อนพักยาว',
+                departureSection: 'ต้นทางเที่ยวบิน',
                 flashcardsSection: 'แฟลชการ์ด', newCardsPerDay: 'คำศัพท์ใหม่สูงสุดต่อวัน',
                 soundSection: 'เสียง', soundEnabled: 'เปิดเสียงแจ้งเตือน',
                 accountSection: 'บัญชี', renameBtn: 'แก้ไขโปรไฟล์ (ชื่อ/รูป)',
@@ -543,7 +553,7 @@
             },
             modalBoardingPass: {
                 title: 'Your boarding pass',
-                seatLabel: 'Seat', durationLabel: 'Duration', boardingLabel: 'Boarding', now: 'Now', dateLabel: 'Date',
+                seatLabel: 'Seat', durationLabel: 'Duration', boardingLabel: 'Boarding', now: 'Now', dateLabel: 'Date', distanceLabel: 'Distance',
                 tip: '📵 Tip: turn on Do Not Disturb or Airplane Mode before boarding, for full focus.',
                 checkInBtn: 'Check in & start flying',
                 swipeHint: 'Swipe to tear & board',
@@ -557,6 +567,14 @@
                 seatTakenLabel: 'Seat {seat}, unavailable',
                 nose: 'Nose',
                 tail: 'Tail'
+            },
+            modalAirportPicker: {
+                title: 'Departure airport',
+                useLocation: 'Use my location',
+                useRandom: 'Random',
+                searchPlaceholder: 'Search airport / city',
+                locationDenied: "Couldn't access your location — try searching or picking from the list instead.",
+                selectedToast: 'Departure set to {code}'
             },
             recap: {
                 streakLabel: 'day streak',
@@ -682,7 +700,8 @@
                 phaseCompleteBreak: 'Break is over — back to focus!',
                 sessionSettingsLabel: 'Session settings',
                 expandMap: 'View full-screen map',
-                minimizeMap: 'Minimize map'
+                minimizeMap: 'Minimize map',
+                distanceKm: '{n} km'
             },
             settings: {
                 title: 'Settings', language: 'Language', theme: 'Theme',
@@ -691,6 +710,7 @@
                 pomodoroSection: 'Focus timer (Pomodoro)',
                 focusMin: 'Focus length (min)', shortBreakMin: 'Short break (min)',
                 longBreakMin: 'Long break (min)', cycles: 'Cycles before long break',
+                departureSection: 'Flight origin',
                 flashcardsSection: 'Flashcards', newCardsPerDay: 'New cards per day',
                 soundSection: 'Sound', soundEnabled: 'Enable notification sound',
                 accountSection: 'Account', renameBtn: 'Edit profile (name/photo)',
