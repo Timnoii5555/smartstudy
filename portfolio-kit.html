@@ -1,0 +1,601 @@
+<!doctype html>
+<title>SmartStudy Portfolio Kit</title>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Kanit:wght@400;500;600&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --accent:#0058bc; --accent-2:#9e3d00; --accent-soft:#d8e2ff;
+  --bg:#f7f8fb; --surface:#ffffff; --surface-low:#eef0f5; --surface-high:#e4e7ee;
+  --text:#161a22; --text-soft:#5b6472; --border:#e1e5ee;
+  --radius-sm:8px; --radius-md:12px; --radius-lg:16px; --radius-xl:24px;
+  --shadow:0 1px 2px rgba(20,30,60,.04), 0 8px 24px rgba(20,30,60,.06);
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --accent:#7fb2ff; --accent-2:#ffb27a; --accent-soft:#1c2740;
+    --bg:#0d1016; --surface:#161a22; --surface-low:#1c212b; --surface-high:#242a36;
+    --text:#eef1f6; --text-soft:#9aa1ad; --border:#262c38;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --accent:#7fb2ff; --accent-2:#ffb27a; --accent-soft:#1c2740;
+  --bg:#0d1016; --surface:#161a22; --surface-low:#1c212b; --surface-high:#242a36;
+  --text:#eef1f6; --text-soft:#9aa1ad; --border:#262c38;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:'Kanit','Noto Sans Thai',system-ui,sans-serif;
+  padding-inline:20px; padding-block:28px 80px;
+}
+h1,h2,h3,h4{font-family:'Plus Jakarta Sans','Noto Sans Thai',system-ui,sans-serif; text-wrap:balance; margin:0}
+.wrap{max-width:1180px; margin:0 auto}
+.kit-header{display:flex; align-items:flex-start; justify-content:space-between; gap:24px; flex-wrap:wrap; margin-bottom:22px}
+.kit-title{font-size:1.75rem; font-weight:800; letter-spacing:-.01em}
+.kit-sub{color:var(--text-soft); font-size:.9rem; margin-top:6px; max-width:60ch}
+.kit-badges{display:flex; gap:8px; flex-wrap:wrap}
+.badge{font-size:.7rem; font-weight:600; padding:.3rem .65rem; border-radius:999px; background:var(--surface-low); color:var(--text-soft); border:1px solid var(--border)}
+
+.tabs{display:flex; gap:6px; border-bottom:1px solid var(--border); margin-bottom:28px; overflow-x:auto}
+.tab-btn{
+  font:inherit; font-weight:700; font-size:.875rem; color:var(--text-soft); background:none; border:none;
+  padding:.85rem 1.1rem; cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap;
+}
+.tab-btn.is-active{color:var(--accent); border-bottom-color:var(--accent)}
+.tab-panel{display:none}
+.tab-panel.is-active{display:block}
+
+section{margin-bottom:44px}
+.section-title{font-size:1.2rem; font-weight:800; margin-bottom:4px}
+.section-hint{color:var(--text-soft); font-size:.85rem; margin-bottom:18px; max-width:70ch}
+
+/* ---- token swatches ---- */
+.swatch-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px}
+.swatch{border:1px solid var(--border); border-radius:var(--radius-md); overflow:hidden; background:var(--surface)}
+.swatch__chip{height:56px}
+.swatch__meta{padding:.6rem .7rem}
+.swatch__name{font-size:.75rem; font-weight:700}
+.swatch__hex{font-family:var(--mono); font-size:.7rem; color:var(--text-soft)}
+.type-row{display:flex; gap:20px; flex-wrap:wrap; margin-top:14px}
+.type-card{flex:1; min-width:240px; border:1px solid var(--border); border-radius:var(--radius-md); padding:1.1rem; background:var(--surface)}
+.type-card__label{font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-soft); margin-bottom:.5rem}
+.radius-row{display:flex; gap:14px; flex-wrap:wrap; margin-top:14px; align-items:flex-end}
+.radius-box{width:64px; height:64px; background:var(--accent-soft); border:1px solid var(--border); display:flex; align-items:flex-end; justify-content:center; font-size:.65rem; color:var(--text-soft); padding-bottom:4px}
+
+/* ---- screen table ---- */
+table{width:100%; border-collapse:collapse; font-size:.85rem}
+.table-wrap{overflow-x:auto; border:1px solid var(--border); border-radius:var(--radius-md)}
+th,td{text-align:left; padding:.65rem .8rem; border-bottom:1px solid var(--border); vertical-align:top}
+th{background:var(--surface-low); font-size:.72rem; text-transform:uppercase; letter-spacing:.05em; color:var(--text-soft)}
+tr:last-child td{border-bottom:none}
+td code, .inline-code{font-family:var(--mono); font-size:.78rem; background:var(--surface-low); padding:.1rem .35rem; border-radius:4px}
+
+/* ---- phone bezels ---- */
+.phone-row{display:flex; gap:26px; overflow-x:auto; padding:10px 4px 20px}
+.phone-unit{flex:0 0 auto; text-align:center}
+.phone-unit__label{font-size:.78rem; font-weight:700; margin-bottom:10px}
+.phone-unit__sub{font-size:.68rem; color:var(--text-soft); font-family:var(--mono); margin-bottom:10px}
+.bezel{
+  width:211px; height:434px; border-radius:32px; background:#111; padding:8px;
+  box-shadow:var(--shadow); position:relative; margin:0 auto;
+}
+.bezel__screen{
+  position:relative; width:195px; height:418px; border-radius:24px; overflow:hidden; background:#f9f9fc;
+}
+.bezel__statusbar{
+  position:absolute; top:0; left:0; right:0; height:20px; background:#f9f9fc;
+  display:flex; align-items:center; justify-content:space-between; padding:0 14px; z-index:5;
+  font-size:8px; font-weight:700; color:#1a1c1e; font-family:'Plus Jakarta Sans',sans-serif;
+}
+.bezel__notch{position:absolute; top:0; left:50%; transform:translateX(-50%); width:58px; height:15px; background:#111; border-radius:0 0 11px 11px; z-index:6}
+.bezel__home{position:absolute; bottom:5px; left:50%; transform:translateX(-50%); width:70px; height:4px; border-radius:99px; background:rgba(0,0,0,.5); z-index:6}
+.bezel iframe{
+  position:absolute; top:20px; left:0; border:none; width:390px; height:796px;
+  transform:scale(0.5); transform-origin:top left; background:#f9f9fc; pointer-events:none;
+}
+
+.callout{display:flex; gap:10px; padding:12px 14px; background:var(--surface-low); border-radius:var(--radius-md); border:1px solid var(--border); font-size:.8rem; margin-top:16px}
+.callout b{color:var(--accent)}
+
+/* ---- prompt cards (tab 2) ---- */
+.prompt-card{border:1px solid var(--border); border-radius:var(--radius-lg); background:var(--surface); margin-bottom:22px; overflow:hidden}
+.prompt-card__head{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:1rem 1.25rem; background:var(--surface-low); flex-wrap:wrap}
+.prompt-card__title{font-weight:800; font-size:.95rem}
+.prompt-card__file{font-family:var(--mono); font-size:.72rem; color:var(--text-soft)}
+.copy-btn{
+  font:inherit; font-size:.75rem; font-weight:700; color:#fff; background:var(--accent); border:none;
+  padding:.45rem .9rem; border-radius:999px; cursor:pointer;
+}
+.copy-btn.copied{background:#17803d}
+.prompt-body{
+  margin:0; padding:1.1rem 1.25rem; font-family:var(--mono); font-size:.76rem; line-height:1.65;
+  white-space:pre-wrap; word-break:break-word; max-height:420px; overflow-y:auto;
+}
+.prompt-body b{color:var(--accent)}
+
+.check-list{display:flex; flex-direction:column; gap:8px; margin-top:12px}
+.check-item{display:flex; gap:10px; align-items:flex-start; font-size:.85rem}
+.check-item .mark{color:#17803d; font-weight:800; flex-shrink:0}
+
+footer{margin-top:40px; padding-top:20px; border-top:1px solid var(--border); font-size:.72rem; color:var(--text-soft)}
+</style>
+
+<div class="wrap">
+  <div class="kit-header">
+    <div>
+      <div class="kit-title">SmartStudy — Portfolio Kit</div>
+      <p class="kit-sub">The Focused Scholar (โค้ดจริงเรียก "Smart Study") — เว็บแอปวางแผนอ่านหนังสือสอบ TCAS สร้างด้วย HTML/CSS/JavaScript ล้วน (ไม่มี framework, ไม่มี build step) เก็บข้อมูลใน localStorage เป็นหลัก และเชื่อม Firebase Auth + Firestore แบบ optional สำหรับบัญชีจริง/กระดานผู้นำ</p>
+    </div>
+    <div class="kit-badges">
+      <span class="badge">Vanilla JS · 25 files</span>
+      <span class="badge">localStorage-first</span>
+      <span class="badge">Firebase Auth + Firestore (optional)</span>
+      <span class="badge">TH / EN i18n</span>
+    </div>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab-btn is-active" data-tab="overview" role="tab">1 · Screen &amp; UI Inventory + Live Preview</button>
+    <button class="tab-btn" data-tab="prompts" role="tab">2 · AI Image-Gen Prompts</button>
+    <button class="tab-btn" data-tab="verify" role="tab">3 · Verification Checklist</button>
+  </div>
+
+  <!-- ================================================================= TAB 1 ================================================================= -->
+  <div class="tab-panel is-active" id="tab-overview">
+
+    <section>
+      <div class="section-title">ระบบดีไซน์จริง (ดึงจากโค้ดจริง)</div>
+      <p class="section-hint">ค่าสีทั้งหมดคัดลอกตรงจาก <code class="inline-code">styles/tokens.css</code> — ไม่มีสีไหนถูกเดาขึ้นมาเอง (ทุกอันมีทั้งค่าโหมดสว่างและโหมดมืด)</p>
+      <div class="swatch-grid">
+        <div class="swatch"><div class="swatch__chip" style="background:#0058bc"></div><div class="swatch__meta"><div class="swatch__name">--color-primary</div><div class="swatch__hex">#0058bc</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:#9e3d00"></div><div class="swatch__meta"><div class="swatch__name">--color-tertiary</div><div class="swatch__hex">#9e3d00</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:#405e96"></div><div class="swatch__meta"><div class="swatch__name">--color-secondary</div><div class="swatch__hex">#405e96</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:#17803d"></div><div class="swatch__meta"><div class="swatch__name">--color-success</div><div class="swatch__hex">#17803d</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:#d92d20"></div><div class="swatch__meta"><div class="swatch__name">--color-danger</div><div class="swatch__hex">#d92d20</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:#d8e2ff"></div><div class="swatch__meta"><div class="swatch__name">--color-primary-fixed</div><div class="swatch__hex">#d8e2ff</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:#f9f9fc;border-bottom:1px solid #e5e7eb"></div><div class="swatch__meta"><div class="swatch__name">--color-bg</div><div class="swatch__hex">#f9f9fc</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:#717786"></div><div class="swatch__meta"><div class="swatch__name">--color-outline</div><div class="swatch__hex">#717786</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:#e6f2ff;border:1px solid #0058bc;border-width:0 0 3px 0"></div><div class="swatch__meta"><div class="swatch__name">schedule "blue"</div><div class="swatch__hex">#e6f2ff / #0058bc</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:#ecfdf3;border-bottom:3px solid #22c55e"></div><div class="swatch__meta"><div class="swatch__name">schedule "green"</div><div class="swatch__hex">#ecfdf3 / #22c55e</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:#fff3e6;border-bottom:3px solid #f97316"></div><div class="swatch__meta"><div class="swatch__name">schedule "orange"</div><div class="swatch__hex">#fff3e6 / #f97316</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:#0d1016"></div><div class="swatch__meta"><div class="swatch__name">--color-bg (dark)</div><div class="swatch__hex">#101317</div></div></div>
+      </div>
+
+      <div class="type-row">
+        <div class="type-card">
+          <div class="type-card__label">Headline font</div>
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:1.6rem;font-weight:800">Plus Jakarta Sans</div>
+          <p style="font-size:.78rem;color:var(--text-soft);margin-top:.4rem">ใช้กับหัวข้อ (h1-h4) และตัวเลขขนาดใหญ่ (% ความพร้อม, นาฬิกาจับเวลา) — <b>ไม่มีตัวอักษรไทย</b> จึงต้องมี fallback <code class="inline-code">'Noto Sans Thai'</code> ต่อท้ายเสมอ เพื่อให้หัวข้อภาษาไทยยังอ่านได้</p>
+        </div>
+        <div class="type-card">
+          <div class="type-card__label">Body font</div>
+          <div style="font-family:'Kanit',sans-serif;font-size:1.6rem;font-weight:600">Kanit — เนื้อหาทั่วไป</div>
+          <p style="font-size:.78rem;color:var(--text-soft);margin-top:.4rem">ใช้กับข้อความทั่วไปทั้งหมด รองรับภาษาไทยในตัวฟอนต์เอง ไม่ต้องพึ่ง fallback</p>
+        </div>
+        <div class="type-card">
+          <div class="type-card__label">ไอคอน</div>
+          <div style="font-size:1.1rem;font-weight:700">Material Symbols Outlined</div>
+          <p style="font-size:.78rem;color:var(--text-soft);margin-top:.4rem">ไอคอนทุกจุดในแอป (settings, timer, delete ฯลฯ) มาจากชุดนี้ทั้งหมด โหลดจาก Google Fonts</p>
+        </div>
+      </div>
+
+      <div class="radius-row">
+        <div><div class="radius-box" style="border-radius:8px">8px</div><div style="font-size:.68rem;color:var(--text-soft);text-align:center;margin-top:4px">--radius-sm</div></div>
+        <div><div class="radius-box" style="border-radius:12px">12px</div><div style="font-size:.68rem;color:var(--text-soft);text-align:center;margin-top:4px">--radius-md</div></div>
+        <div><div class="radius-box" style="border-radius:16px">16px</div><div style="font-size:.68rem;color:var(--text-soft);text-align:center;margin-top:4px">--radius-lg</div></div>
+        <div><div class="radius-box" style="border-radius:24px">24px</div><div style="font-size:.68rem;color:var(--text-soft);text-align:center;margin-top:4px">--radius-xl</div></div>
+        <div><div class="radius-box" style="border-radius:32px">32px</div><div style="font-size:.68rem;color:var(--text-soft);text-align:center;margin-top:4px">--radius-2xl</div></div>
+        <div><div class="radius-box" style="border-radius:999px">99px</div><div style="font-size:.68rem;color:var(--text-soft);text-align:center;margin-top:4px">--radius-full</div></div>
+      </div>
+
+      <div class="callout"><span>🔎</span><div><b>สิ่งที่ตรวจสอบแล้วและไม่ใช้:</b> ฟอนต์ <code class="inline-code">Prompt</code> ถูกโหลดผ่าน Google Fonts link ใน <code class="inline-code">index.html</code> แต่ไม่มี CSS rule ไหนอ้างอิงถึงมันเลยสักจุด (grep ทั้งโปรเจกต์แล้ว) — จึงไม่นับเป็นส่วนหนึ่งของ font pairing จริง เพื่อไม่ให้ระบุผิด</div></div>
+    </section>
+
+    <section>
+      <div class="section-title">รายการหน้าจอทั้งหมด (7 หน้าหลัก)</div>
+      <p class="section-hint">ทุกหน้าคือ <code class="inline-code">&lt;div class="screen"&gt;</code> เดียวกันในไฟล์ <code class="inline-code">index.html</code> ไฟล์เดียว สลับแสดงผลด้วย <code class="inline-code">js/router.js</code> (ไม่ใช่คนละไฟล์ HTML) — ตรวจสอบจาก id, ฟังก์ชัน onEnter/register และข้อความจริงในไฟล์</p>
+      <div class="table-wrap">
+        <table>
+          <tr><th>#</th><th>Screen id</th><th>ชื่อ (จาก h1/h2 จริง)</th><th>หน้าที่</th><th>ไฟล์หลัก</th></tr>
+          <tr><td>0</td><td><code>screen0</code></td><td>"ใครจะอ่านหนังสือวันนี้?"</td><td>เข้าสู่ระบบ/สมัครสมาชิกจริง (Firebase) หรือใช้โปรไฟล์ในเครื่อง (fallback)</td><td><code>js/profile.js</code>, <code>js/auth.js</code></td></tr>
+          <tr><td>1</td><td><code>screen1</code></td><td>"เป้าหมายของคุณ" (ขั้นที่ 1 จาก 3)</td><td>เลือกวิชาสอบ 1 วิชา จาก 23 วิชา TCAS จริง แยกแท็บหมวดหมู่ หรือสร้างวิชาเอง</td><td><code>js/onboarding.js</code>, <code>data/subjects.js</code></td></tr>
+          <tr><td>2</td><td><code>screen2</code></td><td>"กำหนดวันสอบและเวลาที่คุณมี"</td><td>ตั้งวันสอบ, ชม.อ่าน/วัน, และลำดับการอ่าน แล้วให้ระบบสร้างแผนอ่านอัตโนมัติ</td><td><code>js/onboarding.js</code>, <code>js/planner.js</code></td></tr>
+          <tr><td>3</td><td><code>screen3</code></td><td>"สวัสดี, สรุปผลวันนี้"</td><td>แดชบอร์ด: วงแหวนความพร้อม, เควสประจำวัน+แต้ม, หัวข้อที่ต้องอ่านวันนี้</td><td><code>js/dashboard.js</code>, <code>js/quests.js</code></td></tr>
+          <tr><td>4</td><td><code>screen4</code></td><td>"ตารางเรียน"</td><td>ปฏิทินรายสัปดาห์ ลาก-วางไม่ได้แต่เพิ่ม/ลบคาบเรียนได้ พร้อมค้นหา</td><td><code>js/schedule.js</code></td></tr>
+          <tr><td>5</td><td><code>screen5</code></td><td>"คลังศัพท์"</td><td>ทบทวนคำศัพท์แบบ flip-card ต่อชุด (deck) พร้อมสรุปผลท้ายรอบ</td><td><code>js/flashcards.js</code></td></tr>
+          <tr><td>6</td><td><code>screen6</code></td><td>"โหมดโฟกัส"</td><td>ตัวจับเวลา Pomodoro วงแหวน + เสียงบรรยากาศ 6 แบบ (สร้างสดด้วย Web Audio) + อัปโหลดเสียงเอง</td><td><code>js/focus.js</code>, <code>js/customSounds.js</code></td></tr>
+        </table>
+      </div>
+
+      <p class="section-hint" style="margin-top:18px"><b>ฟีเจอร์ที่ไม่มีหน้าจอเฉพาะ (cross-cutting):</b></p>
+      <div class="check-list">
+        <div class="check-item"><span class="mark">•</span><div>โหมดมืด/สว่าง/ตามระบบ — ตั้งค่าได้ใน Settings, มี "zero-flash bootstrap" กันจอกระพริบตอนโหลดหน้า (<code class="inline-code">js/theme.js</code>)</div></div>
+        <div class="check-item"><span class="mark">•</span><div>ใช้งานได้ออฟไลน์/ไม่มีเน็ตทั้งหมด — เก็บข้อมูลใน localStorage เป็นหลัก บัญชีจริงเป็น optional layer เท่านั้น</div></div>
+        <div class="check-item"><span class="mark">•</span><div>สองภาษา TH/EN สลับได้ทันทีทั้งแอปโดยไม่รีเฟรช (<code class="inline-code">js/i18n.js</code>)</div></div>
+        <div class="check-item"><span class="mark">•</span><div>Export/นำเข้าไม่ได้อีกต่อไป (เอาออกแล้วตามคำขอผู้ใช้) — แต่ยังส่งออกเป็นรูปโปรไฟล์แบบบีบอัดเก็บใน Firestore ได้ (ไม่ใช้ Firebase Storage เพราะต้องใช้แผนเสียเงิน)</div></div>
+        <div class="check-item"><span class="mark">•</span><div>กระดานผู้นำข้ามผู้ใช้ (<code class="inline-code">js/leaderboard.js</code>) — sync แต้มแบบ one-way ผ่าน Firestore</div></div>
+      </div>
+
+      <div class="callout"><span>🏆</span><div><b>3 หน้าที่แนะนำสำหรับภาพ Overview:</b> <b>Dashboard</b> (รวมฟีเจอร์ engineering เยอะสุดในหน้าเดียว: อัลกอริทึมจัดตารางอ่าน + ระบบเควส/แต้ม), <b>โหมดโฟกัส</b> (UI ที่คัสตอมมากสุด: วงแหวน SVG jจับเวลา + เอนจิน Web Audio สร้างเสียง 6 แบบสด), <b>ตารางเรียน</b> (component ปฏิทินที่ซับซ้อนที่สุด เขียนเองทั้งหมดไม่ใช้ library) — ทั้งสามหน้านี้คนละแนวกัน ทำให้ภาพรวมดูมีมิติทางวิศวกรรมที่หลากหลาย ไม่ใช่แค่หน้าจอ CRUD ซ้ำๆ กัน</div></div>
+    </section>
+
+    <section>
+      <div class="section-title">พรีวิวสด — โค้ดจริงรันอยู่ในกรอบมือถือ</div>
+      <p class="section-hint">แต่ละกรอบคือ <code class="inline-code">&lt;iframe&gt;</code> ที่โหลด <code class="inline-code">preview-app.html</code> (สำเนา 100% ของ <code class="inline-code">index.html</code> จริง ต่างกันแค่ 3 บรรทัดที่ระบุไว้ในไฟล์) พร้อม query <code class="inline-code">?screen=screenN</code> — ข้อมูลตัวอย่างเป็นโปรไฟล์สมมติ "ปัญ" ที่ seed ผ่าน <code class="inline-code">preview-stub.js</code> (ดูรายละเอียดใน callout ท้ายส่วนนี้) นี่คือโค้ดจริงกำลังรันจริง ไม่ใช่ภาพวาดจำลอง</p>
+
+      <div class="phone-row" id="phoneRow"></div>
+
+      <div class="callout"><span>🧪</span><div><b>ข้อมูลสมมติ "ปัญ":</b> วิชา TGAT · อ่านจบแล้ว 5/8 บท (63%) · แต้มสะสม 245 (เลเวล "นักอ่านฝึกหัด") · เหลือเวลาสอบ 45 วัน · โฟกัสวันนี้ 2:15 ชม. จากเป้า 4:30 ชม. — ตัวเลขทั้งหมดคำนวณจากวันที่จริง ณ ตอนที่คุณเปิดหน้านี้ (ไม่ใช่วันที่ตายตัว) ผ่านฟังก์ชันวันที่ตัวเดียวกับที่แอปจริงใช้ ดังนั้นความสัมพันธ์ของตัวเลขจะถูกต้องเสมอไม่ว่าจะเปิดวันไหน</div></div>
+      <div class="callout"><span>⚠️</span><div><b>ข้อค้นพบจริงจากการทำพรีวิวสด (ไม่ได้แต่งขึ้น):</b> หน้า "คลังศัพท์" (screen5) จะเริ่มที่การ์ดใบแรกเสมอ ("Aptitude") ไม่ว่าจะ seed ข้อมูลยังไง เพราะ <code class="inline-code">js/flashcards.js</code> ออกแบบมาให้ session การทบทวนไม่ถูกบันทึกลง state โดยตั้งใจ (อ่านคอมเมนต์ในไฟล์ได้) — เป็นตัวอย่างจริงว่าเทคนิค live-preview เจอพฤติกรรมจริงของโค้ดที่ภาพวาดจำลองจะไม่มีวันเจอ</div></div>
+    </section>
+
+  </div>
+
+  <!-- ================================================================= TAB 2 ================================================================= -->
+  <div class="tab-panel" id="tab-prompts">
+    <section style="margin-bottom:20px">
+      <div class="section-title">AI Image-Generation Prompts</div>
+      <p class="section-hint">8 prompts total (1 overview + 7 per-screen), all in English for pasting into an image generator. Every prompt uses the exact same "ปัญ / TGAT" sample dataset described in Tab 1 so every generated image stays consistent with the others.</p>
+    </section>
+    <div id="promptList"></div>
+  </div>
+
+  <!-- ================================================================= TAB 3 ================================================================= -->
+  <div class="tab-panel" id="tab-verify">
+    <section>
+      <div class="section-title">เช็กลิสต์ยืนยัน</div>
+      <div class="check-list">
+        <div class="check-item"><span class="mark">✓</span><div>ทั้ง 7 หน้าจอใน Tab 1 มี prompt ตรงกันใน Tab 2 ครบทุกหน้า (screen0–screen6) รวม overview prompt อีก 1 อัน = 8 prompts</div></div>
+        <div class="check-item"><span class="mark">✓</span><div>ไม่มี prompt ไหนต้องแบ่ง A/B เพราะไม่มีหน้าไหนมี callout เกิน 8 จุด (มากสุดคือหน้าโฟกัสกับแดชบอร์ด 7-8 จุด)</div></div>
+        <div class="check-item"><span class="mark">✓</span><div>ทุก element ที่ระบุไว้ในตาราง inventory (Tab 1) มี callout อธิบายอย่างน้อย 1 จุดใน Tab 2 — ดูตาราง traceability ด้านล่าง</div></div>
+        <div class="check-item"><span class="mark">✓</span><div>ตัวเลขตัวอย่าง (5/8 บท, 63%, 245 แต้ม, 45 วัน, 2:15 ชม.) เหมือนกันทุก prompt และตรงกับค่าที่ seed ไว้จริงใน <code class="inline-code">preview-stub.js</code> ซึ่งพรีวิวสดใน Tab 1 ก็แสดงค่าเดียวกันนี้จริง</div></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">ตาราง Traceability — ฟีเจอร์ในภาพ → ไฟล์/ฟังก์ชันจริง</div>
+      <p class="section-hint">ทุกแถวคือ callout หนึ่งจุดจาก Tab 2 โยงกลับไปยังโค้ดจริงที่ตรวจสอบแล้ว</p>
+      <div class="table-wrap">
+        <table id="traceTable"></table>
+      </div>
+    </section>
+
+    <footer>SmartStudy Portfolio Kit — สร้างจากโค้ดจริงในโปรเจกต์ ณ commit ล่าสุด · เนื้อหาทุกจุดตรวจสอบกับไฟล์จริงก่อนเขียน ไม่มีข้อความ/สี/ฟอนต์ใดถูกสมมติขึ้นเอง</footer>
+  </div>
+</div>
+
+<script>
+// ---------------------------------------------------------------- Tabs
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('is-active', b === btn));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('is-active', p.id === 'tab-' + btn.dataset.tab));
+  });
+});
+
+// ---------------------------------------------------------------- Tab 1: phone bezels
+const SCREENS = [
+  { id: 'screen0', label: 'Screen 0 · ล็อกอิน' },
+  { id: 'screen1', label: 'Screen 1 · เลือกวิชา' },
+  { id: 'screen2', label: 'Screen 2 · วันสอบ+เวลา' },
+  { id: 'screen3', label: 'Screen 3 · แดชบอร์ด' },
+  { id: 'screen4', label: 'Screen 4 · ตารางเรียน' },
+  { id: 'screen5', label: 'Screen 5 · คลังศัพท์' },
+  { id: 'screen6', label: 'Screen 6 · โฟกัส' }
+];
+const phoneRow = document.getElementById('phoneRow');
+SCREENS.forEach(s => {
+  const unit = document.createElement('div');
+  unit.className = 'phone-unit';
+  unit.innerHTML = `
+    <div class="phone-unit__label">${s.label}</div>
+    <div class="phone-unit__sub">?screen=${s.id}</div>
+    <div class="bezel">
+      <div class="bezel__notch"></div>
+      <div class="bezel__screen">
+        <div class="bezel__statusbar"><span>9:41</span><span>●●●</span></div>
+        <iframe src="preview-app.html?screen=${s.id}" title="${s.label}" loading="lazy"></iframe>
+      </div>
+      <div class="bezel__home"></div>
+    </div>`;
+  phoneRow.appendChild(unit);
+});
+
+// ---------------------------------------------------------------- Tab 2: prompts + Tab 3: traceability
+const DATASET = "Sample dataset (identical in every prompt): learner nickname \"Pan\" (ปัญ), studying for subject \"TGAT\" (ความถนัดทั่วไป), exam in 45 days, daily goal 4.5 hrs, overall readiness 63% (5 of 8 TGAT topics finished), 245 accumulated points at level \"นักอ่านฝึกหัด / Diligent Reader\", today's focus time 2:15 of a 4:30 goal, Pomodoro cycle 2 of 4 with 18:47 remaining, rain ambient sound selected.";
+
+const PROMPTS = [
+{
+  key: 'overview', file: 'Overview (3 phones)',
+  body:
+`PURPOSE: Portfolio "overview" hero image for a university engineering-admissions application, showing the breadth of a real, working study-planner web app called "The Focused Scholar / Smart Study".
+
+CANVAS: 2400x1350px landscape, light neutral studio background (soft off-white #f7f8fb), soft ambient shadow beneath each device — no other props, no hands.
+
+SCREEN CONTENT (3 phones side by side, left to right):
+Phone A — Dashboard: heading "สวัสดี, สรุปผลวันนี้", a circular readiness ring reading "63%" with sublabel "ความพร้อมสอบ", a "เควสประจำวัน" card listing 4 quests with progress bars, a "หัวข้อที่ต้องอ่าน" checklist showing 7 rows (5 with checkmarks struck through, 2 unchecked), a small star badge reading "⭐ 245 · นักอ่านฝึกหัด".
+Phone B — Focus mode: heading "โหมดโฟกัส", a large circular timer ring about one-quarter filled, big digital readout "0:18:47", caption "โฟกัส · รอบที่ 2 / 4", a row of 6 small pill buttons for ambient sounds (rain one highlighted blue), two stat tiles "วันนี้ 02:15" and "เป้าหมาย 04:30".
+Phone C — Schedule: heading "ตารางเรียน", a small monthly calendar widget on the left with one date pulsing (exam-day indicator), a weekly grid on the right with 3 colored session blocks (blue, green, orange) at different times/days.
+
+CALLOUTS: none (overview shot, no numbered callouts).
+
+DEVICE: 3x iPhone 15 Pro, Natural Titanium finish, held at a slight 3D perspective angle (not flat-on), consistent camera height across all three.
+
+STYLE: Clean modern SaaS/EdTech marketing photography look; palette anchored on deep blue #0058bc as the primary accent with warm burnt-orange #9e3d00 as a secondary accent; UI typography is a geometric sans (Plus Jakarta Sans) for headings and numbers; soft rounded corners (16-24px) throughout the UI; generous whitespace; realistic soft shadows under each phone.
+
+${DATASET}
+
+AVOID: garbled or illegible Thai/English text, human hands or people, overlapping UI elements, any invented button or screen not listed above, stock-photo genericness, harsh drop shadows, glossy 3D renders.`
+},
+{
+  key: 'screen0', file: 'screen0 — Login/Signup',
+  body:
+`PURPOSE: Portfolio detail image explaining the real accounts (sign-up) screen of "The Focused Scholar" study app.
+
+CANVAS: 1600x1600px square, soft off-white background #f7f8fb, plenty of margin around the phone for callout lines to point outward.
+
+SCREEN CONTENT (top to bottom, exactly as in the real app):
+1. Small header text "The Focused Scholar" top-left.
+2. Large heading "ใครจะอ่านหนังสือวันนี้?"
+3. Subtitle "เลือกโปรไฟล์ของคุณ เพื่อให้เราจดจำความคืบหน้าของคุณโดยเฉพาะ"
+4. A pill-shaped 2-tab switcher: "เข้าสู่ระบบ" (inactive) / "สมัครสมาชิก" (active, selected).
+5. A circular dashed-border avatar-upload button with a camera-plus icon, label "ไม่บังคับ — แตะเพื่อเลือกรูป".
+6. Text field "ชื่อของคุณ".
+7. Text field "อีเมล".
+8. Password field "รหัสผ่าน" with helper text "อย่างน้อย 6 ตัวอักษร".
+9. Full-width dark blue button "สร้างบัญชี" with a person-add icon.
+10. Small centered link "ลืมรหัสผ่าน?" below the form.
+
+CALLOUTS (numbered 1-6, each a short leader line to one element):
+1 → the tab switcher: "Toggles between a real Firebase email/password login and sign-up form."
+2 → the avatar button: "Optional profile photo — resized and compressed client-side, stored in Firestore (no paid Storage plan needed)."
+3 → the name field: "Display name shown later on the cross-user leaderboard."
+4 → the "สร้างบัญชี" button: "Creates a real Firebase Auth account and an isolated per-account local state."
+5 → the "ลืมรหัสผ่าน?" link: "Triggers Firebase's built-in password-reset email flow."
+6 → whitespace below the form (pointing at the hidden section): "A local, no-account 'guest profile' mode still exists underneath as an automatic fallback if the account system is ever unreachable."
+
+DEVICE: iPhone 15 Pro, Natural Titanium, flat-on front view, centered.
+
+STYLE: Same design system as the overview image — deep blue #0058bc accent, Plus Jakarta Sans headings, rounded 16px cards, clean callout leader-lines in dark blue with small numbered circular badges.
+
+${DATASET}
+
+AVOID: garbled text, invented fields not listed above, people/hands, callout lines crossing each other, a visible keyboard.`
+},
+{
+  key: 'screen1', file: 'screen1 — Subject picker',
+  body:
+`PURPOSE: Portfolio detail image showing the subject-selection screen with its category tabs and custom-subject feature.
+
+CANVAS: 1600x1600px square, soft off-white background.
+
+SCREEN CONTENT (top to bottom):
+1. Two small step-dots (first one filled) with label "ขั้นที่ 1 จาก 3".
+2. Heading "เป้าหมายของคุณ".
+3. Subtitle "คุณกำลังเตรียมตัวสอบวิชาอะไรบ้าง?" and small hint text below it.
+4. A horizontal row of pill category tabs: "ทั้งหมด" (active/dark blue), "TGAT", "TPAT", "A-Level", "ของฉัน".
+5. A vertical list of subject cards, each with a rounded-square icon, a title and a one-line description: first card "TGAT" / "ความถนัดทั่วไป (3 พาร์ท)" shown selected (blue border, filled checkmark circle); second card "TPAT3" / "ความถนัดทางวิทยาศาสตร์ เทคโนโลยี และวิศวกรรมศาสตร์"; third card "A-Level คณิตศาสตร์ประยุกต์ 1" / "สายวิทย์: พีชคณิต แคลคูลัส สถิติ".
+6. A final dashed-outline card with a plus icon: "สร้างวิชาของฉันเอง" / "สร้างวิชาและหัวข้อของคุณเอง".
+7. Full-width bottom button "ถัดไป" with a forward-arrow icon.
+
+CALLOUTS (numbered 1-5):
+1 → the category tabs: "Filters 23 real TCAS subjects into TGAT / TPAT / A-Level groups instead of one long scroll."
+2 → the selected TGAT card: "Selected subject — its checkmark badge fills solid blue."
+3 → an expandable topics list inside a card (implied, describe as small chevron/accordion hint at the bottom of the selected card): "Each card can expand to list its exact reading topics before committing."
+4 → the "สร้างวิชาของฉันเอง" card: "Lets a learner define an entirely custom subject and topic list for exams the app doesn't ship content for."
+5 → the "ถัดไป" button: "Locks in the chosen subject and moves to setting the exam date."
+
+DEVICE: iPhone 15 Pro, Natural Titanium, flat-on front view.
+
+STYLE: Same design system as the overview image.
+
+${DATASET}
+
+AVOID: garbled text, showing more than the 3 subject cards + add-card described, people/hands, invented icons.`
+},
+{
+  key: 'screen2', file: 'screen2 — Exam date & reading order',
+  body:
+`PURPOSE: Portfolio detail image showing the exam-date, daily-hours and reading-order-strategy setup screen.
+
+CANVAS: 1600x1900px portrait, soft off-white background.
+
+SCREEN CONTENT (top to bottom):
+1. Heading "กำหนดวันสอบและเวลาที่คุณมี" and subtitle "ให้เราช่วยคำนวณแผนที่เหมาะสมกับไลฟ์สไตล์ของคุณที่สุด".
+2. Card "วันสอบที่สำคัญที่สุดของคุณ" with a date field showing a chosen date and a calendar icon.
+3. Card "เวลาอ่านหนังสือต่อวัน" with a large readout "4.5 ชม.", a horizontal slider, and end labels "ขยันเล็กน้อย" / "วิถีนักรบ", plus a highlighted callout box with a lightbulb icon reading "เหลือเวลา 45 วัน (รวมเวลาอ่าน 202.5 ชม.)".
+4. Card "ลำดับการอ่าน" with subtitle "อยากให้เราจัดลำดับหัวข้อในแต่ละวันแบบไหน?" and a 2x2 grid of 4 selectable option cards: "อัตโนมัติ (แนะนำ)" (selected, blue border) / "เรียงตามลำดับ" / "ง่ายไปยาก" / "ยากไปง่าย", each with a small caption line beneath its title.
+5. Full-width dark blue button "สร้างแผนการเรียนอัจฉริยะ" with a lightning-bolt icon.
+
+CALLOUTS (numbered 1-5):
+1 → the date field: "Sets the target exam date; every other calculation on this screen derives from it."
+2 → the calculation callout box: "Live-computed days-remaining and total study hours, recalculated the instant the date or slider changes."
+3 → the "อัตโนมัติ (แนะนำ)" option: "Selected strategy — interleaves hard and easy topics evenly across the plan instead of grouping them."
+4 → the other 3 order-strategy cards collectively: "Alternative sequencing strategies a learner can pick instead."
+5 → the "สร้างแผนการเรียนอัจฉริยะ" button: "Runs the real day-by-day scheduling algorithm and generates the reading plan the Dashboard checklist will follow."
+
+DEVICE: iPhone 15 Pro, Natural Titanium, flat-on front view.
+
+STYLE: Same design system as the overview image.
+
+${DATASET}
+
+AVOID: garbled text, a 5th order-strategy option, people/hands.`
+},
+{
+  key: 'screen3', file: 'screen3 — Dashboard',
+  body:
+`PURPOSE: Portfolio detail image for the app's home dashboard — the single screen with the most engineering logic wired into one view.
+
+CANVAS: 1600x2000px portrait, soft off-white background, extra bottom margin for callouts.
+
+SCREEN CONTENT (top to bottom):
+1. Heading "สวัสดี, สรุปผลวันนี้" with a small pill badge top-right reading "⭐ 245 · นักอ่านฝึกหัด", subtitle "อัปเดตความก้าวหน้าของคุณด้านล่างได้เลย 🚀".
+2. "เควสประจำวัน" card: a level icon + "นักอ่านฝึกหัด" + a thin progress bar toward the next level, then 4 quest rows each with an icon, a title, a thin progress bar and either a count like "6/10" or a highlighted pill button "รับ +15": "อ่านเนื้อหาให้จบอย่างน้อย 1 บทวันนี้" (done, greyed with checkmark), "ทำ Focus Session ให้ครบ 1 รอบ" (claim button showing), "ทบทวนคำศัพท์ 10 คำ" (6/10), "ถึงเป้าหมายชั่วโมงอ่านของวันนี้" (0/1).
+3. A circular progress ring card "ความก้าวหน้าเนื้อหาหลัก" showing "63%" and "ความพร้อมสอบ" in the center, with two stat pairs beneath it: "04:30 เป้าหมาย" and "5 เนื้อหาที่อ่านจบ".
+4. A "เป้าหมายรายวัน" banner card showing "วิชา TGAT" and a thin mini progress bar captioned "ลุยเก็บเนื้อหาให้ครบ 100%".
+5. A wide card "หัวข้อที่ต้องอ่าน" with a badge "7 บท · ติ๊กเมื่อเรียนจบ", listing 7 checklist rows with Thai topic labels, 5 shown checked/struck-through and 2 shown as open checkboxes.
+
+CALLOUTS (numbered 1-7):
+1 → the points badge: "Cumulative points synced one-way to a shared Firestore leaderboard when signed in."
+2 → the quests card: "Four daily quests, each tied to a real action elsewhere in the app — nothing here is a fake counter."
+3 → the claimable quest button: "A completed quest becomes a tappable claim button that awards points."
+4 → the readiness ring: "Percentage of the whole subject's topics marked complete, independent of which are due today."
+5 → the daily-goal banner: "Shows which subject is currently active and its overall push-to-100% progress."
+6 → the reading checklist: "Driven by the real day-by-day plan from screen 2 — topics not yet checked off from earlier days roll forward here automatically."
+7 → a checked row: "Tapping a row records a completion timestamp, powering the reading-history view in Settings."
+
+DEVICE: iPhone 15 Pro, Natural Titanium, flat-on front view.
+
+STYLE: Same design system as the overview image.
+
+${DATASET}
+
+AVOID: garbled text, showing more than 7 checklist rows, a 100% ring, people/hands.`
+},
+{
+  key: 'screen4', file: 'screen4 — Schedule',
+  body:
+`PURPOSE: Portfolio detail image for the weekly schedule/calendar screen — the most complex hand-built UI component in the app.
+
+CANVAS: 1800x1500px landscape (this screen is wide), soft off-white background.
+
+SCREEN CONTENT (top to bottom / left to right):
+1. Heading "ตารางเรียน" top-left, a small dark-blue pill button "+ เพิ่มคาบเรียน" top-right.
+2. Left sidebar: a small monthly mini-calendar with weekday initials, the current month name, and one date highlighted with a pulsing red dot plus caption "วันสอบ: (+45)".
+3. Right side: a week navigation row with "‹", a week-range label, "›" and a "วันนี้" pill button, above a 7-day-by-24-hour grid with hour labels down the left edge and 3 colored session blocks placed at different day/time positions — one blue block, one green block, one orange block, each showing a short Thai topic label and a time range like "09:00 - 11:00".
+4. Below the calendar: a card "รายการสิ่งที่ต้องทำวันนี้" (may read as empty today, showing the muted placeholder text if today has no block).
+
+CALLOUTS (numbered 1-6):
+1 → the mini-calendar's pulsing dot: "The exam date, permanently pinned and pulsing on the mini calendar."
+2 → the "+ เพิ่มคาบเรียน" button: "Opens a modal to schedule a specific topic into a specific date/time slot, with a 7-color palette and iOS-style scrolling time wheels."
+3 → the blue session block: "One scheduled study session — color is chosen per session, not per subject."
+4 → the week grid overall: "A fully custom weekly calendar grid, built from raw CSS grid math, not a calendar library."
+5 → the week navigation row: "Moves the visible week forward/back while the mini calendar and week grid stay in sync in both directions."
+6 → the search icon in the header (top-right, not otherwise visible in this content — describe as a small magnifying-glass icon button beside settings): "Searches both scheduled sessions and syllabus topics at once."
+
+DEVICE: iPhone 15 Pro, Natural Titanium, in landscape orientation to fit the wide calendar grid.
+
+STYLE: Same design system as the overview image; session block colors exactly: blue #0058bc border on #e6f2ff fill, green #22c55e border on #ecfdf3 fill, orange #f97316 border on #fff3e6 fill.
+
+${DATASET}
+
+AVOID: garbled text, drag handles or resize UI (this app has none), people/hands.`
+},
+{
+  key: 'screen5', file: 'screen5 — Flashcards',
+  body:
+`PURPOSE: Portfolio detail image for the vocabulary flip-card review screen.
+
+CANVAS: 1600x1900px portrait, soft off-white background.
+
+SCREEN CONTENT (top to bottom):
+1. Heading "คลังศัพท์", below it a row: "ชุดคำศัพท์:" label, a pill button "TGAT ▾", a small dot separator, then "1 / 3".
+2. A thin horizontal progress track beneath that row, filled about one third.
+3. A large centered flip-card (front face shown): small blue eyebrow label "ศัพท์", large word "Aptitude", italic grey hint "แตะเพื่อดูความหมาย", and a faint brain/psychology icon lower on the card.
+4. Two large buttons below the card, side by side: left one red-tinted with a skip icon and label "ข้าม / ยังไม่แม่น", right one solid dark blue with a checkmark icon and label "จำได้แล้ว / ไปต่อ".
+5. A small muted tip line at the very bottom: "แตะที่การ์ดเพื่อดูเฉลย และกดเลือกเพื่อบันทึกสถิติ".
+
+CALLOUTS (numbered 1-5):
+1 → the deck selector pill: "Switches between vocabulary decks — a learner can also create entirely new decks."
+2 → the flip-card: "Tapping flips it to reveal the Thai definition and an English example sentence."
+3 → the "ข้าม / ยังไม่แม่น" button: "Marks the word as not-yet-known — it reappears in the 'review missed words' pass at the end."
+4 → the "จำได้แล้ว / ไปต่อ" button: "Marks the word as remembered and advances to the next card."
+5 → the progress track: "Position within the current review pass, not overall deck mastery — a fresh pass always restarts here."
+
+DEVICE: iPhone 15 Pro, Natural Titanium, flat-on front view.
+
+STYLE: Same design system as the overview image.
+
+${DATASET}
+
+AVOID: garbled text, showing a percentage/summary screen (this is the mid-review state, not the results state), people/hands.`
+},
+{
+  key: 'screen6', file: 'screen6 — Focus mode',
+  body:
+`PURPOSE: Portfolio detail image for the Pomodoro focus-timer screen — the most custom, audio-engineering-heavy screen in the app.
+
+CANVAS: 1600x2000px portrait, soft off-white background.
+
+SCREEN CONTENT (top to bottom):
+1. Heading "โหมดโฟกัส", subtitle "ตัดสิ่งรบกวนและเริ่มสร้างสรรค์ผลงาน".
+2. A large circular ring (soft glow behind it) about one-quarter filled in dark blue, centered inside it: a small pill badge "โฟกัส · รอบที่ 2 / 4", a huge digital time readout "0:18:47", and beneath that "เป้าหมายหลัก 04:30".
+3. A row with a small circular reset/refresh icon button and a large dark-blue "ทำต่อ" (Resume) button with a play icon.
+4. A toggle row "เสียงแจ้งเตือนเมื่อครบเวลา" with an on-state switch.
+5. An "เสียงบรรยากาศ (Ambient)" panel: a header row with a small play button, then a horizontally-wrapping row of 6 rounded pill buttons each with a small icon and label — "เสียงสีน้ำตาล", "เสียงฝน" (this one highlighted/active, solid blue), "เสียงสีขาว", "คลื่นทะเล", "เสียงลม", "ร้านกาแฟ" — plus a dashed "+ เพิ่มเสียงของฉัน" pill at the end, and a volume slider row beneath.
+6. Two small stat tiles at the bottom: "วันนี้ 02:15" and "เป้าหมาย 04:30".
+
+CALLOUTS (numbered 1-7):
+1 → the timer ring: "A raw SVG ring, not an image — its stroke-dashoffset animates the countdown."
+2 → the cycle badge: "Automatically cycles focus → short break → long break; this is cycle 2 of 4 before the next long break."
+3 → the "ทำต่อ" button: "Resumes a paused session — every reload/re-entry pauses by design so the timer never silently runs in the background."
+4 → the ambient sound row: "6 sounds generated live with the Web Audio API (filtered noise + slow LFOs) — no audio files shipped."
+5 → the active "เสียงฝน" pill: "Currently selected ambient sound."
+6 → the "+ เพิ่มเสียงของฉัน" pill: "Lets a learner upload and loop their own audio file instead of a built-in sound."
+7 → the two stat tiles: "Today's accumulated focus time against the daily goal set in screen 2/Settings."
+
+DEVICE: iPhone 15 Pro, Natural Titanium, flat-on front view.
+
+STYLE: Same design system as the overview image; the ring glow uses a soft blue radial glow behind the circle.
+
+${DATASET}
+
+AVOID: garbled text, more than 6 built-in sound pills, a full/complete ring, people/hands.`
+}
+];
+
+const promptList = document.getElementById('promptList');
+PROMPTS.forEach((p, i) => {
+  const card = document.createElement('div');
+  card.className = 'prompt-card';
+  card.innerHTML = `
+    <div class="prompt-card__head">
+      <div><div class="prompt-card__title">${i + 1}. ${p.file}</div></div>
+      <button class="copy-btn" type="button">Copy prompt</button>
+    </div>
+    <pre class="prompt-body"></pre>`;
+  card.querySelector('.prompt-body').textContent = p.body;
+  const btn = card.querySelector('.copy-btn');
+  btn.addEventListener('click', () => {
+    navigator.clipboard.writeText(p.body).then(() => {
+      btn.textContent = 'Copied ✓'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy prompt'; btn.classList.remove('copied'); }, 1600);
+    });
+  });
+  promptList.appendChild(card);
+});
+
+// ---------------------------------------------------------------- Tab 3: traceability table
+const TRACE = [
+  ['เควสประจำวัน 4 อัน + ปุ่มรับแต้ม', 'js/quests.js — QUEST_DEFS, claim()'],
+  ['เลเวล/แต้มสะสม + badge ⭐', 'js/quests.js — LEVELS, levelFor(); js/dashboard.js — renderPointsBadge()'],
+  ['วงแหวนความพร้อม %', 'js/dashboard.js — render() (RING_CIRCUMFERENCE calc)'],
+  ['หัวข้อที่ต้องอ่านวันนี้ (roll-forward)', 'js/planner.js — topicsDueBy(); js/dashboard.js — getTodaysTopics()'],
+  ['แท็บหมวดหมู่วิชา (TGAT/TPAT/A-Level/ของฉัน)', 'js/onboarding.js — CATEGORIES, renderCategoryTabs(); data/subjects.js — categoryOf()'],
+  ['สร้างวิชาของฉันเอง', 'js/onboarding.js — openCustomSubjectModal(), saveCustomSubjectBtn handler'],
+  ['ลำดับการอ่าน 4 แบบ', 'js/planner.js — ORDER_STRATEGIES, orderTopics(); js/onboarding.js — ORDER_STRATEGY_META'],
+  ['คำนวณวันสอบ/ชม.รวมแบบสด', 'js/onboarding.js — updateCalcText()'],
+  ['ปฏิทินรายสัปดาห์ + mini calendar sync', 'js/schedule.js — renderMiniCalendar(), renderSessionBlocks()'],
+  ['สีคาบเรียน 7 สี', 'js/schedule.js — COLOR_KEYS, COLOR_META'],
+  ['ค้นหาคาบเรียน/หัวข้อ', 'js/schedule.js — renderSearchResults()'],
+  ['ทบทวนคำศัพท์แบบ flip-card', 'js/flashcards.js — render(), flipIfReviewing()'],
+  ['ปุ่มข้าม/จำได้แล้ว', 'js/flashcards.js — btnReviewAgain/btnRemembered handlers'],
+  ['วงแหวนจับเวลา Pomodoro (SVG)', 'js/focus.js — render() (focusTimerRing stroke-dashoffset)'],
+  ['วนรอบ โฟกัส→พักสั้น→พักยาว', 'js/focus.js — completePhase()'],
+  ['เสียงบรรยากาศ 6 แบบ (Web Audio สด)', 'js/focus.js — BUILTIN_AMBIENT_TYPES, buildBuiltinGraph()'],
+  ['อัปโหลดเสียงของตัวเอง', 'js/customSounds.js — addSound(); js/focus.js — buildCustomGraph()'],
+  ['สมัครสมาชิก/เข้าสู่ระบบจริง', 'js/auth.js — signUp(), logIn(); js/profile.js'],
+  ['รูปโปรไฟล์แบบไม่ใช้ Storage', 'js/auth.js — resizeImageToDataURL()'],
+  ['ลืมรหัสผ่าน', 'js/auth.js — resetPassword()'],
+  ['กระดานผู้นำข้ามผู้ใช้', 'js/leaderboard.js — render(); js/auth.js — fetchLeaderboard(), syncPoints()'],
+  ['ประวัติการอ่าน (วันที่อ่านจบ)', 'js/history.js — render(); js/dashboard.js — toggleTopic() (completedAt)']
+];
+const traceTable = document.getElementById('traceTable');
+traceTable.innerHTML = '<tr><th>ฟีเจอร์ที่ปรากฏใน prompt/ภาพ</th><th>ไฟล์ + ฟังก์ชันจริง</th></tr>' +
+  TRACE.map(r => `<tr><td>${r[0]}</td><td><code>${r[1]}</code></td></tr>`).join('');
+</script>
