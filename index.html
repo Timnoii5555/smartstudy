@@ -6,6 +6,15 @@
 <title>The Focused Scholar - Smart Study Planner</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%9A%3C/text%3E%3C/svg%3E">
 
+<!-- PWA: installable ("add to home screen") + works offline via sw.js.
+     Relative paths throughout since this deploys under a GitHub Pages
+     subpath (…/smartstudy/), never the domain root. -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0058bc">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
 <!--
   Zero-flash theme bootstrap. This MUST run before any CSS paints, so it is an
   inline, synchronous script at the very top of <head> — before stylesheets,
@@ -999,6 +1008,31 @@
             <button type="button" id="closeStatsBtn" class="modal-close" data-i18n-attr='{"aria-label":"aria.closeDialog"}' aria-label="Close"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">close</span></button>
         </div>
         <div id="statsBody" class="flex flex-col gap-4 custom-scroll" style="max-height:28rem;overflow-y:auto"></div>
+        <button type="button" id="openRecapBtn" class="btn btn--outline btn--block" style="margin-top:1.25rem">
+            <span class="material-symbols-outlined" aria-hidden="true">auto_awesome</span>
+            <span data-i18n="modalStats.createCardBtn">Create a shareable card</span>
+        </button>
+    </div>
+</div>
+
+<div id="recapModal" class="modal-overlay hidden">
+    <div class="modal-panel modal-panel--sheet" data-modal-panel>
+        <div class="modal-header">
+            <h2 class="modal-title"><span class="material-symbols-outlined" aria-hidden="true">auto_awesome</span> <span data-i18n="modalRecap.title">Your progress card</span></h2>
+            <button type="button" id="closeRecapBtn" class="modal-close" data-i18n-attr='{"aria-label":"aria.closeDialog"}' aria-label="Close"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">close</span></button>
+        </div>
+        <p class="text-outline" style="font-size:0.75rem;margin-bottom:1rem" data-i18n="modalRecap.hint">Just your own progress — nothing here compares you to anyone else.</p>
+        <div style="max-width:16rem;margin:0 auto 1.25rem;border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-md)">
+            <canvas id="recapCanvas" width="1080" height="1920" style="display:block;width:100%;height:auto"></canvas>
+        </div>
+        <div class="flex flex-col gap-2">
+            <button type="button" id="recapShareBtn" class="btn btn--primary btn--block" hidden>
+                <span class="material-symbols-outlined" aria-hidden="true">share</span><span data-i18n="modalRecap.shareBtn">Share</span>
+            </button>
+            <button type="button" id="recapDownloadBtn" class="btn btn--outline btn--block">
+                <span class="material-symbols-outlined" aria-hidden="true">download</span><span data-i18n="modalRecap.downloadBtn">Download image</span>
+            </button>
+        </div>
     </div>
 </div>
 
@@ -1241,6 +1275,7 @@
 <script src="js/onboarding.js"></script>
 <script src="js/dashboard.js"></script>
 <script src="js/stats.js"></script>
+<script src="js/recap.js"></script>
 <script src="js/schedule.js"></script>
 <script src="js/flashcards.js"></script>
 <script src="js/focus.js"></script>

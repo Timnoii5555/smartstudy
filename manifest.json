@@ -1,0 +1,18 @@
+{
+  "name": "The Focused Scholar — Smart Study Planner",
+  "short_name": "SmartStudy",
+  "description": "Auto-generated day-by-day TCAS reading plans, spaced-repetition flashcards, and a forgiving focus timer — free, no account required.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f9f9fc",
+  "theme_color": "#0058bc",
+  "lang": "th",
+  "dir": "ltr",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -72,12 +72,24 @@
         return resumable.includes(s.ui.lastScreen) ? s.ui.lastScreen : 'screen3';
     }
 
+    /** Registers sw.js so the app installs like a real app and keeps
+     *  working offline (see that file's header). A relative path (no
+     *  leading slash) so the scope resolves correctly under GitHub Pages'
+     *  …/smartstudy/ subpath rather than the domain root. Silently skipped
+     *  under file:// or any browser without support — this is a pure
+     *  enhancement, never something the app depends on to function. */
+    function registerServiceWorker() {
+        if (!('serviceWorker' in navigator) || global.location.protocol === 'file:') return;
+        navigator.serviceWorker.register('sw.js').catch((e) => console.warn('[app] Service worker registration failed', e));
+    }
+
     function boot() {
         I18n.init();
         TFS.Theme.init();
         I18n.applyTranslations(document);
 
         Router.show(resolveInitialScreen());
+        registerServiceWorker();
 
         if (TFS.Storage.isBroken()) TFS.Toast.warn(I18n.t('errors.storageUnavailable'), 7000);
         else if (TFS.Storage.wasCorrupt()) TFS.Toast.warn(I18n.t('errors.corruptData'), 7000);

@@ -186,7 +186,20 @@
                 message: 'เนื้อหาที่เหลือต้องใช้เวลาอ่านรวมประมาณ {needHours} ชม. แต่จากจำนวนวันที่เหลือถึงวันสอบและเวลาที่ตั้งไว้ตอนนี้ ({haveHours} ชม./วัน) จะรวมได้ประมาณ {capacityHours} ชม. เท่านั้น (ขาดไปประมาณ {gapHours} ชม.) ลองเลือกทางใดทางหนึ่งด้านล่างได้เลยครับ',
                 increaseHours: 'เพิ่มเวลาอ่านต่อวัน', changeSubject: 'เลือกวิชาอื่นหรือลดเนื้อหา'
             },
-            modalStats: { title: 'สรุปรายสัปดาห์' },
+            modalStats: { title: 'สรุปรายสัปดาห์', createCardBtn: 'สร้างการ์ดสรุปผลงานไว้แชร์' },
+            modalRecap: {
+                title: 'การ์ดผลงานของฉัน',
+                hint: 'เป็นผลงานของคุณคนเดียวเท่านั้น ไม่มีการเทียบกับใครทั้งนั้น',
+                shareBtn: 'แชร์', downloadBtn: 'ดาวน์โหลดรูปภาพ'
+            },
+            recap: {
+                streakLabel: 'วันติดต่อกัน',
+                weekLabel: 'เวลาโฟกัสสัปดาห์นี้',
+                bestTimeLabel: 'ช่วงเวลาที่โฟกัสได้ดีที่สุด',
+                footerLine: 'ทำเพื่อความฝันของตัวเอง ไม่ใช่เพื่อแข่งกับใคร ✨',
+                shareUnsupported: 'อุปกรณ์นี้แชร์รูปโดยตรงไม่ได้ ลองดาวน์โหลดแล้วแชร์เองได้ครับ',
+                shareFailed: 'แชร์ไม่สำเร็จ ลองดาวน์โหลดรูปแทนได้ครับ'
+            },
             stats: {
                 summaryTotal: 'สัปดาห์นี้คุณโฟกัสไปทั้งหมด {hrs} ชม.',
                 summaryUp: 'มากกว่าสัปดาห์ก่อน {hrs} ชม.',
@@ -492,7 +505,20 @@
                 message: "The remaining content needs about {needHours}h of reading, but the days left before your exam at {haveHours}h/day only add up to about {capacityHours}h (a gap of about {gapHours}h). Pick one of the options below.",
                 increaseHours: 'Increase daily hours', changeSubject: 'Choose a different subject or trim content'
             },
-            modalStats: { title: 'This week' },
+            modalStats: { title: 'This week', createCardBtn: 'Create a shareable card' },
+            modalRecap: {
+                title: 'Your progress card',
+                hint: "Just your own progress — nothing here compares you to anyone else.",
+                shareBtn: 'Share', downloadBtn: 'Download image'
+            },
+            recap: {
+                streakLabel: 'day streak',
+                weekLabel: 'Focus time this week',
+                bestTimeLabel: 'Focuses best in the',
+                footerLine: "For your own goals — not a competition with anyone ✨",
+                shareUnsupported: "This device can't share images directly — try downloading and sharing it yourself.",
+                shareFailed: 'Share failed — try downloading the image instead.'
+            },
             stats: {
                 summaryTotal: "You focused for {hrs} total this week.",
                 summaryUp: 'That is {hrs} more than the week before.',
