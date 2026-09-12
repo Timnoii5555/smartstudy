@@ -200,6 +200,13 @@
                 swipeHint: 'รูดเพื่อฉีกตั๋วและขึ้นเครื่อง',
                 swipeAria: 'รูดเพื่อฉีกตั๋วและเริ่มโฟกัส'
             },
+            modalSeatPicker: {
+                title: 'เลือกที่นั่งของคุณ',
+                hint: 'แตะที่นั่งที่ว่างเพื่อเลือก',
+                confirmBtn: 'ยืนยันที่นั่ง',
+                seatLabel: 'ที่นั่ง {seat}',
+                seatTakenLabel: 'ที่นั่ง {seat} ไม่ว่าง'
+            },
             recap: {
                 streakLabel: 'วันติดต่อกัน',
                 weekLabel: 'เวลาโฟกัสสัปดาห์นี้',
@@ -321,7 +328,10 @@
                 today: 'วันนี้', goal: 'เป้าหมาย',
                 timerAnnounce: '{phase} เหลือเวลา {time}',
                 phaseCompleteFocus: 'ครบเวลาโฟกัสแล้ว ถึงเวลาพัก!',
-                phaseCompleteBreak: 'พักครบแล้ว กลับมาโฟกัสกันต่อ!'
+                phaseCompleteBreak: 'พักครบแล้ว กลับมาโฟกัสกันต่อ!',
+                sessionSettingsLabel: 'การตั้งค่าเซสชัน',
+                expandMap: 'ดูแผนที่เต็มจอ',
+                minimizeMap: 'ย่อแผนที่'
             },
             settings: {
                 title: 'ตั้งค่า', language: 'ภาษา', theme: 'ธีม',
@@ -537,6 +547,13 @@
                 swipeHint: 'Swipe to tear & board',
                 swipeAria: 'Swipe to tear the ticket and start focusing'
             },
+            modalSeatPicker: {
+                title: 'Choose your seat',
+                hint: 'Tap an available seat to pick it',
+                confirmBtn: 'Confirm seat',
+                seatLabel: 'Seat {seat}',
+                seatTakenLabel: 'Seat {seat}, unavailable'
+            },
             recap: {
                 streakLabel: 'day streak',
                 weekLabel: 'Focus time this week',
@@ -658,7 +675,10 @@
                 today: 'Today', goal: 'Goal',
                 timerAnnounce: '{phase}, {time} remaining',
                 phaseCompleteFocus: 'Focus session complete — time for a break!',
-                phaseCompleteBreak: 'Break is over — back to focus!'
+                phaseCompleteBreak: 'Break is over — back to focus!',
+                sessionSettingsLabel: 'Session settings',
+                expandMap: 'View full-screen map',
+                minimizeMap: 'Minimize map'
             },
             settings: {
                 title: 'Settings', language: 'Language', theme: 'Theme',

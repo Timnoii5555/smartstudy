@@ -697,7 +697,7 @@
              (#focusTodayHours / #focusGoalHours) — this replaces its role
              as the *current phase's* progress indicator, which previously
              had no visual at all beyond the countdown digits themselves. -->
-        <div class="flight-viz">
+        <div class="flight-viz" id="flightViz">
             <!-- A real satellite map (Leaflet + Esri World Imagery — no API
                  key required, see js/focus.js's header) instead of a drawn
                  illustration: the route from Bangkok to the current
@@ -721,6 +721,27 @@
                     <span id="focusModeLabel"><span data-i18n="s6.mainGoal">Main goal</span> <span id="displayFocusGoal" style="margin-left:0.25rem;font-weight:700">04:30</span></span>
                 </span>
             </div>
+
+            <!-- Full-screen "on the plane" mode (see js/focus.js's
+                 enterImmersive/exitImmersive) — purely a view toggle over
+                 the same map/timer, entered manually here or automatically
+                 right after boarding, exited any time via the minimize
+                 button without ever pausing the session underneath. -->
+            <button type="button" id="flightVizExpandBtn" class="flight-viz__expand" data-i18n-attr='{"aria-label":"s6.expandMap"}' aria-label="View full-screen map">
+                <span class="material-symbols-outlined" aria-hidden="true">open_in_full</span>
+            </button>
+            <button type="button" id="flightVizMinimizeBtn" class="flight-viz__minimize" data-i18n-attr='{"aria-label":"s6.minimizeMap"}' aria-label="Minimize map">
+                <span class="material-symbols-outlined" aria-hidden="true">close_fullscreen</span>
+            </button>
+            <div class="flight-viz__immersive-controls">
+                <button type="button" id="focusImmersiveResetBtn" class="focus-reset-btn" data-i18n-attr='{"aria-label":"s6.reset"}' aria-label="Reset">
+                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.5rem">refresh</span>
+                </button>
+                <button type="button" id="focusImmersiveStartBtn" class="btn btn--primary flex-1">
+                    <span id="focusImmersiveStartBtnIcon" class="material-symbols-outlined" aria-hidden="true" style="font-size:1.5rem;font-variation-settings:'FILL' 1">play_arrow</span>
+                    <span id="focusImmersiveStartBtnText" data-i18n="s6.start">Start</span>
+                </button>
+            </div>
         </div>
 
         <!-- Only shown before a focus phase starts (see js/focus.js's
@@ -741,46 +762,61 @@
                 </button>
             </div>
 
-            <button type="button" id="notifToggleBtn" class="toggle-row">
+            <!-- Sound/co-study/ambient used to be three always-visible cards
+                 stacked here — real testers found the screen too busy with
+                 all of them open by default. They're unchanged underneath,
+                 just tucked behind one disclosure row so the screen reads
+                 clean at a glance and the options are still one tap away. -->
+            <button type="button" id="sessionSettingsToggleBtn" class="toggle-row session-settings-toggle" aria-expanded="false" aria-controls="sessionSettingsPanel">
                 <span class="settings-row__left">
-                    <span class="settings-row__icon"><span class="material-symbols-outlined" aria-hidden="true" id="notifToggleIcon">notifications_active</span></span>
-                    <span style="font-weight:500" data-i18n="s6.soundToggleLabel">Play sound at time up</span>
+                    <span class="settings-row__icon"><span class="material-symbols-outlined" aria-hidden="true">tune</span></span>
+                    <span style="font-weight:500" data-i18n="s6.sessionSettingsLabel">Session settings</span>
                 </span>
-                <span id="notifToggleSwitch" class="switch"><span class="switch__knob"></span></span>
+                <span class="material-symbols-outlined session-settings-toggle__chevron" aria-hidden="true">expand_more</span>
             </button>
 
-            <!-- Co-study presence (Phase 5, scoped to the public room only —
-                 see js/presence.js). Joining is implicit: this toggle plus an
-                 actually-running focus session adds you to the count; off by
-                 default, one tap to enable. No chat, no names, no list. -->
-            <button type="button" id="coStudyToggleBtn" class="toggle-row" hidden>
-                <span class="settings-row__left">
-                    <span class="settings-row__icon"><span class="material-symbols-outlined" aria-hidden="true">groups</span></span>
-                    <span style="font-weight:500" data-i18n="s6.coStudyToggleLabel">Join the public focus room</span>
-                </span>
-                <span id="coStudyToggleSwitch" class="switch"><span class="switch__knob"></span></span>
-            </button>
-            <p id="coStudyCountText" class="text-outline" style="font-size:0.75rem;margin:-0.75rem 0 0.75rem 0.5rem" hidden></p>
-
-            <div class="ambient-panel">
-                <div class="ambient-panel__row">
+            <div class="session-settings-panel" id="sessionSettingsPanel" hidden>
+                <button type="button" id="notifToggleBtn" class="toggle-row">
                     <span class="settings-row__left">
-                        <span class="settings-row__icon"><span class="material-symbols-outlined" aria-hidden="true">graphic_eq</span></span>
-                        <span style="font-weight:500" data-i18n="s6.ambientLabel">Ambient sound</span>
+                        <span class="settings-row__icon"><span class="material-symbols-outlined" aria-hidden="true" id="notifToggleIcon">notifications_active</span></span>
+                        <span style="font-weight:500" data-i18n="s6.soundToggleLabel">Play sound at time up</span>
                     </span>
-                    <button type="button" id="ambientPlayBtn" class="icon-btn" style="background:var(--color-primary-fixed);color:var(--color-primary)" data-i18n-attr='{"aria-label":"aria.playAmbient"}' aria-label="Play ambient sound">
-                        <span class="material-symbols-outlined" aria-hidden="true" id="ambientPlayIcon">play_arrow</span>
-                    </button>
-                </div>
-                <div class="ambient-panel__types custom-scroll" id="ambientTypeGrid" role="radiogroup" aria-label="Ambient sound type"></div>
-                <div class="ambient-panel__row">
-                    <div class="ambient-panel__volume">
-                        <span class="material-symbols-outlined text-outline" aria-hidden="true" style="font-size:1.1rem">volume_down</span>
-                        <label for="ambientVolumeSlider" class="sr-only" data-i18n-attr='{"aria-label":"aria.ambientVolume"}'>Volume</label>
-                        <input type="range" id="ambientVolumeSlider" min="0" max="1" step="0.01" value="0.5">
+                    <span id="notifToggleSwitch" class="switch"><span class="switch__knob"></span></span>
+                </button>
+
+                <!-- Co-study presence (Phase 5, scoped to the public room only —
+                     see js/presence.js). Joining is implicit: this toggle plus an
+                     actually-running focus session adds you to the count; off by
+                     default, one tap to enable. No chat, no names, no list. -->
+                <button type="button" id="coStudyToggleBtn" class="toggle-row" hidden>
+                    <span class="settings-row__left">
+                        <span class="settings-row__icon"><span class="material-symbols-outlined" aria-hidden="true">groups</span></span>
+                        <span style="font-weight:500" data-i18n="s6.coStudyToggleLabel">Join the public focus room</span>
+                    </span>
+                    <span id="coStudyToggleSwitch" class="switch"><span class="switch__knob"></span></span>
+                </button>
+                <p id="coStudyCountText" class="text-outline" style="font-size:0.75rem;margin:-0.75rem 0 0 0.5rem" hidden></p>
+
+                <div class="ambient-panel">
+                    <div class="ambient-panel__row">
+                        <span class="settings-row__left">
+                            <span class="settings-row__icon"><span class="material-symbols-outlined" aria-hidden="true">graphic_eq</span></span>
+                            <span style="font-weight:500" data-i18n="s6.ambientLabel">Ambient sound</span>
+                        </span>
+                        <button type="button" id="ambientPlayBtn" class="icon-btn" style="background:var(--color-primary-fixed);color:var(--color-primary)" data-i18n-attr='{"aria-label":"aria.playAmbient"}' aria-label="Play ambient sound">
+                            <span class="material-symbols-outlined" aria-hidden="true" id="ambientPlayIcon">play_arrow</span>
+                        </button>
                     </div>
+                    <div class="ambient-panel__types custom-scroll" id="ambientTypeGrid" role="radiogroup" aria-label="Ambient sound type"></div>
+                    <div class="ambient-panel__row">
+                        <div class="ambient-panel__volume">
+                            <span class="material-symbols-outlined text-outline" aria-hidden="true" style="font-size:1.1rem">volume_down</span>
+                            <label for="ambientVolumeSlider" class="sr-only" data-i18n-attr='{"aria-label":"aria.ambientVolume"}'>Volume</label>
+                            <input type="range" id="ambientVolumeSlider" min="0" max="1" step="0.01" value="0.5">
+                        </div>
+                    </div>
+                    <input type="file" id="ambientUploadInput" class="settings-file-input" accept="audio/*">
                 </div>
-                <input type="file" id="ambientUploadInput" class="settings-file-input" accept="audio/*">
             </div>
         </div>
 
@@ -1089,12 +1125,41 @@
     </div>
 </div>
 
-<!-- Shown right before a *fresh* focus phase starts (not on resume, not for
-     breaks — see js/focus.js's focusStartBtn handler): a "check-in" ritual
-     styled like a real boarding pass, the same touch shown in the
-     reference video. Everything on it is decorative flavor (seat, boarding
-     pass barcode) except the destination/duration, which reflect the
-     flight actually picked. -->
+<!-- Step 1 of the "check-in" ritual, shown right before a *fresh* focus
+     phase starts (see js/focus.js's handleStartBtnClick) — a full-screen
+     seat grid like the reference video's, so picking a seat feels like
+     actually boarding a flight instead of just confirming a dialog. The
+     chosen seat feeds into the boarding pass shown next (step 2). -->
+<div id="seatPickerModal" class="modal-overlay hidden">
+    <div class="modal-panel modal-panel--full" data-modal-panel>
+        <div class="seat-picker">
+            <div class="seat-picker__header">
+                <h2 class="seat-picker__title"><span class="material-symbols-outlined" aria-hidden="true">airline_seat_recline_normal</span> <span data-i18n="modalSeatPicker.title">Choose your seat</span></h2>
+                <button type="button" id="closeSeatPickerBtn" class="boarding-pass__close" data-i18n-attr='{"aria-label":"aria.closeDialog"}' aria-label="Close"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">close</span></button>
+            </div>
+            <p class="seat-picker__route" aria-hidden="true">BKK <span class="material-symbols-outlined" aria-hidden="true" style="font-size:0.8rem">flight</span> <span id="seatPickerDestCode">CNX</span></p>
+
+            <div class="seat-picker__cabin custom-scroll">
+                <div class="seat-picker__cols" aria-hidden="true">
+                    <span></span><span>A</span><span>C</span><span class="seat-picker__aisle"></span><span>D</span><span>F</span>
+                </div>
+                <div class="seat-picker__grid" id="seatPickerGrid" role="radiogroup" aria-label="Seat"></div>
+            </div>
+
+            <p class="seat-picker__hint text-outline" data-i18n="modalSeatPicker.hint">Tap an available seat to pick it</p>
+            <button type="button" id="confirmSeatBtn" class="btn btn--primary btn--block" disabled>
+                <span class="material-symbols-outlined" aria-hidden="true">check</span>
+                <span data-i18n="modalSeatPicker.confirmBtn">Confirm seat</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Step 2: shown right after a seat is confirmed above — a "check-in"
+     ritual styled like a real boarding pass, the same touch shown in the
+     reference video. Everything on it is decorative flavor (boarding pass
+     barcode) except the destination/duration/seat, which reflect what was
+     actually picked. -->
 <div id="boardingPassModal" class="modal-overlay hidden">
     <div class="modal-panel modal-panel--sm modal-panel--boarding" data-modal-panel>
         <div class="boarding-pass" id="boardingPassCard">

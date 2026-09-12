@@ -231,7 +231,72 @@
     const focusGoalHours = document.getElementById('focusGoalHours');
     const displayFocusGoal = document.getElementById('displayFocusGoal');
 
+    // Full-screen "on the plane" mode mirrors the same start/reset controls
+    // (see enterImmersive/exitImmersive and handleStartBtnClick further
+    // down) so the countdown stays controllable without ever minimizing.
+    const flightViz = document.getElementById('flightViz');
+    const flightVizExpandBtn = document.getElementById('flightVizExpandBtn');
+    const flightVizMinimizeBtn = document.getElementById('flightVizMinimizeBtn');
+    const focusImmersiveStartBtn = document.getElementById('focusImmersiveStartBtn');
+    const focusImmersiveStartBtnIcon = document.getElementById('focusImmersiveStartBtnIcon');
+    const focusImmersiveStartBtnText = document.getElementById('focusImmersiveStartBtnText');
+    const focusImmersiveResetBtn = document.getElementById('focusImmersiveResetBtn');
+
+    // The three secondary controls (sound/co-study/ambient) used to always
+    // be visible here — collapsed behind one disclosure row instead, see
+    // the click handler further down, purely to declutter this screen.
+    const sessionSettingsToggleBtn = document.getElementById('sessionSettingsToggleBtn');
+    const sessionSettingsPanel = document.getElementById('sessionSettingsPanel');
+    if (sessionSettingsToggleBtn && sessionSettingsPanel) {
+        sessionSettingsToggleBtn.addEventListener('click', () => {
+            const willOpen = sessionSettingsPanel.hidden;
+            sessionSettingsPanel.hidden = !willOpen;
+            sessionSettingsToggleBtn.classList.toggle('is-open', willOpen);
+            sessionSettingsToggleBtn.setAttribute('aria-expanded', String(willOpen));
+        });
+    }
+
     const PHASE_KEY = { focus: 's6.phaseFocus', shortBreak: 's6.phaseShortBreak', longBreak: 's6.phaseLongBreak' };
+
+    // ---------------------------------------------------------------- Full-screen "on the plane" mode
+    //
+    // A pure view toggle over the same map/timer/controls — nothing about
+    // the timer engine above changes when this turns on or off. Entered
+    // manually via the expand button, or automatically right after
+    // boarding (see completeBoarding() below); exited any time via the
+    // minimize button, or forced closed by the router's onLeave hook if
+    // the learner navigates away from this screen entirely.
+
+    function enterImmersive() {
+        if (!flightViz || flightViz.classList.contains('flight-viz--immersive')) return;
+        flightViz.classList.add('flight-viz--immersive');
+        flightViz.setAttribute('role', 'dialog');
+        flightViz.setAttribute('aria-modal', 'true');
+        document.body.classList.add('is-immersive-focus');
+        // Leaflet sizes its tiles against its container at the moment it's
+        // measured — the container just jumped from a small card to the
+        // full viewport, so it needs to re-check or the map looks cropped.
+        if (flightMap) { try { flightMap.invalidateSize(); } catch (e) { /* non-fatal, same as every other flightMap call in this file */ } }
+        if (flightVizMinimizeBtn) flightVizMinimizeBtn.focus();
+    }
+    function exitImmersive() {
+        if (!flightViz || !flightViz.classList.contains('flight-viz--immersive')) return;
+        flightViz.classList.remove('flight-viz--immersive');
+        flightViz.removeAttribute('role');
+        flightViz.removeAttribute('aria-modal');
+        document.body.classList.remove('is-immersive-focus');
+        if (flightMap) { try { flightMap.invalidateSize(); } catch (e) { /* non-fatal */ } }
+        if (flightVizExpandBtn) flightVizExpandBtn.focus();
+    }
+    if (flightVizExpandBtn) flightVizExpandBtn.addEventListener('click', enterImmersive);
+    if (flightVizMinimizeBtn) flightVizMinimizeBtn.addEventListener('click', exitImmersive);
+    // Escape exits immersive mode too, matching what every full-screen-style
+    // surface elsewhere in this app already does (see modal.js's own
+    // Escape handling) — safe as a page-wide listener since it's a no-op
+    // whenever immersive mode isn't actually active.
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && flightViz && flightViz.classList.contains('flight-viz--immersive')) exitImmersive();
+    });
 
     // ---------------------------------------------------------------- "Flight Focus"-style route visual + flight picker
     //
@@ -470,6 +535,11 @@
             const full = durationForMode(mode);
             focusStartBtnText.textContent = (getRemainingSeconds() < full) ? I18n.t('s6.resume') : I18n.t('s6.start');
         }
+        // Mirrors the same state onto the full-screen mode's own start
+        // button, so it reads correctly whichever way immersive mode was
+        // entered (see enterImmersive() above).
+        if (focusImmersiveStartBtnIcon) focusImmersiveStartBtnIcon.textContent = focusStartBtnIcon.textContent;
+        if (focusImmersiveStartBtnText) focusImmersiveStartBtnText.textContent = focusStartBtnText.textContent;
 
         renderSoundToggle();
         renderFlightPlane();
@@ -497,6 +567,10 @@
     }
 
     function completePhase() {
+        // A phase ending (landing for a break, or a break ending) always
+        // drops back to the normal screen — the toast/stats right after
+        // this need to actually be visible, not sit under a full-bleed map.
+        exitImmersive();
         playNotificationSound();
         if (mode === 'focus') {
             cyclesCompletedToday++;
@@ -552,6 +626,7 @@
      *  subtracted back out); one cut short after 5 minutes stays logged as a
      *  partial session — no penalty copy or confirmation dialog either way. */
     function reset() {
+        exitImmersive();
         creditElapsedFocusTime();
         const elapsedMs = getElapsedMsInPhase();
         releaseWakeLock();
@@ -635,6 +710,12 @@
         const finish = () => {
             TFS.Modal.close(boardingPassModal);
             start();
+            // The whole point of the check-in ritual is landing in the
+            // "on the plane" full-screen view right after — see this
+            // file's "Full-screen" section above. exitImmersive() elsewhere
+            // (completePhase, reset, leaving the screen) always brings the
+            // learner back out cleanly.
+            enterImmersive();
         };
         const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         if (reducedMotion) finish();
@@ -693,13 +774,15 @@
     }
     initTearGesture();
 
-    /** Only meaningful right before a genuinely fresh focus phase — see the
-     *  focusStartBtn handler below, which is the only caller. */
-    function showBoardingPass() {
+    /** Step 2 of the check-in ritual (see showSeatPicker below, its only
+     *  caller) — `seat` is whatever was actually picked there; `randomSeat()`
+     *  is only a defensive fallback if the seat picker's elements are ever
+     *  missing for some reason. */
+    function showBoardingPass(seat) {
         const flight = currentFocusFlight() || nearestFlight(pomodoroSettings().focusMin);
         if (boardingPassDestCode) boardingPassDestCode.textContent = flight.code;
         if (boardingPassDestName) boardingPassDestName.textContent = I18n.pick(flight.name);
-        if (boardingPassSeat) boardingPassSeat.textContent = randomSeat();
+        if (boardingPassSeat) boardingPassSeat.textContent = seat || randomSeat();
         if (boardingPassDuration) boardingPassDuration.textContent = I18n.t('s6.flightMinutes', { n: flight.minutes });
         if (boardingPassDate) {
             const today = new Date();
@@ -715,16 +798,103 @@
     document.getElementById('closeBoardingPassBtn').addEventListener('click', () => TFS.Modal.close(boardingPassModal));
     document.getElementById('confirmBoardingBtn').addEventListener('click', () => completeBoarding());
 
-    focusStartBtn.addEventListener('click', () => {
+    // ---------------------------------------------------------------- Seat picker (check-in ritual, step 1)
+
+    const seatPickerModal = document.getElementById('seatPickerModal');
+    const seatPickerGrid = document.getElementById('seatPickerGrid');
+    const seatPickerDestCode = document.getElementById('seatPickerDestCode');
+    const confirmSeatBtn = document.getElementById('confirmSeatBtn');
+    const closeSeatPickerBtn = document.getElementById('closeSeatPickerBtn');
+    const SEAT_LETTERS = ['A', 'C', 'D', 'F']; // a small regional-jet 2+2 cabin, matching these short domestic routes
+    const SEAT_ROWS = 10;
+    let pickedSeat = null;
+
+    /** Rebuilds the whole seat grid, with a handful of seats pre-marked
+     *  "taken" — regenerated fresh each time the picker opens, purely
+     *  decorative realism, the same spirit as the boarding pass's barcode. */
+    function renderSeatGrid() {
+        if (!seatPickerGrid) return;
+        seatPickerGrid.innerHTML = '';
+        pickedSeat = null;
+        if (confirmSeatBtn) confirmSeatBtn.disabled = true;
+        const takenCount = 6 + Math.floor(Math.random() * 6);
+        const taken = new Set();
+        while (taken.size < takenCount) {
+            const r = 1 + Math.floor(Math.random() * SEAT_ROWS);
+            const l = SEAT_LETTERS[Math.floor(Math.random() * SEAT_LETTERS.length)];
+            taken.add(`${r}${l}`);
+        }
+        for (let r = 1; r <= SEAT_ROWS; r++) {
+            const rowEl = U.el('div', { className: 'seat-picker__row' });
+            rowEl.appendChild(U.el('span', { className: 'seat-picker__row-num', text: U.pad2(r) }));
+            SEAT_LETTERS.forEach((letter, i) => {
+                const seatId = `${r}${letter}`;
+                const isTaken = taken.has(seatId);
+                const btn = U.el('button', {
+                    className: 'seat-picker__seat' + (isTaken ? ' is-taken' : ''),
+                    attrs: {
+                        type: 'button', role: 'radio', 'aria-checked': 'false', disabled: isTaken,
+                        'aria-label': I18n.t(isTaken ? 'modalSeatPicker.seatTakenLabel' : 'modalSeatPicker.seatLabel', { seat: seatId })
+                    },
+                    text: letter,
+                    on: isTaken ? {} : { click: () => selectSeat(seatId, btn) }
+                });
+                rowEl.appendChild(btn);
+                if (i === 1) rowEl.appendChild(U.el('span', { className: 'seat-picker__aisle' }));
+            });
+            seatPickerGrid.appendChild(rowEl);
+        }
+    }
+
+    function selectSeat(seatId, btnEl) {
+        if (seatPickerGrid) {
+            U.qsa('.seat-picker__seat.is-selected', seatPickerGrid).forEach((el) => {
+                el.classList.remove('is-selected');
+                el.setAttribute('aria-checked', 'false');
+            });
+        }
+        btnEl.classList.add('is-selected');
+        btnEl.setAttribute('aria-checked', 'true');
+        pickedSeat = seatId;
+        if (confirmSeatBtn) confirmSeatBtn.disabled = false;
+    }
+
+    /** Only meaningful right before a genuinely fresh focus phase — see the
+     *  handleStartBtnClick handler below, which is the only caller. Falls
+     *  straight through to the boarding pass with a random seat if the
+     *  picker's own elements are ever missing, so a markup problem here can
+     *  never block starting a session outright. */
+    function showSeatPicker() {
+        if (!seatPickerModal || !seatPickerGrid) { showBoardingPass(randomSeat()); return; }
+        const flight = currentFocusFlight() || nearestFlight(pomodoroSettings().focusMin);
+        if (seatPickerDestCode) seatPickerDestCode.textContent = flight.code;
+        renderSeatGrid();
+        TFS.Modal.open(seatPickerModal);
+    }
+
+    if (closeSeatPickerBtn) closeSeatPickerBtn.addEventListener('click', () => TFS.Modal.close(seatPickerModal));
+    if (confirmSeatBtn) confirmSeatBtn.addEventListener('click', () => {
+        if (!pickedSeat) return; // disabled until a seat is chosen, but never trust that alone
+        const seat = pickedSeat;
+        TFS.Modal.close(seatPickerModal);
+        showBoardingPass(seat);
+    });
+
+    /** Shared by the normal and full-screen start/pause buttons so both
+     *  read exactly the same state and trigger the same check-in ritual. */
+    function handleStartBtnClick() {
         if (isRunning()) { pause(); return; }
         // Only for a genuinely fresh focus phase — not resuming a paused
         // one, and not for a break — matching the same condition render()
         // already uses to decide between "Start" and "Resume" wording.
         const freshFocusStart = mode === 'focus' && getRemainingSeconds() >= durationForMode(mode);
-        if (freshFocusStart) showBoardingPass();
+        if (freshFocusStart) showSeatPicker();
         else start();
-    });
+    }
+    focusStartBtn.addEventListener('click', handleStartBtnClick);
     focusResetBtn.addEventListener('click', reset);
+    if (focusImmersiveStartBtn) focusImmersiveStartBtn.addEventListener('click', handleStartBtnClick);
+    if (focusImmersiveResetBtn) focusImmersiveResetBtn.addEventListener('click', reset);
 
     function playNotificationSound() {
         if (!State.get().settings.soundEnabled) return;
@@ -1123,6 +1293,10 @@
             // Leaving the focus screen for another in-app screen pauses the
             // run and stops ambient audio — see the file header for why this
             // is a deliberate product choice, not the bug this file fixes.
+            // Immersive mode is forced closed too: it's fixed-position and
+            // otherwise wouldn't be torn down by this screen simply being
+            // hidden, which would leave the whole app unscrollable behind it.
+            exitImmersive();
             pause();
             stopAmbient();
             teardownCoStudyUI();

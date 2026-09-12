@@ -359,6 +359,16 @@ input[type=range]::-moz-range-track { height: 0.5rem; background: var(--color-su
 }
 .modal-overlay.is-open .modal-panel { transform: scale(1); }
 .modal-panel--sm { max-width: 22rem; }
+/* A near-fullscreen panel for the seat picker — the "airplane cabin" feel
+   the reference video has needs real screen real estate, not a small
+   centered card. Transparent/no-padding for the same reason as
+   .modal-panel--boarding: .seat-picker below is the panel's own dark
+   surface, edge to edge, not a card inset inside a white frame. */
+.modal-panel--full {
+    background: transparent; padding: 0; box-shadow: none;
+    width: 100%; height: 100%; max-width: 30rem; max-height: 100dvh; display: flex; overflow: visible;
+}
+@media (min-width: 640px) { .modal-panel--full { max-height: min(46rem, 92dvh); } }
 .modal-panel--sheet { align-self: flex-end; border-bottom-left-radius: 0; border-bottom-right-radius: 0; transform: translateY(100%); }
 @media (min-width: 640px) { .modal-panel--sheet { align-self: center; border-radius: var(--radius-2xl); transform: scale(0.94); } }
 .modal-overlay.is-open .modal-panel--sheet { transform: translateY(0); }
@@ -459,6 +469,45 @@ input[type=range]::-moz-range-track { height: 0.5rem; background: var(--color-su
 @media (prefers-reduced-motion: reduce) {
     .boarding-pass__top, .boarding-pass__stub, .boarding-pass__tear-thumb { transition: opacity 0.15s ease !important; transform: none !important; }
 }
+
+/* ---------- Session settings disclosure (screen 6's decluttered secondary controls) ---------- */
+
+.session-settings-toggle__chevron { color: var(--color-outline); transition: transform 0.2s ease; }
+.session-settings-toggle.is-open .session-settings-toggle__chevron { transform: rotate(180deg); }
+.session-settings-panel { display: flex; flex-direction: column; gap: 1rem; }
+
+/* ---------- Seat picker (screen 6's boarding-ritual step 1, see js/focus.js) ---------- */
+/* Same fixed-dark-card reasoning as the boarding pass: a plane cabin reads
+   as itself regardless of the active app theme. */
+.seat-picker {
+    display: flex; flex-direction: column; width: 100%; height: 100%;
+    background: #17181c; border-radius: var(--radius-2xl); color: #fff;
+    box-shadow: var(--shadow-lg); padding: 1.5rem; box-sizing: border-box; overflow: hidden;
+}
+.seat-picker__header { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+.seat-picker__title { display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 700; color: #fff; margin: 0; }
+.seat-picker__route { text-align: center; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.04em; color: rgba(255, 255, 255, 0.6); display: flex; align-items: center; justify-content: center; gap: 0.35rem; margin: 0.5rem 0 1rem; }
+.seat-picker__cabin { flex: 1; min-height: 0; overflow-y: auto; overflow-x: auto; }
+.seat-picker__cols, .seat-picker__row {
+    display: grid; grid-template-columns: 1.75rem repeat(2, 2.75rem) 1rem repeat(2, 2.75rem);
+    justify-content: center; align-items: center; gap: 0.4rem;
+}
+.seat-picker__cols { font-size: 0.6875rem; font-weight: 700; color: rgba(255, 255, 255, 0.45); text-align: center; margin-bottom: 0.5rem; text-transform: uppercase; }
+.seat-picker__row { margin-bottom: 0.4rem; }
+.seat-picker__row-num { font-size: 0.6875rem; color: rgba(255, 255, 255, 0.4); text-align: right; padding-right: 0.25rem; }
+.seat-picker__seat {
+    width: 2.75rem; height: 2.75rem; border-radius: var(--radius-md); border: 1.5px solid rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.7); font-size: 0.75rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+}
+.seat-picker__seat:disabled, .seat-picker__seat.is-taken { opacity: 0.3; border-style: dashed; }
+.seat-picker__seat.is-selected { background: #ffd54f; border-color: #ffd54f; color: #17181c; }
+.seat-picker__seat:not(:disabled):focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.seat-picker__aisle { position: relative; }
+.seat-picker__aisle::after { content: ''; position: absolute; top: -0.3rem; bottom: -0.3rem; left: 50%; width: 1px; background: rgba(255, 255, 255, 0.12); }
+.seat-picker__hint { color: rgba(255, 255, 255, 0.6); font-size: 0.75rem; text-align: center; margin: 1rem 0 0.75rem; }
+.seat-picker #confirmSeatBtn { flex-shrink: 0; }
+.seat-picker #confirmSeatBtn:disabled { opacity: 0.4; }
 .modal-actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
 .modal-panel__icon { width: 4rem; height: 4rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; }
 .modal-panel__icon--warn { background: color-mix(in srgb, var(--color-danger) 12%, transparent); color: var(--color-danger); }
