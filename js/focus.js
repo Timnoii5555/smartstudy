@@ -6,9 +6,25 @@
  * goal (total focus seconds accumulated today vs. the daily goal), while the
  * big numeric readout counts down the current Pomodoro phase.
  *
- * Fixes bug 1.2: the interval is only ever running while this screen is the
- * active one. Leaving the screen (router teardown) pauses the countdown and
- * suspends any ambient sound instead of letting them keep running invisibly.
+ * Timer correctness (Phase 1 rewrite): the countdown is timestamp-based, not
+ * a `setInterval` counter. `runStartedAtMs` (when the current run segment
+ * began) and `accumulatedMs` (how much of this phase had already elapsed
+ * before that segment) are the only persisted source of truth; remaining
+ * time is always *derived* from `Date.now() - runStartedAtMs`, never
+ * decremented tick-by-tick. This matters because `setInterval` is throttled
+ * or fully suspended by the browser while a tab is backgrounded or the
+ * phone is locked — a counter that ticks itself down loses time exactly
+ * when it matters most. Deriving from a timestamp means a reload, a locked
+ * phone, or a backgrounded tab can never desync the countdown: whenever this
+ * screen is next rendered, remaining time is recomputed fresh and is correct
+ * to within a second, and a run that's still supposed to be going keeps
+ * going (including across a full page reload) rather than silently pausing.
+ *
+ * Leaving screen6 for a different in-app screen still pauses the run (and
+ * stops ambient sound) exactly as before — that's a deliberate product
+ * choice (a "focus session" means being on the focus screen), not the bug
+ * this rewrite fixes. What's fixed is staying *on* this screen while the
+ * browser tab itself is backgrounded/locked/reloaded.
  */
 (function (global) {
     'use strict';
@@ -22,58 +38,176 @@
     function todayISO() { return U.formatDateISO(new Date()); }
     function isActive() { return TFS.Router.current() === 'screen6'; }
     function pomodoroSettings() { return State.get().settings.pomodoro; }
-    function durationForMode(mode) {
+    function durationForMode(m) {
         const p = pomodoroSettings();
-        if (mode === 'shortBreak') return p.shortBreakMin * 60;
-        if (mode === 'longBreak') return p.longBreakMin * 60;
+        if (m === 'shortBreak') return p.shortBreakMin * 60;
+        if (m === 'longBreak') return p.longBreakMin * 60;
         return p.focusMin * 60;
     }
     function getTotalToday() { return State.get().focus.totalSecondsByDate[todayISO()] || 0; }
 
-    // ---- Runtime engine state (mode/remaining/cycles ARE persisted so a reload
-    // resumes where you left off; `isRunning` is deliberately NOT persisted —
-    // every reload/re-entry starts paused, see bug 1.2 rationale above). ----
+    // A session under this length that gets reset/cancelled is discarded
+    // silently rather than logged as partial progress (see reset() below).
+    const MIN_PARTIAL_SECONDS = 5 * 60;
+
+    // ---- Runtime engine state. `mode`/`cyclesCompletedToday` and the two
+    // timestamp fields below ARE persisted (see persistRuntime) so a reload
+    // resumes exactly where things stood — including a run that was still
+    // going. `lastCreditMs` is NOT persisted directly; it is reconstructed
+    // from the persisted `lastCreditAtMs` checkpoint on load so no elapsed
+    // study time is ever double-counted or dropped across a reload. ----
     let mode = 'focus';
-    let phaseRemainingSeconds = durationForMode('focus');
     let cyclesCompletedToday = 0;
-    let isRunning = false;
-    let intervalId = null;
+    let runStartedAtMs = null;   // epoch ms the current run segment began, or null while paused
+    let accumulatedMs = 0;       // ms of the current phase already elapsed from previous run segments
+    let lastCreditMs = Date.now(); // last time totalSecondsByDate/subject/time-of-day were credited
+    let renderIntervalId = null;
+    let wakeLockSentinel = null;
+
+    function getElapsedMsInPhase() {
+        return accumulatedMs + (runStartedAtMs !== null ? (Date.now() - runStartedAtMs) : 0);
+    }
+    function getRemainingSeconds() {
+        const remainingMs = (durationForMode(mode) * 1000) - getElapsedMsInPhase();
+        return Math.max(0, Math.ceil(remainingMs / 1000));
+    }
+    function isRunning() { return runStartedAtMs !== null; }
 
     function loadRuntimeFromState() {
         const f = State.get().focus;
         const today = todayISO();
         if (f.lastActiveDateISO !== today) {
-            // A new day: cycle count and phase restart fresh, but totalSecondsByDate
-            // is keyed by date already so past days are naturally preserved untouched.
+            // A new day: cycle count and phase restart fresh, but the
+            // per-date/per-subject accumulation maps are keyed by date
+            // already so past days are naturally preserved untouched.
             mode = 'focus';
             cyclesCompletedToday = 0;
-            phaseRemainingSeconds = durationForMode('focus');
-            State.commit({ focus: { lastActiveDateISO: today, mode, cyclesCompletedToday, phaseRemainingSeconds } });
+            runStartedAtMs = null;
+            accumulatedMs = 0;
+            State.commit({ focus: { lastActiveDateISO: today, mode, cyclesCompletedToday, runStartedAtMs: null, accumulatedMs: 0 } });
         } else {
             mode = f.mode || 'focus';
             cyclesCompletedToday = f.cyclesCompletedToday || 0;
-            phaseRemainingSeconds = (typeof f.phaseRemainingSeconds === 'number') ? f.phaseRemainingSeconds : durationForMode(mode);
+            accumulatedMs = typeof f.accumulatedMs === 'number' ? f.accumulatedMs : 0;
+            runStartedAtMs = typeof f.runStartedAtMs === 'number' ? f.runStartedAtMs : null;
+        }
+        // Resume crediting from exactly where the last session left off
+        // (mid-run ticking, or the last visibility/pause checkpoint) — never
+        // from "now", which would silently drop everything elapsed while
+        // this screen was unmounted or the tab was gone.
+        lastCreditMs = typeof f.lastCreditAtMs === 'number' ? f.lastCreditAtMs : (runStartedAtMs || Date.now());
+
+        if (isRunning()) {
+            requestWakeLock();
+            ensureRenderInterval();
+            // A locked phone or a killed tab can mean the phase boundary was
+            // already crossed while we were away — catch up once, immediately.
+            creditElapsedFocusTime();
+            if (getRemainingSeconds() <= 0) completePhase();
         }
     }
 
     function persistRuntime() {
-        State.commit({ focus: { mode, cyclesCompletedToday, phaseRemainingSeconds, lastActiveDateISO: todayISO() } });
+        State.commit({ focus: { mode, cyclesCompletedToday, runStartedAtMs, accumulatedMs, lastCreditAtMs: lastCreditMs, lastActiveDateISO: todayISO() } });
+    }
+
+    /** Best-effort "which part of the day" bucket for the Phase 6 stats view —
+     *  deliberately coarse (4 buckets, not a full per-session log) so this
+     *  never grows unbounded and needs no separate cleanup logic. */
+    function timeOfDayBucket(date) {
+        const h = date.getHours();
+        if (h >= 5 && h < 12) return 'morning';
+        if (h >= 12 && h < 17) return 'afternoon';
+        if (h >= 17 && h < 22) return 'evening';
+        return 'night';
     }
 
     function addSecondsToToday(n) {
+        if (n === 0) return;
         const today = todayISO();
         const totals = { ...State.get().focus.totalSecondsByDate };
         totals[today] = Math.max(0, (totals[today] || 0) + n);
-        State.commit({ focus: { totalSecondsByDate: totals } });
 
-        // Guarded so this only commits state (and re-renders subscribers) the
-        // instant the goal is actually crossed, not on every single tick.
-        const goal = State.get().plan.dailyGoalSeconds;
-        if (goal > 0 && TFS.Quests) {
-            const reached = totals[today] >= goal ? 1 : 0;
-            if (TFS.Quests.getProgress('daily-goal') !== reached) TFS.Quests.setProgress('daily-goal', reached);
+        const subjectId = State.get().plan.subject;
+        const bySubject = { ...State.get().focus.totalSecondsBySubject };
+        if (subjectId) {
+            const forSubject = { ...(bySubject[subjectId] || {}) };
+            forSubject[today] = Math.max(0, (forSubject[today] || 0) + n);
+            bySubject[subjectId] = forSubject;
+        }
+
+        const byBucket = { ...State.get().focus.timeOfDayMinutes };
+        const bucket = timeOfDayBucket(new Date());
+        byBucket[bucket] = Math.max(0, (byBucket[bucket] || 0) + (n / 60));
+
+        State.commit({ focus: { totalSecondsByDate: totals, totalSecondsBySubject: bySubject, timeOfDayMinutes: byBucket } });
+
+        if (TFS.Streak) TFS.Streak.reconcile();
+    }
+
+    /** Credits real elapsed wall-clock time (since the last checkpoint) into
+     *  today's totals, but only for time actually spent in the 'focus'
+     *  phase — breaks never count toward the study goal or streak. Called
+     *  on every render tick and at every state transition (start/pause/
+     *  reset/complete/visibility-return) so no elapsed time is ever lost to
+     *  a throttled or suspended background tab.
+     *
+     *  Crucially, this never credits more than the current phase's own
+     *  duration: if the gap since the last checkpoint is long enough that
+     *  the phase boundary falls inside it (a tab backgrounded for hours,
+     *  say), only the time up to that boundary counts as focus time — the
+     *  rest was spent away from the app entirely and is not fabricated
+     *  into study time just because the phase was still technically
+     *  "running" in storage. */
+    function creditElapsedFocusTime() {
+        const now = Date.now();
+        if (!isRunning() || mode !== 'focus') { lastCreditMs = now; return; }
+        const deltaMs = now - lastCreditMs;
+        if (deltaMs <= 0) return;
+
+        const elapsedBeforeThisDelta = accumulatedMs + (lastCreditMs - runStartedAtMs);
+        const budgetLeftMs = Math.max(0, (durationForMode(mode) * 1000) - elapsedBeforeThisDelta);
+
+        if (deltaMs > budgetLeftMs) {
+            const creditableSec = Math.floor(budgetLeftMs / 1000);
+            if (creditableSec > 0) addSecondsToToday(creditableSec);
+            lastCreditMs = now;
+            return;
+        }
+
+        const deltaSec = Math.floor(deltaMs / 1000);
+        if (deltaSec > 0) {
+            addSecondsToToday(deltaSec);
+            lastCreditMs += deltaSec * 1000; // keep any sub-second remainder so normal per-second ticking never drifts
         }
     }
+
+    // ---------------------------------------------------------------- Wake Lock
+
+    async function requestWakeLock() {
+        try {
+            if ('wakeLock' in navigator) wakeLockSentinel = await navigator.wakeLock.request('screen');
+        } catch (e) { /* unsupported, or the page isn't visible yet — fail silently per spec */ }
+    }
+    function releaseWakeLock() {
+        if (wakeLockSentinel) { wakeLockSentinel.release().catch(() => {}); wakeLockSentinel = null; }
+    }
+    // The OS releases a wake lock the instant a tab is hidden; re-acquire it
+    // when the learner comes back to a still-running session.
+    document.addEventListener('visibilitychange', () => {
+        if (!isActive()) return;
+        if (document.visibilityState === 'visible') {
+            creditElapsedFocusTime();
+            if (isRunning() && getRemainingSeconds() <= 0) completePhase();
+            if (isRunning()) requestWakeLock();
+            render();
+        } else if (isRunning()) {
+            // About to be backgrounded/suspended: checkpoint now so nothing
+            // that already elapsed is lost if the tab gets killed outright.
+            creditElapsedFocusTime();
+            persistRuntime();
+        }
+    });
 
     // ---------------------------------------------------------------- DOM refs
 
@@ -96,9 +230,9 @@
         const goal = State.get().plan.dailyGoalSeconds;
         let progress = goal > 0 ? totalToday / goal : 0;
         progress = U.clamp(progress, 0, 1);
-        focusTimerRing.style.strokeDashoffset = String(100 - progress * 100);
+        focusTimerRing.setAttribute('stroke-dashoffset', String(100 - progress * 100));
 
-        focusTimerDisplay.textContent = U.formatSecondsToHMS(phaseRemainingSeconds);
+        focusTimerDisplay.textContent = U.formatSecondsToHMS(getRemainingSeconds());
         focusPhaseLabel.textContent = I18n.t(PHASE_KEY[mode]);
         const cycles = pomodoroSettings().cyclesBeforeLongBreak;
         const currentCycle = (cyclesCompletedToday % cycles) + 1;
@@ -108,24 +242,29 @@
         focusTodayHours.textContent = U.formatSecondsToHHMM(totalToday);
         focusGoalHours.textContent = U.formatSecondsToHHMM(goal);
 
-        if (isRunning) {
+        if (isRunning()) {
             focusStartBtnIcon.textContent = 'pause';
             focusStartBtnText.textContent = I18n.t('s6.pause');
         } else {
             focusStartBtnIcon.textContent = 'play_arrow';
             const full = durationForMode(mode);
-            focusStartBtnText.textContent = (phaseRemainingSeconds < full) ? I18n.t('s6.resume') : I18n.t('s6.start');
+            focusStartBtnText.textContent = (getRemainingSeconds() < full) ? I18n.t('s6.resume') : I18n.t('s6.start');
         }
 
         renderSoundToggle();
     }
 
-    function tick() {
-        phaseRemainingSeconds--;
-        if (mode === 'focus') addSecondsToToday(1);
+    function ensureRenderInterval() {
+        if (renderIntervalId !== null) return;
+        renderIntervalId = setInterval(tick, 1000);
+    }
+    function clearRenderInterval() {
+        if (renderIntervalId !== null) { clearInterval(renderIntervalId); renderIntervalId = null; }
+    }
 
-        if (phaseRemainingSeconds <= 0) completePhase();
-        persistRuntime();
+    function tick() {
+        creditElapsedFocusTime();
+        if (isRunning() && getRemainingSeconds() <= 0) completePhase();
         render();
     }
 
@@ -136,42 +275,58 @@
             const cycles = pomodoroSettings().cyclesBeforeLongBreak;
             mode = (cyclesCompletedToday % cycles === 0) ? 'longBreak' : 'shortBreak';
             TFS.Toast.info(I18n.t('s6.phaseCompleteFocus'));
-            if (TFS.Quests) TFS.Quests.bump('focus-session', 1);
         } else {
             mode = 'focus';
             TFS.Toast.info(I18n.t('s6.phaseCompleteBreak'));
         }
-        phaseRemainingSeconds = durationForMode(mode);
+        accumulatedMs = 0;
+        // Auto-advance into the next phase without requiring another tap —
+        // but only if a session was actually running; completing a phase
+        // that was reached via the day-rollover reset above never auto-runs.
+        if (isRunning()) { runStartedAtMs = Date.now(); lastCreditMs = runStartedAtMs; }
+        persistRuntime();
     }
 
     function start() {
-        if (isRunning) return;
-        isRunning = true;
-        intervalId = setInterval(tick, 1000);
+        if (isRunning()) return;
+        runStartedAtMs = Date.now();
+        lastCreditMs = runStartedAtMs;
+        requestWakeLock();
+        ensureRenderInterval();
+        persistRuntime();
         render();
     }
 
     function pause() {
-        if (!isRunning) return;
-        clearInterval(intervalId);
-        intervalId = null;
-        isRunning = false;
+        if (!isRunning()) return;
+        creditElapsedFocusTime();
+        accumulatedMs += Date.now() - runStartedAtMs;
+        runStartedAtMs = null;
+        releaseWakeLock();
+        clearRenderInterval();
         persistRuntime();
         render();
     }
 
+    /** "Cancel" per the spec: a focus phase cut short before 5 minutes is
+     *  discarded silently (the seconds already credited to today's total are
+     *  subtracted back out); one cut short after 5 minutes stays logged as a
+     *  partial session — no penalty copy or confirmation dialog either way. */
     function reset() {
-        pause();
-        if (mode === 'focus') {
-            const elapsed = durationForMode('focus') - phaseRemainingSeconds;
-            if (elapsed > 0) addSecondsToToday(-elapsed);
+        creditElapsedFocusTime();
+        const elapsedMs = getElapsedMsInPhase();
+        releaseWakeLock();
+        clearRenderInterval();
+        runStartedAtMs = null;
+        if (mode === 'focus' && elapsedMs > 0 && elapsedMs < MIN_PARTIAL_SECONDS * 1000) {
+            addSecondsToToday(-Math.floor(elapsedMs / 1000));
         }
-        phaseRemainingSeconds = durationForMode(mode);
+        accumulatedMs = 0;
         persistRuntime();
         render();
     }
 
-    focusStartBtn.addEventListener('click', () => { isRunning ? pause() : start(); });
+    focusStartBtn.addEventListener('click', () => { isRunning() ? pause() : start(); });
     focusResetBtn.addEventListener('click', reset);
 
     function playNotificationSound() {
@@ -215,7 +370,7 @@
     let goalWheelsBuilt = false;
 
     btnOpenSetTimerModal.addEventListener('click', () => {
-        if (isRunning) { TFS.Toast.warn(I18n.t('errors.stopTimerFirst')); return; }
+        if (isRunning()) { TFS.Toast.warn(I18n.t('errors.stopTimerFirst')); return; }
         if (!goalWheelsBuilt) {
             WP.createItems(hoursWheel, 24, false);
             WP.createItems(minutesWheel, 59, true);
@@ -490,8 +645,9 @@
             renderAmbientTypeGrid();
         },
         onLeave: () => {
-            // Bug 1.2: never let the Pomodoro countdown or ambient audio keep
-            // running once the user has navigated away from this screen.
+            // Leaving the focus screen for another in-app screen pauses the
+            // run and stops ambient audio — see the file header for why this
+            // is a deliberate product choice, not the bug this file fixes.
             pause();
             stopAmbient();
         }

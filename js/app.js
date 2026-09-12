@@ -54,6 +54,17 @@
         if (!TFS.Storage.getActiveProfileId()) {
             return TFS.Storage.hasSeenLanding() ? 'screen0' : 'screenLanding';
         }
+        // Set by js/landing.js's "just start a focus session" shortcut right
+        // before the reload it triggers — a one-shot bypass of the normal
+        // subject/exam-date setup wall so a brand-new visitor can start
+        // studying within two taps, with zero data entered (Phase 2).
+        try {
+            const skipKey = TFS.Landing && TFS.Landing.SKIP_TO_FOCUS_KEY;
+            if (skipKey && global.sessionStorage.getItem(skipKey) === '1') {
+                global.sessionStorage.removeItem(skipKey);
+                return 'screen6';
+            }
+        } catch (e) { /* ignore — falls through to the normal resolution below */ }
         const s = State.get();
         if (!s.plan.subject) return 'screen1';
         if (!s.plan.examDateISO) return 'screen2';

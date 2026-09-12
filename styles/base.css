@@ -112,3 +112,16 @@ a { color: inherit; text-decoration: none; }
 .text-outline { color: var(--color-outline); }
 .text-primary { color: var(--color-primary); }
 .text-tertiary { color: var(--color-tertiary); }
+
+/* Respect the OS-level "reduce motion" preference everywhere at once, instead
+   of guarding every individual transition/animation rule by hand — this is a
+   blanket safety net so a new component can never accidentally reintroduce
+   motion for someone who has explicitly asked their system to minimize it. */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+    }
+}

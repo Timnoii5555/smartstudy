@@ -186,11 +186,8 @@
      * commits) share this list so the two behave consistently.
      */
     const ATOMIC_STATE_PATHS = new Set([
-        'flashcards.decks', 'syllabusProgress', 'focus.totalSecondsByDate',
-        // quests.js replaces these wholesale on every daily reset (`progress: {}`,
-        // `claimed: {}`) — without this they'd merge key-by-key onto yesterday's
-        // object and an empty reset patch would silently keep every old key.
-        'quests.progress', 'quests.claimed'
+        'flashcards.decks', 'syllabusProgress', 'focus.totalSecondsByDate', 'focus.totalSecondsBySubject',
+        'flashcards.srs' // SM-2 per-card scheduling state (js/srs.js) — keyed by card id, same resurrection risk
     ]);
     function isAtomicPath(pathParts) {
         return ATOMIC_STATE_PATHS.has(pathParts.join('.'));

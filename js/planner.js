@@ -120,6 +120,52 @@
         return ids;
     }
 
-    TFS.Planner = { ORDER_STRATEGIES, orderTopics, buildReadingPlan, topicsForDate, topicsDueBy };
+    /**
+     * "Not up for it today" (screen 3): moves `topicIds` off of `fromDateISO`
+     * and greedily re-packs them into the following days, respecting each
+     * day's remaining minute budget exactly like buildReadingPlan does. If
+     * every existing day already has a full plate (e.g. the exam is
+     * tomorrow), new days are appended right after the plan rather than
+     * silently dropping the deferred topics — nothing scheduled ever just
+     * vanishes because there was no room for it.
+     */
+    function redistributeIncomplete(plan, fromDateISO, topicIds, dailyGoalSeconds, subjectTopics) {
+        if (!plan || !topicIds || topicIds.length === 0) return plan;
+        const dailyBudgetMin = Math.max(15, Math.round((dailyGoalSeconds || 4.5 * 3600) / 60));
+        const estById = {};
+        (subjectTopics || []).forEach(t => { estById[t.id] = t.estMinutes || 120; });
+        const minutesOf = (id) => estById[id] || 120;
+
+        const days = plan.days.map(d => ({ dateISO: d.dateISO, topicIds: d.topicIds.slice() }));
+        const fromIdx = days.findIndex(d => d.dateISO === fromDateISO);
+        if (fromIdx === -1) return plan;
+
+        const deferSet = new Set(topicIds);
+        days[fromIdx].topicIds = days[fromIdx].topicIds.filter(id => !deferSet.has(id));
+
+        const queue = topicIds.slice();
+        let idx = fromIdx + 1;
+        while (queue.length) {
+            if (idx >= days.length) {
+                const lastISO = days.length ? days[days.length - 1].dateISO : fromDateISO;
+                days.push({ dateISO: U.formatDateISO(U.addDays(U.parseISODate(lastISO), 1)), topicIds: [] });
+            }
+            const day = days[idx];
+            let load = day.topicIds.reduce((sum, id) => sum + minutesOf(id), 0);
+            // Always seat at least one topic on a day even if it alone exceeds
+            // the budget, same rule buildReadingPlan uses, so a single big
+            // deferred topic can never stall this loop either.
+            while (queue.length && (day.topicIds.length === 0 || load + minutesOf(queue[0]) <= dailyBudgetMin)) {
+                const id = queue.shift();
+                day.topicIds.push(id);
+                load += minutesOf(id);
+            }
+            idx++;
+        }
+
+        return { ...plan, days };
+    }
+
+    TFS.Planner = { ORDER_STRATEGIES, orderTopics, buildReadingPlan, topicsForDate, topicsDueBy, redistributeIncomplete };
 
 })(window);

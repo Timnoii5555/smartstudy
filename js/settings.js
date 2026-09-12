@@ -99,8 +99,8 @@
 
     // ---------------------------------------------------------------- Change name / nickname
     // Works for both a real account (Firebase Auth profile + the mirrored
-    // Firestore doc the leaderboard reads) and a local guest profile (just
-    // its entry in storage.js's profiles index) — whichever is active.
+    // Firestore doc) and a local guest profile (just its entry in
+    // storage.js's profiles index) — whichever is active.
     const renameModal = document.getElementById('renameModal');
     const renameInput = document.getElementById('renameInput');
     const renameAvatarField = document.getElementById('renameAvatarField');

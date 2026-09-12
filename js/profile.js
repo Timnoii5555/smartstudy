@@ -223,15 +223,15 @@
             renderEmojiPicker();
             renderProfileList();
 
-            // Once real accounts work, the local/guest path is retired from the
-            // UI entirely — it only ever reappears as a fallback if Firebase
-            // itself is unreachable (see js/auth.js's isEnabled()).
-            const useCloudOnly = Auth.isEnabled();
-            authSection.hidden = !useCloudOnly;
-            guestSectionLabel.hidden = useCloudOnly;
-            profileListContainer.hidden = useCloudOnly;
-            createProfileCard.hidden = useCloudOnly;
-            createProfileWrap.hidden = useCloudOnly;
+            // Real accounts are the lead option once Firebase is configured,
+            // but the local guest path underneath the "or" divider always
+            // stays reachable too — never forcing a signup before someone
+            // can even try the app is a hard rule here, not just a nicety.
+            authSection.hidden = !Auth.isEnabled();
+            guestSectionLabel.hidden = false;
+            profileListContainer.hidden = false;
+            createProfileCard.hidden = false;
+            createProfileWrap.hidden = false;
             if (Auth.isEnabled()) {
                 setAuthTab('login');
                 loginEmail.value = ''; loginPassword.value = '';

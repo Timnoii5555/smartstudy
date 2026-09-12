@@ -22,10 +22,9 @@
     const dashboardMainSubject = document.getElementById('dashboardMainSubject');
     const checklistContainer = document.getElementById('syllabusChecklistContainer');
     const readAheadPrompt = document.getElementById('readAheadPrompt');
-    const pointsBadge = document.getElementById('pointsBadge');
     const streakBadge = document.getElementById('streakBadge');
-    const questsCard = document.getElementById('questsCard');
     const readinessScoreCard = document.getElementById('readinessScoreCard');
+    const notTodayBtn = document.getElementById('notTodayBtn');
 
     const RING_CIRCUMFERENCE = 2 * Math.PI * 88; // matches the SVG circle's r="88"
 
@@ -52,7 +51,6 @@
         // No explicit render() call here: this screen is subscribed to state
         // changes below and re-renders itself whenever it is the active screen.
         State.commit({ syllabusProgress: allProgress });
-        if (!wasDone && TFS.Quests) TFS.Quests.bump('complete-topic', 1);
     }
 
     /** The end of the "currently visible" window into the reading plan:
@@ -124,10 +122,24 @@
     function renderChecklist(subject) {
         checklistContainer.innerHTML = '';
         if (!subject) {
-            checklistContainer.appendChild(U.el('p', { className: 'text-outline text-center', text: I18n.t('s3.emptyChecklist') }));
+            // Reached by a guest who used the landing page's "just start
+            // focusing" shortcut and then tapped Home before ever picking a
+            // subject — still a real, useful state, not a dead end: explain
+            // what to do next and offer both the structured path and staying
+            // in Focus mode a moment longer (Phase 2's empty-state rule).
+            checklistContainer.appendChild(U.el('div', { className: 'text-center', attrs: { style: 'padding:1rem 0' } }, [
+                U.el('p', { className: 'text-outline', attrs: { style: 'margin-bottom:1rem' }, text: I18n.t('s3.emptyChecklist') }),
+                U.el('button', {
+                    className: 'btn btn--primary btn--sm', attrs: { type: 'button', style: 'margin:0 auto' },
+                    text: I18n.t('s3.emptyChecklistCta'),
+                    on: { click: () => TFS.Router.show('screen1') }
+                })
+            ]));
             readAheadPrompt.hidden = true;
+            notTodayBtn.hidden = true;
             return;
         }
+        notTodayBtn.hidden = false;
         const progress = getTopicProgressMap(subject.id);
         const todaysTopics = getTodaysTopics(subject);
         totalLessonsBadge.textContent = String(todaysTopics.length);
@@ -150,15 +162,10 @@
         renderReadAheadPrompt(subject, todaysTopics, progress);
     }
 
-    function renderPointsBadge() {
-        if (!TFS.Quests) return;
-        const points = State.get().points.total;
-        const level = TFS.Quests.levelFor(points);
-        pointsBadge.innerHTML = '';
-        pointsBadge.appendChild(U.el('span', { className: 'material-symbols-outlined', attrs: { 'aria-hidden': 'true', style: 'font-size:1rem' }, text: 'star' }));
-        pointsBadge.appendChild(document.createTextNode(I18n.t('quests.pointsBadge', { n: points, level: I18n.pick(level.current.title) })));
-    }
-
+    /** The streak badge is deliberately small, quiet, and never the most
+     *  prominent thing on the screen (see js/streak.js's file header for the
+     *  forgiving design it's built on) — just a number, plus how many
+     *  "freeze" days are left this month once fewer than 2 remain. */
     function renderStreakBadge() {
         const streak = State.get().streak;
         if (!streak.current) { streakBadge.hidden = true; return; }
@@ -166,6 +173,10 @@
         streakBadge.innerHTML = '';
         streakBadge.appendChild(U.el('span', { className: 'material-symbols-outlined', attrs: { 'aria-hidden': 'true', style: "font-size:1rem;font-variation-settings:'FILL' 1" }, text: 'local_fire_department' }));
         streakBadge.appendChild(document.createTextNode(I18n.t('s3.streakBadge', { n: streak.current })));
+        const freezesLeft = TFS.Streak ? TFS.Streak.freezesRemaining() : 2;
+        if (freezesLeft < 2) {
+            streakBadge.title = I18n.t('s3.streakFreezesLeft', { n: freezesLeft });
+        }
     }
 
     /** How many of the last 7 calendar days (today included) hit the daily
@@ -221,6 +232,37 @@
         readinessScoreCard.appendChild(list);
     }
 
+    /** "Not up for it today" (Phase 2): defers whatever is left of *today's*
+     *  scheduled reading — never the whole due-by-cutoff window, which may
+     *  already include topics the learner deliberately pulled forward via
+     *  "read ahead" — into the following days, using the same day-capacity
+     *  logic the plan was built with. No confirmation dialog, no streak
+     *  penalty, just a brief neutral toast; see js/planner.js's
+     *  redistributeIncomplete for how the re-packing itself works. */
+    function deferToday(subject) {
+        const plan = State.get().plan.readingPlan;
+        const today = U.formatDateISO(new Date());
+        if (!plan || plan.subjectId !== subject.id) {
+            // No structured day-by-day plan to redistribute (e.g. legacy data) —
+            // there's nothing to move, so just acknowledge and stop there.
+            TFS.Toast.info(I18n.t('s3.notTodayToast'));
+            return;
+        }
+        const progress = getTopicProgressMap(subject.id);
+        const todaysScheduled = TFS.Planner.topicsForDate(plan, today);
+        const incomplete = todaysScheduled.filter(id => !progress[id]);
+        if (incomplete.length > 0) {
+            const newPlan = TFS.Planner.redistributeIncomplete(plan, today, incomplete, State.get().plan.dailyGoalSeconds, subject.topics);
+            State.commit({ plan: { readingPlan: newPlan, readAheadUntilDate: null } });
+        }
+        TFS.Toast.info(I18n.t('s3.notTodayToast'));
+    }
+
+    notTodayBtn.addEventListener('click', () => {
+        const subject = getCurrentSubject();
+        if (subject) deferToday(subject);
+    });
+
     function markSubjectCompleted(subjectId) {
         const done = State.get().plan.completedSubjects || [];
         if (!done.includes(subjectId)) {
@@ -247,11 +289,7 @@
         progressCircle.setAttribute('stroke-dashoffset', (RING_CIRCUMFERENCE - (percent / 100) * RING_CIRCUMFERENCE).toFixed(2));
 
         renderChecklist(subject);
-        renderPointsBadge();
-        if (TFS.Quests) {
-            TFS.Quests.renderCard(questsCard);
-            TFS.Quests.updateStreak();
-        }
+        if (TFS.Streak) TFS.Streak.reconcile();
         renderStreakBadge();
         renderReadinessScore(percent);
 

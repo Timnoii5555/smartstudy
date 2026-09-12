@@ -1,20 +1,21 @@
 /**
  * auth.js
- * Real accounts (email/password sign-up & log-in), photo avatars, and a
- * cross-user leaderboard — all via Firebase Auth + Firestore (no Firebase
- * Storage — see the avatar note below for why). Every function here is
- * safe to call even when Firebase isn't configured
- * yet (see js/firebaseConfig.js): `isEnabled()` returns false and the app
- * keeps working entirely offline through the local profile system
+ * Real accounts (email/password sign-up & log-in) and photo avatars, via
+ * Firebase Auth + Firestore (no Firebase Storage — see the avatar note below
+ * for why). Every function here is safe to call even when Firebase isn't
+ * configured yet (see js/firebaseConfig.js): `isEnabled()` returns false and
+ * the app keeps working entirely offline through the local profile system
  * (js/profile.js) either way.
  *
- * Scope decision, on purpose: only identity + leaderboard fields (display
- * name, avatar URL, points) live in the cloud, in one Firestore document per
- * user (`users/{uid}`). Everything else a learner has — schedule,
- * flashcards, focus stats, syllabus progress, the reading plan — stays local
- * to this device/profile, exactly as before. Syncing *all* of that across
- * devices would be a much bigger project than "let people log in for real
- * and see how they stack up against others."
+ * Scope decision, on purpose: only identity fields (display name, avatar
+ * URL) live in the cloud, in one Firestore document per user
+ * (`users/{uid}`). There is deliberately no cross-user leaderboard or any
+ * other feature that compares learners against each other — every stat this
+ * app shows compares a learner only to their own past. Everything else a
+ * learner has — schedule, flashcards, focus stats, syllabus progress, the
+ * reading plan — stays local to this device/profile. Syncing *all* of that
+ * across devices would be a much bigger project than "let people log in for
+ * real from more than one device."
  *
  * Avatar photos deliberately do NOT use Firebase Storage: as of late 2024,
  * new Firebase projects must be on the paid "Blaze" plan (a billing card on
@@ -138,7 +139,7 @@
         }
         await cred.user.updateProfile({ displayName });
         await db.collection('users').doc(uid).set({
-            displayName, avatarURL: avatarURL || null, points: 0,
+            displayName, avatarURL: avatarURL || null,
             createdAt: global.firebase.firestore.FieldValue.serverTimestamp(),
             lastActive: global.firebase.firestore.FieldValue.serverTimestamp()
         });
@@ -159,8 +160,8 @@
 
     /** Renames the currently logged-in account everywhere its display name is
      *  read from: the Firebase Auth profile itself, and the mirrored
-     *  Firestore doc the leaderboard actually queries (Auth profile changes
-     *  aren't visible to other users' leaderboard reads, only this document is). */
+     *  Firestore doc (kept in sync purely so a future device/session reading
+     *  this account's profile back sees the same name either way). */
     async function updateDisplayName(name) {
         if (!currentUser) throw new Error('not_logged_in');
         await currentUser.updateProfile({ displayName: name });
@@ -177,34 +178,20 @@
         return avatarURL;
     }
 
-    /** The current user's own Firestore doc (display name, avatar, points) —
-     *  used to prefill the "edit profile" modal, since Firebase Auth's own
-     *  user object doesn't carry the avatar (only Firestore does here). */
+    /** The current user's own Firestore doc (display name, avatar) — used to
+     *  prefill the "edit profile" modal, since Firebase Auth's own user
+     *  object doesn't carry the avatar (only Firestore does here). */
     async function getOwnProfile() {
         if (!currentUser || !db) return null;
         const doc = await db.collection('users').doc(currentUser.uid).get();
         return doc.exists ? doc.data() : null;
     }
 
-    /** One-way mirror: local points (computed by quests.js) → cloud. The
-     *  cloud copy is read-only from the app's own point of view — it exists
-     *  only so the leaderboard query has something to read across users. */
-    function syncPoints(points) {
-        if (!currentUser || !db) return;
-        db.collection('users').doc(currentUser.uid).set({ points }, { merge: true })
-            .catch(e => console.warn('[auth] Points sync failed (offline?)', e));
-    }
-
-    async function fetchLeaderboard(limitCount = 50) {
-        const snap = await db.collection('users').orderBy('points', 'desc').limit(limitCount).get();
-        return snap.docs.map(doc => ({ uid: doc.id, ...doc.data() }));
-    }
-
     init();
 
     TFS.Auth = {
         isEnabled, isCloudProfileId, cloudProfileId, init, onAuthChange, getCurrentUser,
-        signUp, logIn, logOut, resetPassword, updateDisplayName, updateAvatar, getOwnProfile, syncPoints, fetchLeaderboard, errorKey
+        signUp, logIn, logOut, resetPassword, updateDisplayName, updateAvatar, getOwnProfile, errorKey
     };
 
 })(window);

@@ -8,8 +8,8 @@
  * TFS.FIREBASE_ENABLED stays false and js/auth.js never touches the network:
  * the app quietly runs on the local-only profile system (js/profile.js)
  * exactly as it did before real accounts existed. Nothing breaks either way
- * — real accounts, photo avatars and the leaderboard just switch on
- * automatically the moment this file has real values.
+ * — real accounts and photo avatars just switch on automatically the moment
+ * this file has real values.
  */
 (function (global) {
     'use strict';

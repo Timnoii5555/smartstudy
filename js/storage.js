@@ -145,28 +145,26 @@
                 return { decks, deckOrder: Object.keys(decks), currentDeckId: Object.keys(decks)[0] || null };
             })(),
             focus: {
-                totalSecondsByDate: {}, // 'YYYY-MM-DD' -> seconds
-                mode: 'focus',          // 'focus' | 'shortBreak' | 'longBreak'
-                phaseRemainingSeconds: 25 * 60, // matches settings.pomodoro.focusMin by default
+                totalSecondsByDate: {},     // 'YYYY-MM-DD' -> seconds
+                totalSecondsBySubject: {},  // subjectId -> { 'YYYY-MM-DD': seconds } — see js/stats.js
+                timeOfDayMinutes: { morning: 0, afternoon: 0, evening: 0, night: 0 }, // coarse "best time of day" buckets
+                mode: 'focus',              // 'focus' | 'shortBreak' | 'longBreak'
                 cyclesCompletedToday: 0,
+                runStartedAtMs: null,       // epoch ms the current run segment began, or null while paused — see js/focus.js
+                accumulatedMs: 0,           // ms of the current phase already elapsed from previous run segments
+                lastCreditAtMs: null,       // last time totals above were credited, so a reload never double-counts or drops time
                 lastActiveDateISO: null
             },
             ui: {
-                lastScreen: 'screen1',
-                hasSeenQuestIntro: false
+                lastScreen: 'screen1'
             },
             streak: {
-                current: 0,      // consecutive days with real study activity, ending today or yesterday
-                longest: 0,      // best streak ever, kept even after the current one breaks
-                lastActiveDateISO: null
-            },
-            quests: {
-                dateISO: null, // set to today's date the first time quests.js touches it
-                progress: {},  // questId -> number, reset daily
-                claimed: {}    // questId -> true, reset daily
-            },
-            points: {
-                total: 0 // cumulative — never reset by the daily quest rollover
+                current: 0,               // consecutive days with >=15 min of real focus time, ending today or yesterday
+                longest: 0,               // best streak ever, kept even after the current one breaks
+                lastActiveDateISO: null,  // last calendar day that counted toward the streak
+                lastReconciledDateISO: null, // last day js/streak.js checked for a missed day since lastActiveDateISO
+                freezeMonthKey: null,     // 'YYYY-MM' — which month freezesUsedThisMonth applies to
+                freezesUsedThisMonth: 0   // 0-2; a missed day consumes one automatically before the streak ever drops
             }
         };
     }

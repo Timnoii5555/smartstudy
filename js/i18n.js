@@ -33,6 +33,8 @@
                 heroSubtitle: 'SmartStudy คำนวณแผนอ่านรายวันให้อัตโนมัติจากวันสอบจริงของคุณ พร้อมระบบเกมมิฟิเคชันที่ทำให้การอ่านหนังสือกลายเป็นสิ่งที่อยากเปิดมาทำทุกวัน',
                 ctaBtn: 'เริ่มต้นใช้งานฟรี',
                 ctaNote: 'ไม่ต้องใช้บัตรเครดิต · ไม่มีโฆษณา · ฟรีตลอดไป',
+                skipToFocus: 'หรือเริ่มโฟกัสตอนนี้เลย — ไม่ต้องตั้งค่าอะไรก่อน',
+                quickGuestName: 'ผู้มาเยือน',
                 stepsTitle: 'เริ่มต้นใช้งานยังไง',
                 newBadge: 'ใหม่',
                 step1Title: '1. เลือกวิชาที่จะสอบ',
@@ -40,7 +42,7 @@
                 step2Title: '2. ตั้งวันสอบและเวลาที่มี',
                 step2Desc: 'บอกวันสอบและจำนวนชั่วโมงที่อ่านได้ต่อวัน ระบบจะสร้างแผนอ่านรายวันให้อัตโนมัติทันที',
                 step3Title: '3. ทำตามแผนทุกวัน',
-                step3Desc: 'ติ๊กหัวข้อที่อ่านจบวันนี้ ทำเควสประจำวัน สะสมแต้ม และต่อสตรีค ได้จากหน้าแดชบอร์ดเดียว',
+                step3Desc: 'ติ๊กหัวข้อที่อ่านจบวันนี้ และต่อสตรีคแบบไม่กดดัน ได้จากหน้าแดชบอร์ดเดียว',
                 step4Title: '4. ติดตามความพร้อมสอบจริง',
                 step4Desc: 'ใช้โหมดโฟกัสพร้อมเสียงบรรยากาศ แล้วดูคะแนนความพร้อมสอบรวมของคุณ — ไม่ใช่แค่ "% เสร็จแล้ว" เฉยๆ — ขยับขึ้นเรื่อยๆ',
                 compareTitle: 'ต่างจากแอปติวทั่วไปยังไง',
@@ -48,12 +50,12 @@
                 compareThem1: 'ต้องพิมพ์ตารางเรียนเองทั้งหมด',
                 compareThem2: 'ความคืบหน้าคือแถบ "% เสร็จแล้ว" เส้นเดียว',
                 compareThem3: 'เสียงบรรยากาศ = ไฟล์ mp3 วนลูป',
-                compareThem4: 'อ่านคนเดียว ไม่เห็นภาพว่าตัวเองอยู่ตรงไหนเทียบกับคนอื่น',
+                compareThem4: 'อ่านคนเดียว ไม่รู้เลยว่ามีใครกำลังอ่านอยู่เหมือนกันไหม',
                 compareUsLabel: 'SmartStudy',
                 compareUs1: 'ระบบสร้างแผนให้จากวันสอบของคุณเอง',
                 compareUs2: 'คะแนนรวมที่นับความสม่ำเสมอด้วย ไม่ใช่แค่ % เนื้อหา',
                 compareUs3: 'เสียงสังเคราะห์สดด้วย Web Audio ไม่มีไฟล์เลย',
-                compareUs4: 'เควสประจำวัน แต้ม สตรีค และกระดานผู้นำของจริง',
+                compareUs4: 'ดูว่าตอนนี้มีคนกำลังโฟกัสอยู่กี่คน หรือชวนเพื่อนมาอ่านด้วยกันในห้องส่วนตัว — ไม่มีการจัดอันดับใครแข่งกับใคร',
                 finalTitle: 'พร้อมวางแผนสอบให้เป็นระบบแล้วหรือยัง?',
                 footerNote: 'สร้างมาเพื่อนักเรียนที่กำลังเตรียมสอบ TCAS'
             },
@@ -124,10 +126,14 @@
                 todoTitle: 'หัวข้อที่ต้องอ่าน',
                 lessonsUnit: 'บท',
                 tickHint: 'ติ๊กเมื่อเรียนจบ',
-                emptyChecklist: 'ยังไม่มีวิชาที่เลือก กลับไปเลือกวิชาที่หน้าแรกก่อนนะครับ',
+                emptyChecklist: 'ยังไม่มีวิชาที่เลือก เลือกวิชาแรกของคุณเพื่อสร้างแผนอ่านหนังสือให้อัตโนมัติ',
+                emptyChecklistCta: 'เลือกวิชาที่จะอ่าน',
                 readAheadText: 'เก่งมาก! อ่านครบตามเป้าหมายวันนี้แล้ว อยากอ่านต่อเลยไหม?',
                 readAheadBtn: 'อ่านต่อเลย',
                 streakBadge: '{n} วันติดต่อกัน',
+                streakFreezesLeft: 'เหลือวันหยุดพัก (freeze) {n} วันเดือนนี้',
+                notTodayBtn: 'วันนี้ไม่ไหว',
+                notTodayToast: 'ไม่เป็นไรครับ พักได้ งานที่เหลือของวันนี้ถูกเลื่อนไปวันถัดไปให้แล้ว',
                 readinessScoreTitle: 'คะแนนความพร้อมสอบรวม',
                 readinessScoreHint: 'ไม่ใช่แค่ % เนื้อหา แต่รวมความสม่ำเสมอด้วย',
                 readinessFactorContent: 'เนื้อหาที่อ่านจบ',
@@ -200,14 +206,6 @@
                 errTooMany: 'ลองผิดหลายครั้งเกินไป กรุณารอสักครู่แล้วลองใหม่',
                 errGeneric: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง'
             },
-            modalLeaderboard: {
-                title: 'กระดานผู้นำ',
-                notConfigured: 'ฟีเจอร์นี้ยังไม่เปิดใช้งาน (ต้องตั้งค่าระบบบัญชีก่อน)',
-                needLogin: 'เข้าสู่ระบบด้วยบัญชีจริงเพื่อดูกระดานผู้นำและแข่งกับคนอื่นครับ',
-                loadError: 'โหลดกระดานผู้นำไม่สำเร็จ ลองใหม่อีกครั้ง',
-                empty: 'ยังไม่มีใครอยู่ในกระดานผู้นำเลย',
-                anonymous: 'ผู้ใช้ไม่ระบุชื่อ'
-            },
             modalHistory: {
                 title: 'ประวัติการอ่าน',
                 empty: 'ยังไม่มีหัวข้อที่อ่านจบเลย เริ่มติ๊กจากหน้าแรกได้เลยครับ',
@@ -265,14 +263,8 @@
                 historySection: 'ประวัติการอ่าน', historyBtn: 'ดูสิ่งที่อ่านจบไปแล้ว',
                 feedbackSection: 'ความคิดเห็น', reportBtn: 'รายงานบัค / ข้อเสนอแนะ'
             },
-            quests: {
-                cardTitle: 'เควสประจำวัน',
-                introText: 'ทำภารกิจแต่ละอันให้ครบตามเป้า แล้วกด "รับ" เพื่อรับคะแนนสะสม ยิ่งสะสมเยอะ เลเวลก็ยิ่งสูงขึ้น!',
-                introDismiss: 'เข้าใจแล้ว',
-                pointsTotal: '{n} คะแนนสะสม',
-                pointsBadge: '⭐ {n} · {level}',
-                claim: 'รับ +{points}',
-                claimedToast: 'รับรางวัลแล้ว! +{points} คะแนน 🎉'
+            streak: {
+                freezeUsedToast: 'ใช้วันหยุดพัก (freeze) ไป {n} วันแล้ว ยังเหลืออีก {left} วันในเดือนนี้ สตรีคของคุณยังอยู่ครบ'
             },
             errors: {
                 storageUnavailable: 'เบราว์เซอร์นี้ไม่รองรับการบันทึกข้อมูลถาวร (เช่น โหมดส่วนตัว) การเปลี่ยนแปลงจะหายไปเมื่อปิดแท็บนี้',
@@ -281,7 +273,7 @@
                 stopTimerFirst: 'กรุณาหยุดเวลาก่อนแก้ไขเป้าหมายครับ'
             },
             aria: {
-                closeDialog: 'ปิดหน้าต่าง', openSettings: 'เปิดการตั้งค่า', openLeaderboard: 'กระดานผู้นำ', openSearch: 'ค้นหา',
+                closeDialog: 'ปิดหน้าต่าง', openSettings: 'เปิดการตั้งค่า', openSearch: 'ค้นหา',
                 closeSearch: 'ปิดการค้นหา', deleteWord: 'ลบคำศัพท์', addWord: 'เพิ่มคำศัพท์',
                 prevMonth: 'เดือนก่อนหน้า', nextMonth: 'เดือนถัดไป', prevWeek: 'สัปดาห์ก่อนหน้า', nextWeek: 'สัปดาห์ถัดไป',
                 playAmbient: 'เล่นเสียงบรรยากาศ', pauseAmbient: 'หยุดเสียงบรรยากาศ', ambientVolume: 'ระดับเสียงบรรยากาศ',
@@ -304,6 +296,8 @@
                 heroSubtitle: 'SmartStudy builds your day-by-day reading plan automatically from your real exam date, and turns studying into something you actually want to open every day.',
                 ctaBtn: 'Start for free',
                 ctaNote: 'No credit card · No ads · Free forever',
+                skipToFocus: 'Or just start a focus session now — no setup',
+                quickGuestName: 'Guest',
                 stepsTitle: 'How it works',
                 newBadge: 'New',
                 step1Title: '1. Pick your exam',
@@ -311,7 +305,7 @@
                 step2Title: '2. Set your exam date & hours',
                 step2Desc: 'Tell it when you sit the exam and how many hours a day you can study — a full day-by-day reading plan is generated automatically.',
                 step3Title: '3. Follow the plan, daily',
-                step3Desc: "Check off today's topics, clear daily quests, earn points and build a study streak — right from your dashboard.",
+                step3Desc: "Check off today's topics right from your dashboard and build a gentle, forgiving study streak.",
                 step4Title: '4. Track real readiness',
                 step4Desc: 'Use Focus mode with live ambient sound, then watch your composite readiness score — not just a flat "% done" — climb over time.',
                 compareTitle: 'How this is different from a typical planner',
@@ -319,12 +313,12 @@
                 compareThem1: 'You type in your own schedule by hand.',
                 compareThem2: 'Progress is one flat "% done" bar.',
                 compareThem3: 'Ambient sound = a looping mp3 file.',
-                compareThem4: 'Studying alone, no sense of progress vs. others.',
+                compareThem4: 'Studying alone, with no sense anyone else is doing it too.',
                 compareUsLabel: 'SmartStudy',
                 compareUs1: 'The plan is generated for you from your exam date.',
                 compareUs2: 'A composite score that also rewards consistency.',
                 compareUs3: 'Sound synthesized live with Web Audio — zero files.',
-                compareUs4: 'Daily quests, points, streaks and a real leaderboard.',
+                compareUs4: 'See how many others are focusing right now, or study together in a private room — never a public ranking.',
                 finalTitle: 'Ready to plan your exam prep properly?',
                 footerNote: 'Built for students preparing for TCAS.'
             },
@@ -395,10 +389,14 @@
                 todoTitle: "Topics to read",
                 lessonsUnit: 'topics',
                 tickHint: 'Tap to mark as done',
-                emptyChecklist: 'No subject selected yet. Go back to the first screen to choose one.',
+                emptyChecklist: "No subject selected yet — pick your first one and we'll build a reading plan automatically.",
+                emptyChecklistCta: 'Choose a subject',
                 readAheadText: "Nice work! You've hit today's target. Want to keep reading ahead?",
                 readAheadBtn: 'Keep reading',
                 streakBadge: '{n}-day streak',
+                streakFreezesLeft: '{n} freeze day(s) left this month',
+                notTodayBtn: 'Not feeling it today',
+                notTodayToast: "No worries — take the day off. Today's remaining topics have been pushed to the next days.",
                 readinessScoreTitle: 'Composite exam-readiness score',
                 readinessScoreHint: "Not just content % — consistency counts too",
                 readinessFactorContent: 'Content finished',
@@ -471,14 +469,6 @@
                 errTooMany: 'Too many attempts — please wait a moment and try again.',
                 errGeneric: 'Something went wrong — please try again.'
             },
-            modalLeaderboard: {
-                title: 'Leaderboard',
-                notConfigured: "This feature isn't set up yet (needs the account system configured first).",
-                needLogin: 'Log in with a real account to see the leaderboard and compete with others.',
-                loadError: 'Could not load the leaderboard — please try again.',
-                empty: 'Nobody is on the leaderboard yet.',
-                anonymous: 'Anonymous learner'
-            },
             modalHistory: {
                 title: 'Reading history',
                 empty: "You haven't finished any topics yet — start ticking them off on the first screen.",
@@ -536,14 +526,8 @@
                 historySection: 'Reading history', historyBtn: "See what you've finished",
                 feedbackSection: 'Feedback', reportBtn: 'Report a bug / suggestion'
             },
-            quests: {
-                cardTitle: 'Daily quests',
-                introText: 'Complete each quest to its target, then tap "Claim" for points. The more you stack up, the higher your level!',
-                introDismiss: 'Got it',
-                pointsTotal: '{n} points',
-                pointsBadge: '⭐ {n} · {level}',
-                claim: 'Claim +{points}',
-                claimedToast: 'Reward claimed! +{points} points 🎉'
+            streak: {
+                freezeUsedToast: 'Used {n} freeze day(s) — {left} left this month. Your streak is still intact.'
             },
             errors: {
                 storageUnavailable: "This browser can't persist data here (e.g. private browsing). Changes will be lost when you close this tab.",
@@ -552,7 +536,7 @@
                 stopTimerFirst: 'Please stop the timer before editing the goal.'
             },
             aria: {
-                closeDialog: 'Close dialog', openSettings: 'Open settings', openLeaderboard: 'Leaderboard', openSearch: 'Search',
+                closeDialog: 'Close dialog', openSettings: 'Open settings', openSearch: 'Search',
                 closeSearch: 'Close search', deleteWord: 'Delete word', addWord: 'Add word',
                 prevMonth: 'Previous month', nextMonth: 'Next month', prevWeek: 'Previous week', nextWeek: 'Next week',
                 playAmbient: 'Play ambient sound', pauseAmbient: 'Pause ambient sound', ambientVolume: 'Ambient volume',

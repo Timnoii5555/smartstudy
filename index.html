@@ -73,6 +73,10 @@
                 </button>
                 <span class="text-outline" style="font-size:0.8125rem" data-i18n="landing.ctaNote">No credit card · No ads · Free forever</span>
             </div>
+            <button type="button" id="landingSkipToFocusBtn" class="landing-skip-link">
+                <span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.05rem">bolt</span>
+                <span data-i18n="landing.skipToFocus">Or just start a focus session now — no setup</span>
+            </button>
         </section>
 
         <section class="landing-section">
@@ -94,7 +98,7 @@
                     <span class="landing-step__num">3</span>
                     <span class="landing-step__icon material-symbols-outlined" aria-hidden="true">task_alt</span>
                     <h4 data-i18n="landing.step3Title">Follow the plan, daily</h4>
-                    <p data-i18n="landing.step3Desc">Check off today's topics, clear daily quests, earn points and build a study streak — right from your dashboard.</p>
+                    <p data-i18n="landing.step3Desc">Check off today's topics right from your dashboard and build a gentle, forgiving study streak.</p>
                 </div>
                 <div class="landing-step landing-step--new">
                     <span class="landing-step__badge" data-i18n="landing.newBadge">New</span>
@@ -114,14 +118,14 @@
                     <p data-i18n="landing.compareThem1">You type in your own schedule by hand.</p>
                     <p data-i18n="landing.compareThem2">Progress is one flat "% done" bar.</p>
                     <p data-i18n="landing.compareThem3">Ambient sound = a looping mp3 file.</p>
-                    <p data-i18n="landing.compareThem4">Studying alone, no sense of progress vs. others.</p>
+                    <p data-i18n="landing.compareThem4">Studying alone, with no sense anyone else is doing it too.</p>
                 </div>
                 <div class="landing-compare__col landing-compare__col--us">
                     <span class="landing-compare__label" data-i18n="landing.compareUsLabel">SmartStudy</span>
                     <p data-i18n="landing.compareUs1">The plan is generated for you from your exam date.</p>
                     <p data-i18n="landing.compareUs2">A composite score that also rewards consistency.</p>
                     <p data-i18n="landing.compareUs3">Sound synthesized live with Web Audio — zero files.</p>
-                    <p data-i18n="landing.compareUs4">Daily quests, points, streaks and a real leaderboard.</p>
+                    <p data-i18n="landing.compareUs4">See how many others are focusing right now, or study together in a private room — never a public ranking.</p>
                 </div>
             </div>
         </section>
@@ -359,9 +363,6 @@
                 <h1 data-i18n="brand.short">Smart Study</h1>
             </button>
             <div class="app-header__actions">
-                <button type="button" id="openLeaderboardBtn" class="icon-btn" data-i18n-attr='{"aria-label":"aria.openLeaderboard"}' aria-label="Leaderboard">
-                    <span class="material-symbols-outlined" aria-hidden="true">emoji_events</span>
-                </button>
                 <button type="button" class="icon-btn js-open-settings" data-i18n-attr='{"aria-label":"aria.openSettings"}' aria-label="Settings">
                     <span class="material-symbols-outlined" aria-hidden="true">settings</span>
                 </button>
@@ -373,15 +374,10 @@
         <section style="margin-bottom:2rem">
             <div class="flex items-center justify-between flex-wrap gap-2">
                 <h1 data-screen-heading style="font-size:1.75rem;font-weight:600" data-i18n="s3.greeting">Hi, here's today's summary</h1>
-                <div class="flex items-center gap-2">
-                    <span id="streakBadge" class="streak-badge" hidden></span>
-                    <span id="pointsBadge" class="points-badge"></span>
-                </div>
+                <span id="streakBadge" class="streak-badge" hidden></span>
             </div>
             <p class="text-outline" style="font-size:0.875rem" data-i18n="s3.subtitle">Update your progress below 🚀</p>
         </section>
-
-        <div id="questsCard" class="card quests-card" style="margin-bottom:1.5rem"></div>
 
         <div id="readinessScoreCard" class="card readiness-score-card" style="margin-bottom:1.5rem"></div>
 
@@ -438,6 +434,10 @@
                 </div>
                 <div id="syllabusChecklistContainer" class="checklist"></div>
                 <div id="readAheadPrompt" hidden style="margin-top:1rem"></div>
+                <button type="button" id="notTodayBtn" class="btn btn--ghost btn--sm" style="margin-top:1rem">
+                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.05rem">event_busy</span>
+                    <span data-i18n="s3.notTodayBtn">Not feeling it today</span>
+                </button>
             </div>
         </div>
     </main>
@@ -654,7 +654,7 @@
             <div class="focus-ring-glow"></div>
             <svg class="focus-ring-svg" viewBox="0 0 200 200">
                 <circle cx="100" cy="100" r="92" fill="none" stroke="var(--color-surface-highest)" stroke-width="8"></circle>
-                <circle id="focusTimerRing" cx="100" cy="100" r="92" fill="none" stroke="var(--color-primary)" stroke-linecap="round" stroke-width="10" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" style="transition:stroke-dashoffset 1s linear"></circle>
+                <circle id="focusTimerRing" cx="100" cy="100" r="92" fill="none" stroke="var(--color-primary)" stroke-linecap="round" stroke-width="10" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"></circle>
             </svg>
             <div class="text-center" style="z-index:10;cursor:pointer" id="btnOpenSetTimerModal" title="Set your daily goal">
                 <div class="focus-phase-badge"><span id="focusPhaseLabel" data-i18n="s6.phaseFocus">Focus</span> · <span id="focusCycleLabel"></span></div>
@@ -857,16 +857,6 @@
             <button type="button" id="cancelDeleteBtn" class="btn btn--ghost btn--flex" data-i18n="common.cancel">Cancel</button>
             <button type="button" id="confirmDeleteBtn" class="btn btn--danger btn--flex" data-i18n="modalDeleteClass.ok">Delete</button>
         </div>
-    </div>
-</div>
-
-<div id="leaderboardModal" class="modal-overlay hidden">
-    <div class="modal-panel modal-panel--sheet" data-modal-panel>
-        <div class="modal-header">
-            <h2 class="modal-title"><span class="material-symbols-outlined" aria-hidden="true">emoji_events</span> <span data-i18n="modalLeaderboard.title">Leaderboard</span></h2>
-            <button type="button" id="closeLeaderboardBtn" class="modal-close" data-i18n-attr='{"aria-label":"aria.closeDialog"}' aria-label="Close"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">close</span></button>
-        </div>
-        <div id="leaderboardBody"></div>
     </div>
 </div>
 
@@ -1122,7 +1112,7 @@
 <script src="js/i18n.js"></script>
 <script src="js/theme.js"></script>
 <script src="js/toast.js"></script>
-<script src="js/quests.js"></script>
+<script src="js/streak.js"></script>
 <script src="js/customSounds.js"></script>
 <!-- Firebase (Auth + Firestore only — no Storage, see js/auth.js) is entirely
      optional: see js/firebaseConfig.js. If these fail to load (offline, or
@@ -1137,7 +1127,6 @@
 <script src="js/router.js"></script>
 <script src="js/profile.js"></script>
 <script src="js/landing.js"></script>
-<script src="js/leaderboard.js"></script>
 <script src="js/datepicker.js"></script>
 <script src="js/wheelpicker.js"></script>
 <script src="js/onboarding.js"></script>
