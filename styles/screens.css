@@ -167,6 +167,14 @@ html.dark .schedule-block--teal { background: rgba(20,184,166,0.15); color: #5ee
    time), not a decorative loop; prefers-reduced-motion (styles/base.css)
    already collapses this to an instant snap for anyone who's asked for that. */
 #flightPlane { transition: transform 1s linear; }
+/* Cabin windows: unlit (empty seat) by default, warmly lit for every real
+   learner currently sharing this flight — see js/focus.js's
+   renderFlightWindows(). Fill is a literal color, not a token: it's meant
+   to read as "a lit window at dusk" regardless of which of the 4 app
+   themes is active, the same reasoning as the plane's own fixed white. */
+.flight-window { fill: rgba(0, 0, 0, 0.28); transition: fill 0.6s ease, r 0.6s ease; }
+.flight-window.is-lit { fill: #ffd54f; }
+#flightTrail { transition: stroke-dashoffset 1s linear; }
 .flight-viz__route {
     position: absolute; top: 0.85rem; left: 50%; transform: translateX(-50%);
     display: flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.9rem;

@@ -236,11 +236,19 @@
     // ---------------------------------------------------------------- "Flight Focus"-style route visual + flight picker
 
     const flightPathEl = document.getElementById('flightPath');
+    const flightTrailEl = document.getElementById('flightTrail');
     const flightPlaneEl = document.getElementById('flightPlane');
+    const flightWindowEls = flightPlaneEl ? Array.from(flightPlaneEl.querySelectorAll('.flight-window')) : [];
     const flightDestCodeEl = document.getElementById('flightDestCode');
     const flightPickerRow = document.getElementById('flightPickerRow');
     const flightPickerLabel = document.getElementById('flightPickerLabel');
     let flightPathLength = null;
+    // How many real people are on this exact flight right now, including
+    // this learner — refreshed by refreshCoStudyCount() below whenever
+    // sharing is on and a flight matches; otherwise just "yourself" once a
+    // flight is selected at all, as flavor. renderFlightWindows() below is
+    // the only thing that reads this.
+    let knownFlightPassengerCount = 1;
 
     // A handful of curated study-session lengths, each given a (purely
     // decorative — not real airport/flight data) destination, the same
@@ -270,14 +278,27 @@
         return closest.code;
     }
 
+    /** Lights up one cabin window per real learner currently on this exact
+     *  flight (capped at however many window slots the plane actually has;
+     *  anyone beyond that is still counted in the text next to the
+     *  toggle, just not drawn individually). Never anything more specific
+     *  than a lit dot — see the HTML comment above #flightPlane for why. */
+    function renderFlightWindows(count) {
+        const lit = U.clamp(count, 0, flightWindowEls.length);
+        flightWindowEls.forEach((el, i) => el.classList.toggle('is-lit', i < lit));
+    }
+
     /** Moves the plane along the fixed route path to reflect how far into
      *  the current phase we are — the current-phase equivalent of what the
      *  old progress ring showed, computed the same timestamp-derived way
-     *  as the countdown itself so it's never a step behind it. */
+     *  as the countdown itself so it's never a step behind it. Also fills
+     *  in the "traveled" trail behind it and keeps the cabin windows in
+     *  sync with the last-known passenger count. */
     function renderFlightPlane() {
         if (!flightPathEl || !flightPlaneEl) return;
         const total = durationForMode(mode);
         if (flightDestCodeEl) flightDestCodeEl.textContent = nearestFlightCode(Math.round(total / 60));
+        renderFlightWindows(knownFlightPassengerCount);
 
         // SVG geometry queries (getTotalLength/getPointAtLength) are the one
         // part of this screen that isn't fully reliable across browsers —
@@ -297,6 +318,10 @@
             const p2 = flightPathEl.getPointAtLength(Math.min(flightPathLength, len + 1));
             const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI;
             flightPlaneEl.setAttribute('transform', `translate(${p1.x},${p1.y}) rotate(${angle})`);
+            if (flightTrailEl) {
+                flightTrailEl.setAttribute('stroke-dasharray', String(flightPathLength));
+                flightTrailEl.setAttribute('stroke-dashoffset', String(flightPathLength * (1 - progress)));
+            }
         } catch (e) {
             console.warn('[focus] Could not position the flight-path plane this render (will retry next tick).', e);
         }
@@ -419,8 +444,10 @@
             TFS.Toast.info(I18n.t('s6.phaseCompleteFocus'));
             // Landed for a break — a flight's shared room only makes sense
             // while actually mid-focus, so leave it rather than keep
-            // pinging a room for a flight that's no longer in the air.
+            // pinging a room for a flight that's no longer in the air, and
+            // reset the cabin back to just yourself until the next flight.
             if (TFS.Presence) TFS.Presence.stopHeartbeat();
+            knownFlightPassengerCount = 1;
         } else {
             mode = 'focus';
             TFS.Toast.info(I18n.t('s6.phaseCompleteBreak'));
@@ -805,15 +832,28 @@
     async function refreshCoStudyCount() {
         const flight = mode === 'focus' ? currentFocusFlight() : null;
         const enabled = State.get().settings.coStudyPublicEnabled;
-        if (!flight || !enabled || !TFS.Presence || !TFS.Presence.isAvailable()) { coStudyCountText.hidden = true; return; }
+        if (!flight || !enabled || !TFS.Presence || !TFS.Presence.isAvailable()) {
+            coStudyCountText.hidden = true;
+            knownFlightPassengerCount = 1; // just yourself, as flavor — see renderFlightWindows()
+            renderFlightWindows(knownFlightPassengerCount);
+            return;
+        }
         const n = await TFS.Presence.fetchFlightCount(flight.id);
         if (!isActive()) return; // the learner navigated away while this was in flight
         if (n === null) { coStudyCountText.hidden = true; return; }
+
+        // A heartbeat only exists once a session is actually running (see
+        // start()), so `n` only counts *this* learner once they've joined —
+        // before that, `n` is purely "other people already flying" and
+        // needs +1 for the window/count display to read as "yourself plus
+        // however many others", the same framing either way.
+        const totalIncludingSelf = isRunning() ? n : n + 1;
+        knownFlightPassengerCount = totalIncludingSelf;
+        renderFlightWindows(knownFlightPassengerCount);
+
         coStudyCountText.hidden = false;
-        // `n` includes this learner's own heartbeat once joined, so the
-        // "with you" count is n-1 — never claim company that isn't there.
-        coStudyCountText.textContent = n > 1
-            ? I18n.t('s6.coStudyCountActive', { n: n - 1 })
+        coStudyCountText.textContent = totalIncludingSelf > 1
+            ? I18n.t('s6.coStudyCountActive', { n: totalIncludingSelf - 1 })
             : I18n.t('s6.coStudyCountAlone');
     }
 
