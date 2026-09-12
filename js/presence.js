@@ -95,15 +95,30 @@
     async function sendHeartbeat(flightId) {
         const ref = membersRef(flightId);
         if (!isAvailable() || !ref) return;
+        // merge:true so a heartbeat that doesn't carry a seat (e.g. one
+        // fired right after a page reload, before this module's own
+        // in-memory currentSeat is set again) never wipes out the seat a
+        // previous heartbeat already wrote for this same document.
+        const payload = { lastHeartbeat: Date.now() };
+        if (currentSeat) payload.seat = currentSeat;
         try {
-            const payload = { lastHeartbeat: Date.now() };
-            if (currentSeat) payload.seat = currentSeat;
-            // merge:true so a heartbeat that doesn't carry a seat (e.g. one
-            // fired right after a page reload, before this module's own
-            // in-memory currentSeat is set again) never wipes out the seat
-            // a previous heartbeat already wrote for this same document.
             await ref.doc(myPresenceId()).set(payload, { merge: true });
-        } catch (e) { console.warn('[presence] heartbeat failed (Firestore rules for "presence_flights" may not be set up yet)', e); }
+        } catch (e) {
+            // A rule deployed before the `seat` field existed (see this
+            // file's header) rejects the *whole* write once `seat` is
+            // included, not just that field — which would silently break
+            // even the plain headcount for anyone who's ever picked a seat.
+            // Retry without it so presence itself keeps working regardless
+            // of whether that rule has been updated yet; only real seat
+            // occupancy stays unavailable until it is.
+            if (payload.seat) {
+                try {
+                    await ref.doc(myPresenceId()).set({ lastHeartbeat: Date.now() }, { merge: true });
+                    return;
+                } catch (e2) { /* fall through to the warning below */ }
+            }
+            console.warn('[presence] heartbeat failed (Firestore rules for "presence_flights" may not be set up yet)', e);
+        }
     }
 
     async function leave(flightId) {

@@ -282,6 +282,14 @@ body.is-immersive-focus { overflow: hidden; }
 
 .flight-picker__label { font-size: 0.75rem; font-weight: 600; text-align: center; margin-bottom: 0.6rem; }
 .flight-picker {
+    /* width:100% (not just the flex/overflow rules below) matters here:
+       .focus-shell is a flex column with align-items:center, so a child
+       with no explicit width sizes to fit its own content instead of the
+       column's available width — with 11 flight cards that content is far
+       wider than any phone screen, so without this the *whole row*, not
+       just its overflow, pushed past the viewport and made the entire page
+       scroll sideways instead of just this one row. */
+    width: 100%; min-width: 0;
     display: flex; gap: 0.65rem; overflow-x: auto; padding: 0.2rem 0.15rem 0.85rem;
     margin-bottom: 0.5rem; scroll-snap-type: x proximity;
 }

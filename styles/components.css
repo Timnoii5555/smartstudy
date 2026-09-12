@@ -254,7 +254,10 @@ input[type=range]::-moz-range-track { height: 0.5rem; background: var(--color-su
 
 .color-swatch { cursor: pointer; position: relative; }
 .color-swatch input { position: absolute; opacity: 0; pointer-events: none; }
-.color-swatch__dot { width: 2rem; height: 2rem; border-radius: 50%; border: 2px solid; transition: box-shadow 0.15s ease; }
+/* display:inline-block is required here — a bare <span> is inline by
+   default, which makes a browser ignore width/height entirely and collapse
+   this down to a thin sliver instead of a proper circular swatch. */
+.color-swatch__dot { display: inline-block; width: 2rem; height: 2rem; border-radius: 50%; border: 2px solid; transition: box-shadow 0.15s ease; }
 .color-swatch input:checked + .color-swatch__dot { box-shadow: 0 0 0 2px var(--color-surface-lowest), 0 0 0 4px currentColor; }
 .color-swatch input:focus-visible + .color-swatch__dot { box-shadow: var(--shadow-ring); }
 
