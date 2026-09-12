@@ -186,6 +186,20 @@
                 message: 'เนื้อหาที่เหลือต้องใช้เวลาอ่านรวมประมาณ {needHours} ชม. แต่จากจำนวนวันที่เหลือถึงวันสอบและเวลาที่ตั้งไว้ตอนนี้ ({haveHours} ชม./วัน) จะรวมได้ประมาณ {capacityHours} ชม. เท่านั้น (ขาดไปประมาณ {gapHours} ชม.) ลองเลือกทางใดทางหนึ่งด้านล่างได้เลยครับ',
                 increaseHours: 'เพิ่มเวลาอ่านต่อวัน', changeSubject: 'เลือกวิชาอื่นหรือลดเนื้อหา'
             },
+            modalStats: { title: 'สรุปรายสัปดาห์' },
+            stats: {
+                summaryTotal: 'สัปดาห์นี้คุณโฟกัสไปทั้งหมด {hrs} ชม.',
+                summaryUp: 'มากกว่าสัปดาห์ก่อน {hrs} ชม.',
+                summaryDown: 'น้อยกว่าสัปดาห์ก่อน {hrs} ชม.',
+                summaryLeastSubject: '{subject} เป็นวิชาที่ได้รับความสนใจน้อยที่สุดในตอนนี้',
+                thisWeekLabel: 'เวลาโฟกัสรวม 7 วันล่าสุด',
+                deltaUp: 'เพิ่มขึ้น {hrs} ชม. จาก 7 วันก่อนหน้า',
+                deltaDown: 'ลดลง {hrs} ชม. จาก 7 วันก่อนหน้า',
+                deltaSame: 'เท่ากับ 7 วันก่อนหน้า',
+                perSubjectTitle: 'เวลาที่ใช้ไปกับแต่ละวิชา',
+                bestTimeOfDay: 'ช่วงเวลาที่คุณโฟกัสได้ดีที่สุดมักเป็นช่วง{time}',
+                bucket: { morning: 'เช้า', afternoon: 'บ่าย', evening: 'เย็น', night: 'ดึก' }
+            },
             modalDeleteCard: { title: 'ลบคำศัพท์', selectLabel: 'เลือกคำศัพท์ที่ต้องการลบ', warning: '*การลบคำศัพท์จะไม่สามารถกู้คืนได้', ok: 'ลบคำศัพท์' },
             modalCustomSubject: {
                 title: 'สร้างวิชาของฉันเอง',
@@ -287,7 +301,7 @@
                 stopTimerFirst: 'กรุณาหยุดเวลาก่อนแก้ไขเป้าหมายครับ'
             },
             aria: {
-                closeDialog: 'ปิดหน้าต่าง', openSettings: 'เปิดการตั้งค่า', openSearch: 'ค้นหา', openWeakDecks: 'จุดอ่อน',
+                closeDialog: 'ปิดหน้าต่าง', openSettings: 'เปิดการตั้งค่า', openSearch: 'ค้นหา', openWeakDecks: 'จุดอ่อน', openStats: 'สรุปรายสัปดาห์',
                 closeSearch: 'ปิดการค้นหา', deleteWord: 'ลบคำศัพท์', addWord: 'เพิ่มคำศัพท์',
                 prevMonth: 'เดือนก่อนหน้า', nextMonth: 'เดือนถัดไป', prevWeek: 'สัปดาห์ก่อนหน้า', nextWeek: 'สัปดาห์ถัดไป',
                 playAmbient: 'เล่นเสียงบรรยากาศ', pauseAmbient: 'หยุดเสียงบรรยากาศ', ambientVolume: 'ระดับเสียงบรรยากาศ',
@@ -463,6 +477,20 @@
                 message: "The remaining content needs about {needHours}h of reading, but the days left before your exam at {haveHours}h/day only add up to about {capacityHours}h (a gap of about {gapHours}h). Pick one of the options below.",
                 increaseHours: 'Increase daily hours', changeSubject: 'Choose a different subject or trim content'
             },
+            modalStats: { title: 'This week' },
+            stats: {
+                summaryTotal: "You focused for {hrs} total this week.",
+                summaryUp: 'That is {hrs} more than the week before.',
+                summaryDown: 'That is {hrs} less than the week before.',
+                summaryLeastSubject: '{subject} has gotten the least attention lately.',
+                thisWeekLabel: 'Total focus time, last 7 days',
+                deltaUp: 'Up {hrs} from the previous 7 days',
+                deltaDown: 'Down {hrs} from the previous 7 days',
+                deltaSame: 'Same as the previous 7 days',
+                perSubjectTitle: 'Time spent per subject',
+                bestTimeOfDay: 'You tend to focus best in the {time}',
+                bucket: { morning: 'morning', afternoon: 'afternoon', evening: 'evening', night: 'late night' }
+            },
             modalDeleteCard: { title: 'Delete word', selectLabel: 'Choose a word to delete', warning: '*This cannot be undone.', ok: 'Delete word' },
             modalCustomSubject: {
                 title: 'Create my own subject',
@@ -564,7 +592,7 @@
                 stopTimerFirst: 'Please stop the timer before editing the goal.'
             },
             aria: {
-                closeDialog: 'Close dialog', openSettings: 'Open settings', openSearch: 'Search', openWeakDecks: 'Weak spots',
+                closeDialog: 'Close dialog', openSettings: 'Open settings', openSearch: 'Search', openWeakDecks: 'Weak spots', openStats: 'Weekly stats',
                 closeSearch: 'Close search', deleteWord: 'Delete word', addWord: 'Add word',
                 prevMonth: 'Previous month', nextMonth: 'Next month', prevWeek: 'Previous week', nextWeek: 'Next week',
                 playAmbient: 'Play ambient sound', pauseAmbient: 'Pause ambient sound', ambientVolume: 'Ambient volume',
