@@ -26,7 +26,7 @@
 // Bump this on any change to this file (or to the strategy above) so every
 // previously-installed service worker discards its old cache on its next
 // activate — see the comment on activate() below.
-const CACHE_VERSION = 'tfs-v2';
+const CACHE_VERSION = 'tfs-v3';
 
 const PRECACHE_URLS = [
     './',
@@ -102,7 +102,16 @@ self.addEventListener('fetch', (event) => {
     if (url.origin !== self.location.origin) return; // leave cross-origin requests alone entirely
 
     event.respondWith(
-        fetch(req)
+        // `cache: 'no-store'` is the actual fix here, not just the network-
+        // first strategy above it: fetch() from inside a service worker
+        // still goes through the browser's own ordinary HTTP cache by
+        // default, which can satisfy a "network" request with a
+        // recently-fetched (and by now stale, relative to a just-shipped
+        // deploy) response without a real round-trip at all. This forces a
+        // genuine fetch from the server every time, so "network-first"
+        // actually means the network, not whatever the browser's HTTP
+        // cache thinks is still fresh enough.
+        fetch(req, { cache: 'no-store' })
             .then((res) => {
                 const copy = res.clone();
                 caches.open(CACHE_VERSION).then((cache) => cache.put(req, copy));

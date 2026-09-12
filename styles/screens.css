@@ -160,11 +160,35 @@ html.dark .schedule-block--teal { background: rgba(20,184,166,0.15); color: #5ee
    block in index.html for why this replaced the plain progress ring):
    the current Pomodoro phase's progress is a plane's position along a
    real route on an actual satellite map (js/focus.js, via Leaflet). */
-.flight-viz { position: relative; width: 100%; max-width: 26rem; margin: 0 auto 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 1.25rem; }
+.flight-viz { position: relative; width: 100%; max-width: 26rem; margin: 0 auto 1.5rem; }
 .flight-viz__map {
-    width: 100%; aspect-ratio: 2 / 1; display: block; border-radius: 1.75rem;
-    box-shadow: var(--shadow-lg); background: var(--color-surface-high); overflow: hidden;
+    width: 100%; aspect-ratio: 2 / 1; min-height: 11rem; display: block; border-radius: 1.75rem;
+    box-shadow: var(--shadow-lg); overflow: hidden;
+    /* A gradient fallback behind the satellite tiles — shown any time they
+       haven't loaded yet (a fresh page load) or can't (offline, a blocked
+       CDN, Esri's tile service having a bad day), so the worst case is a
+       pleasant blue box instead of a blank/broken-looking one. */
+    background: linear-gradient(160deg, var(--color-primary-container), var(--color-primary));
 }
+/* The HUD (phase/countdown/goal) is centered *over* the map on a small
+   translucent panel, not stacked below it — position:absolute takes it out
+   of flow entirely, which keeps .flight-viz's own height driven purely by
+   the map's aspect-ratio, exactly like the plain progress ring this
+   replaced, rather than growing every time this section is shown. The
+   panel's own backing (rather than bare text) is what keeps it legible
+   against imagery of unpredictable brightness while still leaving the
+   route/plane around its edges visible rather than fully covered. */
+.flight-viz__hud {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 500; text-align: center;
+    background: rgba(0, 0, 0, 0.4); border-radius: var(--radius-xl); padding: 1rem 1.5rem; color: #fff;
+    backdrop-filter: blur(2px);
+}
+/* .focus-phase-badge keeps its own self-contained pill colors (fine on any
+   backdrop); the plain-text pieces need an explicit override here since
+   they'd otherwise inherit dark, surface-toned colors meant for a light
+   card, illegible against this panel's dark background. */
+.flight-viz__hud .focus-time-display { color: #fff; }
+.flight-viz__hud .focus-goal-label { color: rgba(255, 255, 255, 0.85); }
 /* Leaflet renders its own tiles/panes/controls inside — round its outer
    frame to match the card, and keep its (required, see js/focus.js's
    header) attribution readable but unobtrusive against imagery of
@@ -197,7 +221,6 @@ html.dark .schedule-block--teal { background: rgba(20,184,166,0.15); color: #5ee
     background: rgba(0, 0, 0, 0.35); border-radius: var(--radius-full);
     color: #fff; font-weight: 700; font-size: 0.75rem; letter-spacing: 0.03em;
 }
-.flight-viz__hud { text-align: center; }
 
 .flight-picker__label { font-size: 0.75rem; font-weight: 600; text-align: center; margin-bottom: 0.6rem; }
 .flight-picker {
