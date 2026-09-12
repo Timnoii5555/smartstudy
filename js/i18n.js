@@ -196,7 +196,9 @@
                 title: 'ตั๋วโดยสารของคุณ',
                 seatLabel: 'ที่นั่ง', durationLabel: 'ระยะเวลา', boardingLabel: 'ขึ้นเครื่อง', now: 'ตอนนี้', dateLabel: 'วันที่',
                 tip: '📵 เคล็ดลับ: เปิดโหมดห้ามรบกวนหรือโหมดเครื่องบินก่อนขึ้นเครื่อง เพื่อโฟกัสได้เต็มที่',
-                checkInBtn: 'เช็คอินและเริ่มบิน'
+                checkInBtn: 'เช็คอินและเริ่มบิน',
+                swipeHint: 'รูดเพื่อฉีกตั๋วและขึ้นเครื่อง',
+                swipeAria: 'รูดเพื่อฉีกตั๋วและเริ่มโฟกัส'
             },
             recap: {
                 streakLabel: 'วันติดต่อกัน',
@@ -531,7 +533,9 @@
                 title: 'Your boarding pass',
                 seatLabel: 'Seat', durationLabel: 'Duration', boardingLabel: 'Boarding', now: 'Now', dateLabel: 'Date',
                 tip: '📵 Tip: turn on Do Not Disturb or Airplane Mode before boarding, for full focus.',
-                checkInBtn: 'Check in & start flying'
+                checkInBtn: 'Check in & start flying',
+                swipeHint: 'Swipe to tear & board',
+                swipeAria: 'Swipe to tear the ticket and start focusing'
             },
             recap: {
                 streakLabel: 'day streak',

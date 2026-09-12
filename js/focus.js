@@ -569,12 +569,16 @@
     // ---------------------------------------------------------------- Boarding pass ("check in" ritual)
 
     const boardingPassModal = document.getElementById('boardingPassModal');
+    const boardingPassCard = document.getElementById('boardingPassCard');
     const boardingPassDestCode = document.getElementById('boardingPassDestCode');
     const boardingPassDestName = document.getElementById('boardingPassDestName');
     const boardingPassSeat = document.getElementById('boardingPassSeat');
     const boardingPassDuration = document.getElementById('boardingPassDuration');
     const boardingPassDate = document.getElementById('boardingPassDate');
     const boardingPassBarcode = document.getElementById('boardingPassBarcode');
+    const boardingPassTear = document.getElementById('boardingPassTear');
+    const boardingPassTearThumb = document.getElementById('boardingPassTearThumb');
+    const TEAR_COMPLETE_RATIO = 0.82;
 
     function randomSeat() {
         const row = 1 + Math.floor(Math.random() * 32);
@@ -596,6 +600,99 @@
         }
     }
 
+    /** Moves the drag thumb to `ratio` (0-1) along the tear track and keeps
+     *  its ARIA value in sync. Safe to call before the modal is visible —
+     *  it only reads layout when ratio > 0, which never happens until a
+     *  real drag/keypress is already underway. */
+    function setTearProgress(ratio) {
+        if (!boardingPassTear || !boardingPassTearThumb) return;
+        const clamped = Math.max(0, Math.min(1, ratio));
+        let offset = 4;
+        if (clamped > 0) {
+            const trackRect = boardingPassTear.getBoundingClientRect();
+            const maxLeft = Math.max(0, trackRect.width - boardingPassTearThumb.offsetWidth - 8);
+            offset = 4 + clamped * maxLeft;
+        }
+        boardingPassTearThumb.style.left = offset + 'px';
+        boardingPassTearThumb.setAttribute('aria-valuenow', String(Math.round(clamped * 100)));
+    }
+
+    function resetTear() {
+        if (boardingPassTear) boardingPassTear.classList.remove('is-dragging', 'is-complete');
+        if (boardingPassCard) boardingPassCard.classList.remove('is-torn');
+        setTearProgress(0);
+    }
+
+    /** Plays the tear-apart animation, then performs the exact same action
+     *  as the plain fallback button (close + start) — called both when the
+     *  swipe gesture crosses its threshold and when that fallback button is
+     *  tapped, so every path ends the same way. Reduced-motion users skip
+     *  the wait entirely rather than sitting through a transform they won't
+     *  see, per this app's accessibility rules. */
+    function completeBoarding() {
+        if (boardingPassTear) boardingPassTear.classList.add('is-complete');
+        if (boardingPassCard) boardingPassCard.classList.add('is-torn');
+        const finish = () => {
+            TFS.Modal.close(boardingPassModal);
+            start();
+        };
+        const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reducedMotion) finish();
+        else setTimeout(finish, 360);
+    }
+
+    /** Drag-to-tear gesture on the boarding-pass stub. Uses pointer capture
+     *  so move/up events keep reaching the thumb even once the finger/mouse
+     *  leaves it mid-drag. Arrow keys and Enter/Space give the same result
+     *  without a pointer, and the always-visible fallback button below
+     *  covers everyone else — this is flavor on top of that, never the only
+     *  way to proceed. */
+    function initTearGesture() {
+        if (!boardingPassTear || !boardingPassTearThumb) return;
+        let dragging = false;
+        let startX = 0;
+        let maxLeft = 1;
+
+        function onPointerDown(e) {
+            dragging = true;
+            boardingPassTear.classList.add('is-dragging');
+            startX = e.clientX;
+            const trackRect = boardingPassTear.getBoundingClientRect();
+            maxLeft = Math.max(1, trackRect.width - boardingPassTearThumb.offsetWidth - 8);
+            try { boardingPassTearThumb.setPointerCapture(e.pointerId); } catch (err) { /* unsupported, drag still works via move/up */ }
+        }
+        function onPointerMove(e) {
+            if (!dragging) return;
+            setTearProgress((e.clientX - startX) / maxLeft);
+        }
+        function onPointerUp(e) {
+            if (!dragging) return;
+            dragging = false;
+            boardingPassTear.classList.remove('is-dragging');
+            const ratio = Math.max(0, Math.min(1, (e.clientX - startX) / maxLeft));
+            if (ratio >= TEAR_COMPLETE_RATIO) { setTearProgress(1); completeBoarding(); }
+            else setTearProgress(0);
+        }
+        boardingPassTearThumb.addEventListener('pointerdown', onPointerDown);
+        boardingPassTearThumb.addEventListener('pointermove', onPointerMove);
+        boardingPassTearThumb.addEventListener('pointerup', onPointerUp);
+        boardingPassTearThumb.addEventListener('pointercancel', onPointerUp);
+        boardingPassTearThumb.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+                e.preventDefault();
+                setTearProgress(1);
+                completeBoarding();
+            } else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                e.preventDefault();
+                const current = Number(boardingPassTearThumb.getAttribute('aria-valuenow') || '0') / 100;
+                const next = current + (e.key === 'ArrowRight' ? 0.2 : -0.2);
+                if (next >= TEAR_COMPLETE_RATIO) { setTearProgress(1); completeBoarding(); }
+                else setTearProgress(next);
+            }
+        });
+    }
+    initTearGesture();
+
     /** Only meaningful right before a genuinely fresh focus phase — see the
      *  focusStartBtn handler below, which is the only caller. */
     function showBoardingPass() {
@@ -611,14 +708,12 @@
             boardingPassDate.textContent = `${today.getFullYear() + 543}/${U.pad2(today.getMonth() + 1)}/${U.pad2(today.getDate())}`;
         }
         renderBarcode();
+        resetTear();
         TFS.Modal.open(boardingPassModal);
     }
 
     document.getElementById('closeBoardingPassBtn').addEventListener('click', () => TFS.Modal.close(boardingPassModal));
-    document.getElementById('confirmBoardingBtn').addEventListener('click', () => {
-        TFS.Modal.close(boardingPassModal);
-        start();
-    });
+    document.getElementById('confirmBoardingBtn').addEventListener('click', () => completeBoarding());
 
     focusStartBtn.addEventListener('click', () => {
         if (isRunning()) { pause(); return; }

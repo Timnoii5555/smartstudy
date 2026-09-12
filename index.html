@@ -1096,47 +1096,61 @@
      pass barcode) except the destination/duration, which reflect the
      flight actually picked. -->
 <div id="boardingPassModal" class="modal-overlay hidden">
-    <div class="modal-panel modal-panel--sm" data-modal-panel>
-        <div class="modal-header">
-            <h2 class="modal-title"><span class="material-symbols-outlined" aria-hidden="true">confirmation_number</span> <span data-i18n="modalBoardingPass.title">Your boarding pass</span></h2>
-            <button type="button" id="closeBoardingPassBtn" class="modal-close" data-i18n-attr='{"aria-label":"aria.closeDialog"}' aria-label="Close"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">close</span></button>
-        </div>
-
-        <div class="boarding-pass">
-            <div class="boarding-pass__route">
-                <span class="boarding-pass__code">BKK</span>
-                <span class="material-symbols-outlined boarding-pass__plane" aria-hidden="true">flight</span>
-                <span class="boarding-pass__code" id="boardingPassDestCode">CNX</span>
+    <div class="modal-panel modal-panel--sm modal-panel--boarding" data-modal-panel>
+        <div class="boarding-pass" id="boardingPassCard">
+            <div class="boarding-pass__top">
+                <div class="boarding-pass__header">
+                    <span class="boarding-pass__title"><span class="material-symbols-outlined" aria-hidden="true">confirmation_number</span> <span data-i18n="modalBoardingPass.title">Your boarding pass</span></span>
+                    <button type="button" id="closeBoardingPassBtn" class="boarding-pass__close" data-i18n-attr='{"aria-label":"aria.closeDialog"}' aria-label="Close"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">close</span></button>
+                </div>
+                <div class="boarding-pass__route">
+                    <span class="boarding-pass__code">BKK</span>
+                    <span class="material-symbols-outlined boarding-pass__plane" aria-hidden="true">flight</span>
+                    <span class="boarding-pass__code" id="boardingPassDestCode">CNX</span>
+                </div>
+                <p class="boarding-pass__city" id="boardingPassDestName">Chiang Mai</p>
+                <div class="boarding-pass__divider" aria-hidden="true"></div>
+                <div class="boarding-pass__grid">
+                    <div class="boarding-pass__field">
+                        <span class="boarding-pass__label" data-i18n="modalBoardingPass.seatLabel">Seat</span>
+                        <span class="boarding-pass__value" id="boardingPassSeat">14A</span>
+                    </div>
+                    <div class="boarding-pass__field">
+                        <span class="boarding-pass__label" data-i18n="modalBoardingPass.durationLabel">Duration</span>
+                        <span class="boarding-pass__value" id="boardingPassDuration">25 min</span>
+                    </div>
+                    <div class="boarding-pass__field">
+                        <span class="boarding-pass__label" data-i18n="modalBoardingPass.boardingLabel">Boarding</span>
+                        <span class="boarding-pass__value" data-i18n="modalBoardingPass.now">Now</span>
+                    </div>
+                    <div class="boarding-pass__field">
+                        <span class="boarding-pass__label" data-i18n="modalBoardingPass.dateLabel">Date</span>
+                        <span class="boarding-pass__value" id="boardingPassDate">2569/06/24</span>
+                    </div>
+                </div>
+                <div class="boarding-pass__barcode" id="boardingPassBarcode" aria-hidden="true"></div>
             </div>
-            <p class="boarding-pass__city" id="boardingPassDestName">Chiang Mai</p>
-            <div class="boarding-pass__divider" aria-hidden="true"></div>
-            <div class="boarding-pass__grid">
-                <div class="boarding-pass__field">
-                    <span class="boarding-pass__label" data-i18n="modalBoardingPass.seatLabel">Seat</span>
-                    <span class="boarding-pass__value" id="boardingPassSeat">14A</span>
+
+            <div class="boarding-pass__perforation" aria-hidden="true"><span class="material-symbols-outlined boarding-pass__perforation-icon">content_cut</span></div>
+
+            <div class="boarding-pass__stub" id="boardingPassStub">
+                <p class="boarding-pass__tip" data-i18n="modalBoardingPass.tip">📵 Tip: turn on Do Not Disturb or Airplane Mode before boarding, for full focus.</p>
+
+                <div class="boarding-pass__tear" id="boardingPassTear">
+                    <span class="boarding-pass__tear-hint" id="boardingPassTearHint" data-i18n="modalBoardingPass.swipeHint">Swipe to tear &amp; board</span>
+                    <div class="boarding-pass__tear-thumb" id="boardingPassTearThumb" role="slider" tabindex="0"
+                         aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
+                         data-i18n-attr='{"aria-label":"modalBoardingPass.swipeAria"}' aria-label="Swipe to tear the ticket and start focusing">
+                        <span class="material-symbols-outlined" aria-hidden="true">content_cut</span>
+                    </div>
                 </div>
-                <div class="boarding-pass__field">
-                    <span class="boarding-pass__label" data-i18n="modalBoardingPass.durationLabel">Duration</span>
-                    <span class="boarding-pass__value" id="boardingPassDuration">25 min</span>
-                </div>
-                <div class="boarding-pass__field">
-                    <span class="boarding-pass__label" data-i18n="modalBoardingPass.boardingLabel">Boarding</span>
-                    <span class="boarding-pass__value" data-i18n="modalBoardingPass.now">Now</span>
-                </div>
-                <div class="boarding-pass__field">
-                    <span class="boarding-pass__label" data-i18n="modalBoardingPass.dateLabel">Date</span>
-                    <span class="boarding-pass__value" id="boardingPassDate">2569/06/24</span>
-                </div>
+
+                <button type="button" id="confirmBoardingBtn" class="boarding-pass__fallback-btn">
+                    <span class="material-symbols-outlined" aria-hidden="true">flight_takeoff</span>
+                    <span data-i18n="modalBoardingPass.checkInBtn">Check in &amp; start flying</span>
+                </button>
             </div>
-            <div class="boarding-pass__barcode" id="boardingPassBarcode" aria-hidden="true"></div>
         </div>
-
-        <p class="text-outline" style="font-size:0.75rem;text-align:center;margin:1.25rem 0" data-i18n="modalBoardingPass.tip">📵 Tip: turn on Do Not Disturb or Airplane Mode before boarding, for full focus.</p>
-
-        <button type="button" id="confirmBoardingBtn" class="btn btn--primary btn--block">
-            <span class="material-symbols-outlined" aria-hidden="true">flight_takeoff</span>
-            <span data-i18n="modalBoardingPass.checkInBtn">Check in &amp; start flying</span>
-        </button>
     </div>
 </div>
 
