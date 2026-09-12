@@ -51,6 +51,7 @@ const PRECACHE_URLS = [
     './js/datepicker.js',
     './js/wheelpicker.js',
     './js/onboarding.js',
+    './js/garden.js',
     './js/dashboard.js',
     './js/stats.js',
     './js/schedule.js',

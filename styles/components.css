@@ -308,6 +308,17 @@ input[type=range]::-moz-range-track { height: 0.5rem; background: var(--color-su
     padding: 0.35rem 0.75rem; border-radius: var(--radius-full); white-space: nowrap;
 }
 
+/* ---------- Focus garden (screen 3) — see js/garden.js ---------- */
+
+.garden-card { display: flex; align-items: center; gap: 1.25rem; padding: 1rem 1.5rem; }
+.garden-card__svg-wrap { width: 5.5rem; height: 5.5rem; flex-shrink: 0; }
+.garden-card__svg-wrap svg circle, .garden-card__svg-wrap svg rect {
+    transition: r 0.6s ease, opacity 0.6s ease, height 0.6s ease, y 0.6s ease, width 0.6s ease, x 0.6s ease, cx 0.6s ease, cy 0.6s ease;
+}
+.garden-card__text { min-width: 0; }
+.garden-card__stage { font-size: 1rem; font-weight: 700; margin-bottom: 0.15rem; }
+.garden-card__hours { font-size: 0.8125rem; color: var(--color-outline); margin: 0; }
+
 /* ---------- Composite readiness score (screen 3) ---------- */
 
 .readiness-score-card { padding: 1.25rem 1.5rem; }

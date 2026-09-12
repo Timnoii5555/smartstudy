@@ -291,6 +291,7 @@
         renderChecklist(subject);
         if (TFS.Streak) TFS.Streak.reconcile();
         renderStreakBadge();
+        if (TFS.Garden) TFS.Garden.render();
         renderReadinessScore(percent);
 
         if (percent === 100 && total > 0) {

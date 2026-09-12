@@ -200,6 +200,14 @@
                 shareUnsupported: 'อุปกรณ์นี้แชร์รูปโดยตรงไม่ได้ ลองดาวน์โหลดแล้วแชร์เองได้ครับ',
                 shareFailed: 'แชร์ไม่สำเร็จ ลองดาวน์โหลดรูปแทนได้ครับ'
             },
+            garden: {
+                stageSeed: 'เพิ่งปลูกเมล็ดแรก 🌱',
+                stageSprout: 'กำลังแตกยอดอ่อน',
+                stageGrowing: 'เติบโตขึ้นเรื่อยๆ',
+                stageBlooming: 'ใกล้จะออกดอกเต็มต้นแล้ว',
+                stageFull: 'ต้นไม้ของคุณออกดอกเต็มที่แล้ว 🌸',
+                hoursCaption: 'รวมเวลาโฟกัสตลอดที่ผ่านมา {hrs} ชม.'
+            },
             stats: {
                 summaryTotal: 'สัปดาห์นี้คุณโฟกัสไปทั้งหมด {hrs} ชม.',
                 summaryUp: 'มากกว่าสัปดาห์ก่อน {hrs} ชม.',
@@ -518,6 +526,14 @@
                 footerLine: "For your own goals — not a competition with anyone ✨",
                 shareUnsupported: "This device can't share images directly — try downloading and sharing it yourself.",
                 shareFailed: 'Share failed — try downloading the image instead.'
+            },
+            garden: {
+                stageSeed: 'Just planted the first seed 🌱',
+                stageSprout: 'Sprouting',
+                stageGrowing: 'Growing steadily',
+                stageBlooming: 'Almost in full bloom',
+                stageFull: 'Your tree is in full bloom 🌸',
+                hoursCaption: '{hrs} of focus time in total, all-time'
             },
             stats: {
                 summaryTotal: "You focused for {hrs} total this week.",
