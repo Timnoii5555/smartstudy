@@ -686,13 +686,43 @@
             <p class="text-outline" style="font-weight:300" data-i18n="s6.subtitle">Cut distractions and get to work</p>
         </div>
 
-        <div class="focus-ring-wrap">
-            <div class="focus-ring-glow"></div>
-            <svg class="focus-ring-svg" viewBox="0 0 200 200">
-                <circle cx="100" cy="100" r="92" fill="none" stroke="var(--color-surface-highest)" stroke-width="8"></circle>
-                <circle id="focusTimerRing" cx="100" cy="100" r="92" fill="none" stroke="var(--color-primary)" stroke-linecap="round" stroke-width="10" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"></circle>
+        <!-- "Flight Focus"-style visualization: the current Pomodoro phase's
+             progress is a plane flying a fixed route, instead of a bare
+             progress ring. The daily-goal ring's old job (today vs. goal)
+             is still covered by the plain numbers further down this screen
+             (#focusTodayHours / #focusGoalHours) — this replaces its role
+             as the *current phase's* progress indicator, which previously
+             had no visual at all beyond the countdown digits themselves. -->
+        <div class="flight-viz">
+            <svg class="flight-viz__map" viewBox="0 0 400 200" aria-hidden="true">
+                <defs>
+                    <linearGradient id="flightSky" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="var(--color-primary-container)"></stop>
+                        <stop offset="100%" stop-color="var(--color-primary)"></stop>
+                    </linearGradient>
+                </defs>
+                <rect x="0" y="0" width="400" height="200" rx="28" fill="url(#flightSky)"></rect>
+                <ellipse cx="66" cy="42" rx="26" ry="10" fill="rgba(255,255,255,0.22)"></ellipse>
+                <ellipse cx="336" cy="64" rx="22" ry="9" fill="rgba(255,255,255,0.18)"></ellipse>
+                <ellipse cx="205" cy="26" rx="18" ry="7" fill="rgba(255,255,255,0.16)"></ellipse>
+                <!-- Drawn as a dark halo + light line stacked together (rather
+                     than a single flat color) so the dashed route stays
+                     visible regardless of how light or dark this theme's
+                     primary gradient happens to be. -->
+                <path d="M 40 150 Q 200 42 360 150" fill="none" stroke="rgba(0,0,0,0.22)" stroke-width="5" stroke-dasharray="2 11" stroke-linecap="round"></path>
+                <path id="flightPath" d="M 40 150 Q 200 42 360 150" fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="2.5" stroke-dasharray="2 11" stroke-linecap="round"></path>
+                <circle cx="40" cy="150" r="6" fill="#fff" stroke="rgba(0,0,0,0.35)" stroke-width="1.5"></circle>
+                <circle cx="360" cy="150" r="6" fill="#fff" stroke="rgba(0,0,0,0.35)" stroke-width="1.5"></circle>
+                <g id="flightPlane">
+                    <path d="M -11,-7 L 13,0 L -11,7 L -5,0 Z" fill="#fff" stroke="rgba(0,0,0,0.4)" stroke-width="1"></path>
+                </g>
             </svg>
-            <div class="text-center" style="z-index:10;cursor:pointer" id="btnOpenSetTimerModal" title="Set your daily goal">
+            <div class="flight-viz__route" aria-hidden="true">
+                <span class="flight-viz__code">BKK</span>
+                <span class="material-symbols-outlined" aria-hidden="true" style="font-size:0.9rem">flight</span>
+                <span id="flightDestCode" class="flight-viz__code">CNX</span>
+            </div>
+            <div class="flight-viz__hud" style="cursor:pointer" id="btnOpenSetTimerModal" title="Set your daily goal">
                 <div class="focus-phase-badge"><span id="focusPhaseLabel" data-i18n="s6.phaseFocus">Focus</span> · <span id="focusCycleLabel"></span></div>
                 <span id="focusTimerDisplay" class="focus-time-display" aria-live="polite">0:00:00</span>
                 <span class="focus-goal-label">

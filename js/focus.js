@@ -2,9 +2,12 @@
  * focus.js
  * Screen 6: a real Pomodoro engine (focus / short break / long break, cycling
  * automatically, durations configurable in Settings) plus a generated
- * ambient-noise player. The progress ring still tracks the *daily* study
- * goal (total focus seconds accumulated today vs. the daily goal), while the
- * big numeric readout counts down the current Pomodoro phase.
+ * ambient-noise player. The current phase's progress is shown as a plane
+ * flying a fixed route (a "Flight Focus"-style visual, deliberately more
+ * fun to glance at than a bare progress ring — see renderFlightPlane()),
+ * while the *daily* study goal (today's total vs. the goal) is shown as
+ * plain numbers further down the screen. The big numeric readout in the
+ * middle of the flight visual counts down the current Pomodoro phase.
  *
  * Timer correctness (Phase 1 rewrite): the countdown is timestamp-based, not
  * a `setInterval` counter. `runStartedAtMs` (when the current run segment
@@ -213,7 +216,6 @@
     // ---------------------------------------------------------------- DOM refs
 
     const focusTimerDisplay = document.getElementById('focusTimerDisplay');
-    const focusTimerRing = document.getElementById('focusTimerRing');
     const focusPhaseLabel = document.getElementById('focusPhaseLabel');
     const focusCycleLabel = document.getElementById('focusCycleLabel');
     const focusStartBtn = document.getElementById('focusStartBtn');
@@ -226,13 +228,54 @@
 
     const PHASE_KEY = { focus: 's6.phaseFocus', shortBreak: 's6.phaseShortBreak', longBreak: 's6.phaseLongBreak' };
 
-    function render() {
-        const totalToday = getTotalToday();
-        const goal = State.get().plan.dailyGoalSeconds;
-        let progress = goal > 0 ? totalToday / goal : 0;
-        progress = U.clamp(progress, 0, 1);
-        focusTimerRing.setAttribute('stroke-dashoffset', String(100 - progress * 100));
+    // ---------------------------------------------------------------- "Flight Focus"-style route visual
 
+    const flightPathEl = document.getElementById('flightPath');
+    const flightPlaneEl = document.getElementById('flightPlane');
+    const flightDestCodeEl = document.getElementById('flightDestCode');
+    let flightPathLength = null;
+
+    // Purely decorative flavor text (a nod to the viral "flight tracker
+    // timer" format) — not real airport/flight data, just a fun label
+    // picked deterministically from how long the current phase is, longer
+    // phases getting a "farther" destination.
+    const FLIGHT_DESTINATIONS = [
+        { maxMin: 7, code: 'HHQ' },
+        { maxMin: 20, code: 'UTP' },
+        { maxMin: 30, code: 'CNX' },
+        { maxMin: 50, code: 'HKT' },
+        { maxMin: 75, code: 'KBV' },
+        { maxMin: Infinity, code: 'CEI' }
+    ];
+    function destinationCodeForMinutes(minutes) {
+        const match = FLIGHT_DESTINATIONS.find(d => minutes <= d.maxMin);
+        return match ? match.code : FLIGHT_DESTINATIONS[FLIGHT_DESTINATIONS.length - 1].code;
+    }
+
+    /** Moves the plane along the fixed route path to reflect how far into
+     *  the current phase we are — the current-phase equivalent of what the
+     *  old progress ring showed, computed the same timestamp-derived way
+     *  as the countdown itself so it's never a step behind it. */
+    function renderFlightPlane() {
+        if (!flightPathEl || !flightPlaneEl) return;
+        if (flightPathLength === null) flightPathLength = flightPathEl.getTotalLength();
+
+        const total = durationForMode(mode);
+        const remaining = getRemainingSeconds();
+        const progress = total > 0 ? U.clamp(1 - remaining / total, 0, 1) : 0;
+        const len = flightPathLength * progress;
+        const p1 = flightPathEl.getPointAtLength(len);
+        const p2 = flightPathEl.getPointAtLength(Math.min(flightPathLength, len + 1));
+        const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI;
+        flightPlaneEl.setAttribute('transform', `translate(${p1.x},${p1.y}) rotate(${angle})`);
+
+        if (flightDestCodeEl) flightDestCodeEl.textContent = destinationCodeForMinutes(Math.round(total / 60));
+    }
+
+    function render() {
+        renderFlightPlane();
+
+        const goal = State.get().plan.dailyGoalSeconds;
         focusTimerDisplay.textContent = U.formatSecondsToHMS(getRemainingSeconds());
         focusPhaseLabel.textContent = I18n.t(PHASE_KEY[mode]);
         const cycles = pomodoroSettings().cyclesBeforeLongBreak;
@@ -240,7 +283,7 @@
         focusCycleLabel.textContent = I18n.t('s6.cycleLabel', { current: currentCycle, total: cycles });
 
         displayFocusGoal.textContent = U.formatSecondsToHHMM(goal);
-        focusTodayHours.textContent = U.formatSecondsToHHMM(totalToday);
+        focusTodayHours.textContent = U.formatSecondsToHHMM(getTotalToday());
         focusGoalHours.textContent = U.formatSecondsToHHMM(goal);
 
         if (isRunning()) {
