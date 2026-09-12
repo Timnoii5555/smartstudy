@@ -234,98 +234,159 @@
     const PHASE_KEY = { focus: 's6.phaseFocus', shortBreak: 's6.phaseShortBreak', longBreak: 's6.phaseLongBreak' };
 
     // ---------------------------------------------------------------- "Flight Focus"-style route visual + flight picker
+    //
+    // The route is drawn on a real satellite map (Leaflet + Esri World
+    // Imagery, https://server.arcgisonline.com/.../World_Imagery — free,
+    // no API key or account required for this kind of light, non-bulk
+    // use, same as the many small open-source Leaflet demos that use it).
+    // Every real coordinate below is an actual Thai city; only the
+    // "flight" framing around them is invented. All panning/zooming is
+    // disabled since this is a display, not something to explore.
+    //
+    // Leaflet, and the network fetches it makes for map tiles, are kept
+    // fully outside the countdown's critical path: everything in this
+    // block is wrapped so a slow connection, a blocked CDN, or Leaflet
+    // itself throwing can never affect the timer text rendered separately
+    // in render() above it — at worst, the map area just stays blank.
 
-    const flightPathEl = document.getElementById('flightPath');
-    const flightTrailEl = document.getElementById('flightTrail');
-    const flightPlaneEl = document.getElementById('flightPlane');
-    const flightWindowEls = flightPlaneEl ? Array.from(flightPlaneEl.querySelectorAll('.flight-window')) : [];
+    const flightMapContainer = document.getElementById('flightMapContainer');
     const flightDestCodeEl = document.getElementById('flightDestCode');
     const flightPickerRow = document.getElementById('flightPickerRow');
     const flightPickerLabel = document.getElementById('flightPickerLabel');
-    let flightPathLength = null;
-    // How many real people are on this exact flight right now, including
-    // this learner — refreshed by refreshCoStudyCount() below whenever
-    // sharing is on and a flight matches; otherwise just "yourself" once a
-    // flight is selected at all, as flavor. renderFlightWindows() below is
-    // the only thing that reads this.
-    let knownFlightPassengerCount = 1;
 
-    // A handful of curated study-session lengths, each given a (purely
-    // decorative — not real airport/flight data) destination, the same
+    const ORIGIN_LATLNG = [13.7563, 100.5018]; // Bangkok — every flight's departure point
+    const WINDOW_COUNT = 6;
+
+    // A handful of curated study-session lengths, each tied to a real Thai
+    // city (purely thematic — not a real flight schedule), the same
     // spirit as the video that inspired this. Picking one sets the focus
     // duration to exactly that many minutes, so two learners who pick the
     // same flight are — by definition — running the same timer length,
     // which is what makes "you're on the same plane as them" a meaningful
     // thing to show rather than a coincidence.
     const FLIGHTS = [
-        { id: 'hhq', minutes: 15, code: 'HHQ', name: { th: 'หัวหิน', en: 'Hua Hin' } },
-        { id: 'cnx', minutes: 25, code: 'CNX', name: { th: 'เชียงใหม่', en: 'Chiang Mai' } },
-        { id: 'hkt', minutes: 45, code: 'HKT', name: { th: 'ภูเก็ต', en: 'Phuket' } },
-        { id: 'kbv', minutes: 60, code: 'KBV', name: { th: 'กระบี่', en: 'Krabi' } },
-        { id: 'cei', minutes: 90, code: 'CEI', name: { th: 'เชียงราย', en: 'Chiang Rai' } }
+        { id: 'hhq', minutes: 15, code: 'HHQ', name: { th: 'หัวหิน', en: 'Hua Hin' }, latlng: [12.5684, 99.9578] },
+        { id: 'cnx', minutes: 25, code: 'CNX', name: { th: 'เชียงใหม่', en: 'Chiang Mai' }, latlng: [18.7883, 98.9853] },
+        { id: 'hkt', minutes: 45, code: 'HKT', name: { th: 'ภูเก็ต', en: 'Phuket' }, latlng: [7.8804, 98.3923] },
+        { id: 'kbv', minutes: 60, code: 'KBV', name: { th: 'กระบี่', en: 'Krabi' }, latlng: [8.0863, 98.9063] },
+        { id: 'cei', minutes: 90, code: 'CEI', name: { th: 'เชียงราย', en: 'Chiang Rai' }, latlng: [19.9105, 99.8406] }
     ];
 
     function flightForMinutes(minutes) { return FLIGHTS.find(f => f.minutes === minutes) || null; }
 
-    /** The nearest flight's code even when the current duration doesn't
-     *  exactly match one (e.g. a custom value set in Settings) — purely for
-     *  the destination label on the map, never used for passenger matching
-     *  (see renderFlightPassengers below, which requires an exact match). */
-    function nearestFlightCode(minutes) {
-        const exact = flightForMinutes(minutes);
-        if (exact) return exact.code;
-        const closest = FLIGHTS.reduce((best, f) => (Math.abs(f.minutes - minutes) < Math.abs(best.minutes - minutes) ? f : best), FLIGHTS[0]);
-        return closest.code;
+    /** The nearest flight even when the current duration doesn't exactly
+     *  match one (e.g. a custom value set in Settings) — used to still
+     *  draw *some* reasonable route and destination code, but never for
+     *  passenger matching (see refreshCoStudyCount, which requires an
+     *  exact match). */
+    function nearestFlight(minutes) {
+        return flightForMinutes(minutes)
+            || FLIGHTS.reduce((best, f) => (Math.abs(f.minutes - minutes) < Math.abs(best.minutes - minutes) ? f : best), FLIGHTS[0]);
+    }
+
+    function interpolateLatLng(a, b, t) {
+        return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+    }
+
+    let flightMap = null, flightRouteLine = null, flightTrailLine = null, flightPlaneMarker = null, flightDestMarker = null;
+    let mapDrawnFlightId = null; // which flight's route is currently on the map, so it's only redrawn/refit when that changes
+
+    function buildPlaneIcon() {
+        const windows = new Array(WINDOW_COUNT).fill('<span class="flight-window-dot"></span>').join('');
+        return L.divIcon({
+            className: 'flight-plane-marker',
+            html: `<span class="material-symbols-outlined flight-plane-marker__glyph" aria-hidden="true">flight</span>`
+                + `<span class="flight-plane-marker__windows">${windows}</span>`,
+            iconSize: [56, 40], iconAnchor: [28, 14]
+        });
+    }
+
+    /** Lazily creates the Leaflet map the first time it's actually needed.
+     *  Returns null (never throws) if Leaflet didn't load or initializing
+     *  it failed for any reason — every caller already treats that as
+     *  "nothing to draw this render" rather than an error. */
+    function ensureFlightMap() {
+        if (flightMap || !flightMapContainer) return flightMap;
+        if (typeof L === 'undefined') return null; // Leaflet's CDN script didn't load — map area just stays blank
+        try {
+            flightMap = L.map(flightMapContainer, {
+                zoomControl: false, dragging: false, touchZoom: false, scrollWheelZoom: false,
+                doubleClickZoom: false, boxZoom: false, keyboard: false, tap: false
+            }).setView(ORIGIN_LATLNG, 6);
+
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Imagery &copy; Esri',
+                maxZoom: 12
+            }).addTo(flightMap);
+
+            flightRouteLine = L.polyline([ORIGIN_LATLNG, ORIGIN_LATLNG], { color: '#000', weight: 5, opacity: 0.22, interactive: false }).addTo(flightMap);
+            flightTrailLine = L.polyline([ORIGIN_LATLNG, ORIGIN_LATLNG], { color: '#fff', weight: 3, interactive: false }).addTo(flightMap);
+            L.circleMarker(ORIGIN_LATLNG, { radius: 5, weight: 1.5, color: 'rgba(0,0,0,0.35)', fillColor: '#fff', fillOpacity: 1, interactive: false }).addTo(flightMap);
+            flightDestMarker = L.circleMarker(ORIGIN_LATLNG, { radius: 5, weight: 1.5, color: 'rgba(0,0,0,0.35)', fillColor: '#fff', fillOpacity: 1, interactive: false }).addTo(flightMap);
+            flightPlaneMarker = L.marker(ORIGIN_LATLNG, { icon: buildPlaneIcon(), interactive: false }).addTo(flightMap);
+        } catch (e) {
+            console.warn('[focus] Flight map failed to initialize; the map area will just stay blank.', e);
+            flightMap = null;
+        }
+        return flightMap;
+    }
+
+    /** (Re)draws the full route the first time a given flight is shown, or
+     *  whenever the selected flight changes — never every render tick,
+     *  which would otherwise reset the zoom/pan constantly. */
+    function updateFlightRoute(flight) {
+        if (mapDrawnFlightId === flight.id) return;
+        mapDrawnFlightId = flight.id;
+        flightRouteLine.setLatLngs([ORIGIN_LATLNG, flight.latlng]);
+        flightDestMarker.setLatLng(flight.latlng);
+        flightMap.fitBounds([ORIGIN_LATLNG, flight.latlng], { padding: [28, 28] });
     }
 
     /** Lights up one cabin window per real learner currently on this exact
      *  flight (capped at however many window slots the plane actually has;
      *  anyone beyond that is still counted in the text next to the
      *  toggle, just not drawn individually). Never anything more specific
-     *  than a lit dot — see the HTML comment above #flightPlane for why. */
+     *  than a lit dot — see buildPlaneIcon() above for why. */
     function renderFlightWindows(count) {
-        const lit = U.clamp(count, 0, flightWindowEls.length);
-        flightWindowEls.forEach((el, i) => el.classList.toggle('is-lit', i < lit));
+        if (!flightPlaneMarker) return;
+        const el = flightPlaneMarker.getElement();
+        if (!el) return;
+        const dots = el.querySelectorAll('.flight-window-dot');
+        const lit = U.clamp(count, 0, dots.length);
+        dots.forEach((dot, i) => dot.classList.toggle('is-lit', i < lit));
     }
 
-    /** Moves the plane along the fixed route path to reflect how far into
-     *  the current phase we are — the current-phase equivalent of what the
-     *  old progress ring showed, computed the same timestamp-derived way
-     *  as the countdown itself so it's never a step behind it. Also fills
-     *  in the "traveled" trail behind it and keeps the cabin windows in
-     *  sync with the last-known passenger count. */
+    /** Moves the plane along the real route to reflect how far into the
+     *  current phase we are — computed the same timestamp-derived way as
+     *  the countdown itself so it's never a step behind it — and fills in
+     *  the "traveled" trail behind it. */
     function renderFlightPlane() {
-        if (!flightPathEl || !flightPlaneEl) return;
         const total = durationForMode(mode);
-        if (flightDestCodeEl) flightDestCodeEl.textContent = nearestFlightCode(Math.round(total / 60));
+        const flight = nearestFlight(Math.round(total / 60));
+        if (flightDestCodeEl) flightDestCodeEl.textContent = flight.code;
         renderFlightWindows(knownFlightPassengerCount);
 
-        // SVG geometry queries (getTotalLength/getPointAtLength) are the one
-        // part of this screen that isn't fully reliable across browsers —
-        // some WebKit versions can throw on a <path> that was only just
-        // made visible (a display:none -> block flip, exactly what
-        // switching screens does) before layout has caught up. None of
-        // that should ever be able to take the rest of the timer down with
-        // it — remaining time, phase, and goal are the parts that actually
-        // matter and are rendered separately in render() regardless of
-        // whether the plane itself could be positioned this pass.
         try {
-            if (flightPathLength === null) flightPathLength = flightPathEl.getTotalLength();
+            const map = ensureFlightMap();
+            if (!map) return;
+            updateFlightRoute(flight);
+
             const remaining = getRemainingSeconds();
             const progress = total > 0 ? U.clamp(1 - remaining / total, 0, 1) : 0;
-            const len = flightPathLength * progress;
-            const p1 = flightPathEl.getPointAtLength(len);
-            const p2 = flightPathEl.getPointAtLength(Math.min(flightPathLength, len + 1));
-            const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI;
-            flightPlaneEl.setAttribute('transform', `translate(${p1.x},${p1.y}) rotate(${angle})`);
-            if (flightTrailEl) {
-                flightTrailEl.setAttribute('stroke-dasharray', String(flightPathLength));
-                flightTrailEl.setAttribute('stroke-dashoffset', String(flightPathLength * (1 - progress)));
-            }
+            const current = interpolateLatLng(ORIGIN_LATLNG, flight.latlng, progress);
+            flightPlaneMarker.setLatLng(current);
+            flightTrailLine.setLatLngs([ORIGIN_LATLNG, current]);
         } catch (e) {
-            console.warn('[focus] Could not position the flight-path plane this render (will retry next tick).', e);
+            console.warn('[focus] Could not update the flight map this render (will retry next tick).', e);
         }
     }
+
+    // How many real people are on this exact flight right now, including
+    // this learner — refreshed by refreshCoStudyCount() below whenever
+    // sharing is on and a flight matches; otherwise just "yourself" once a
+    // flight is selected at all, as flavor. renderFlightWindows() above is
+    // the only thing that reads this.
+    let knownFlightPassengerCount = 1;
 
     /** The flight picker: only meaningful before a focus phase starts (you
      *  can't change your ticket mid-flight) and only for the focus phase
@@ -894,6 +955,12 @@
             renderAmbientUI();
             renderAmbientTypeGrid();
             initCoStudyUI();
+            // Leaflet sizes itself against its container at creation time;
+            // re-checking on every re-entry to this screen (a standard
+            // Leaflet pattern for a map inside a show/hide container) fixes
+            // it up if that container's size was still settling the very
+            // first time the map was created.
+            if (flightMap) { try { flightMap.invalidateSize(); } catch (e) { /* non-fatal — see renderFlightPlane's own guard */ } }
         },
         onLeave: () => {
             // Leaving the focus screen for another in-app screen pauses the

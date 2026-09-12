@@ -159,26 +159,42 @@ html.dark .schedule-block--teal { background: rgba(20,184,166,0.15); color: #5ee
 /* "Flight Focus"-style progress visual (see the HTML comment above this
    block in index.html for why this replaced the plain progress ring):
    the current Pomodoro phase's progress is a plane's position along a
-   fixed route, computed in js/focus.js via SVG getPointAtLength(). */
+   real route on an actual satellite map (js/focus.js, via Leaflet). */
 .flight-viz { position: relative; width: 100%; max-width: 26rem; margin: 0 auto 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 1.25rem; }
-.flight-viz__map { width: 100%; aspect-ratio: 2 / 1; display: block; border-radius: 1.75rem; box-shadow: var(--shadow-lg); }
-/* The plane glides to its new position each second rather than jumping —
-   a meaningful, data-driven motion (it always reflects real elapsed
-   time), not a decorative loop; prefers-reduced-motion (styles/base.css)
-   already collapses this to an instant snap for anyone who's asked for that. */
-#flightPlane { transition: transform 1s linear; }
-/* Cabin windows: unlit (empty seat) by default, warmly lit for every real
-   learner currently sharing this flight — see js/focus.js's
-   renderFlightWindows(). Fill is a literal color, not a token: it's meant
-   to read as "a lit window at dusk" regardless of which of the 4 app
-   themes is active, the same reasoning as the plane's own fixed white. */
-.flight-window { fill: rgba(0, 0, 0, 0.28); transition: fill 0.6s ease, r 0.6s ease; }
-.flight-window.is-lit { fill: #ffd54f; }
-#flightTrail { transition: stroke-dashoffset 1s linear; }
+.flight-viz__map {
+    width: 100%; aspect-ratio: 2 / 1; display: block; border-radius: 1.75rem;
+    box-shadow: var(--shadow-lg); background: var(--color-surface-high); overflow: hidden;
+}
+/* Leaflet renders its own tiles/panes/controls inside — round its outer
+   frame to match the card, and keep its (required, see js/focus.js's
+   header) attribution readable but unobtrusive against imagery of
+   unpredictable brightness. */
+.flight-viz__map .leaflet-container { border-radius: 1.75rem; font: inherit; background: var(--color-surface-high); }
+.flight-viz__map .leaflet-control-attribution { font-size: 0.5625rem; background: rgba(0, 0, 0, 0.35); color: #fff; }
+.flight-viz__map .leaflet-control-attribution a { color: #fff; }
+
+/* The plane marker glides to its new position each second rather than
+   jumping — a meaningful, data-driven motion (it always reflects real
+   elapsed time), not a decorative loop; prefers-reduced-motion
+   (styles/base.css) already collapses this to an instant snap for anyone
+   who's asked for that. */
+.flight-plane-marker { transition: transform 1s linear; display: flex; flex-direction: column; align-items: center; gap: 0.15rem; }
+.flight-plane-marker__glyph {
+    display: flex; align-items: center; justify-content: center; width: 1.75rem; height: 1.75rem; border-radius: 50%;
+    background: #fff; color: var(--color-primary-solid, #0058bc); box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5); font-size: 1.1rem;
+}
+.flight-plane-marker__windows { display: flex; gap: 0.15rem; background: rgba(0, 0, 0, 0.35); padding: 0.15rem 0.3rem; border-radius: var(--radius-full); }
+/* Unlit (empty seat) by default, warmly lit for every real learner
+   currently sharing this flight — see js/focus.js's renderFlightWindows().
+   A literal color, not a token: meant to read as "a lit window at dusk"
+   regardless of which of the 4 app themes is active. */
+.flight-window-dot { width: 0.3rem; height: 0.3rem; border-radius: 50%; background: rgba(255, 255, 255, 0.35); transition: background-color 0.6s ease; }
+.flight-window-dot.is-lit { background: #ffd54f; }
+
 .flight-viz__route {
-    position: absolute; top: 0.85rem; left: 50%; transform: translateX(-50%);
+    position: absolute; top: 0.85rem; left: 50%; transform: translateX(-50%); z-index: 500;
     display: flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.9rem;
-    background: rgba(0, 0, 0, 0.22); border-radius: var(--radius-full);
+    background: rgba(0, 0, 0, 0.35); border-radius: var(--radius-full);
     color: #fff; font-weight: 700; font-size: 0.75rem; letter-spacing: 0.03em;
 }
 .flight-viz__hud { text-align: center; }

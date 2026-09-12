@@ -49,6 +49,10 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Kanit:wght@300;400;500;600&family=Prompt:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<!-- Leaflet: renders the real satellite map behind the focus-screen flight
+     visual (js/focus.js) — see that file's header for the tile source and
+     why it's built to degrade gracefully if this fails to load. -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" rel="stylesheet"/>
 <link href="styles/tokens.css" rel="stylesheet"/>
 <link href="styles/base.css" rel="stylesheet"/>
 <link href="styles/components.css" rel="stylesheet"/>
@@ -694,76 +698,17 @@
              as the *current phase's* progress indicator, which previously
              had no visual at all beyond the countdown digits themselves. -->
         <div class="flight-viz">
-            <svg class="flight-viz__map" viewBox="0 0 400 200" aria-hidden="true">
-                <defs>
-                    <linearGradient id="flightSky" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stop-color="var(--color-primary-container)"></stop>
-                        <stop offset="60%" stop-color="var(--color-primary)"></stop>
-                        <stop offset="100%" stop-color="var(--color-primary)"></stop>
-                    </linearGradient>
-                    <radialGradient id="flightSun" cx="50%" cy="50%" r="50%">
-                        <stop offset="0%" stop-color="#fff" stop-opacity="0.85"></stop>
-                        <stop offset="100%" stop-color="#fff" stop-opacity="0"></stop>
-                    </radialGradient>
-                </defs>
-                <rect x="0" y="0" width="400" height="200" rx="28" fill="url(#flightSky)"></rect>
-
-                <circle cx="312" cy="40" r="55" fill="url(#flightSun)"></circle>
-                <circle cx="312" cy="40" r="15" fill="rgba(255,255,255,0.92)"></circle>
-
-                <g fill="rgba(255,255,255,0.24)">
-                    <circle cx="55" cy="46" r="11"></circle>
-                    <circle cx="68" cy="40" r="14"></circle>
-                    <circle cx="82" cy="47" r="10"></circle>
-                </g>
-                <g fill="rgba(255,255,255,0.16)">
-                    <circle cx="150" cy="24" r="8"></circle>
-                    <circle cx="160" cy="20" r="10"></circle>
-                    <circle cx="171" cy="25" r="7"></circle>
-                </g>
-                <g fill="rgba(255,255,255,0.2)">
-                    <circle cx="245" cy="72" r="9"></circle>
-                    <circle cx="256" cy="67" r="12"></circle>
-                    <circle cx="268" cy="73" r="8"></circle>
-                </g>
-
-                <!-- A distant "ground" strip, kept well below the route so it
-                     reads as depth/atmosphere rather than competing with it. -->
-                <path d="M 0,200 L 0,186 L 45,172 L 95,188 L 150,168 L 210,190 L 270,174 L 330,192 L 400,180 L 400,200 Z" fill="rgba(0,0,0,0.14)"></path>
-                <path d="M 0,200 L 0,194 L 70,182 L 140,196 L 220,178 L 300,196 L 400,186 L 400,200 Z" fill="rgba(0,0,0,0.18)"></path>
-
-                <!-- Route: a dim full path underneath, plus a bright trail
-                     (flightTrail) that fills in behind the plane as it
-                     travels — see js/focus.js's renderFlightPlane(). -->
-                <path d="M 40 150 Q 200 42 360 150" fill="none" stroke="rgba(0,0,0,0.22)" stroke-width="5" stroke-dasharray="2 11" stroke-linecap="round"></path>
-                <path id="flightPath" d="M 40 150 Q 200 42 360 150" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2.5" stroke-dasharray="2 11" stroke-linecap="round"></path>
-                <path id="flightTrail" d="M 40 150 Q 200 42 360 150" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="1000" stroke-dashoffset="1000"></path>
-
-                <circle cx="40" cy="150" r="6" fill="#fff" stroke="rgba(0,0,0,0.35)" stroke-width="1.5"></circle>
-                <circle cx="360" cy="150" r="6" fill="#fff" stroke="rgba(0,0,0,0.35)" stroke-width="1.5"></circle>
-
-                <!-- The plane itself: a proper little silhouette (fuselage,
-                     wings, tail, nose) instead of a plain dart, with a row
-                     of cabin windows. A window lights up for every real
-                     learner currently sharing this exact flight (including
-                     you) — see js/focus.js's renderFlightWindows(), and
-                     js/presence.js for how that count is fetched. Never
-                     more than a lit dot per person: no names, no avatars,
-                     nothing identifying. -->
-                <g id="flightPlane">
-                    <path d="M -13,0 L -21,-9 L -10,-1.5 Z" fill="#fff" stroke="rgba(0,0,0,0.4)" stroke-width="0.8"></path>
-                    <path d="M -2,-3.5 L -9,-15 L 3,-3 Z" fill="#fff" stroke="rgba(0,0,0,0.35)" stroke-width="0.6" opacity="0.95"></path>
-                    <path d="M -2,3.5 L -9,15 L 3,3 Z" fill="#fff" stroke="rgba(0,0,0,0.35)" stroke-width="0.6" opacity="0.95"></path>
-                    <ellipse cx="-1" cy="0" rx="15" ry="4.5" fill="#fff" stroke="rgba(0,0,0,0.4)" stroke-width="1"></ellipse>
-                    <path d="M 12,-2 L 21,0 L 12,2 Z" fill="#fff" stroke="rgba(0,0,0,0.4)" stroke-width="0.8"></path>
-                    <circle class="flight-window" cx="-10" cy="0" r="1.5"></circle>
-                    <circle class="flight-window" cx="-6" cy="0" r="1.5"></circle>
-                    <circle class="flight-window" cx="-2" cy="0" r="1.5"></circle>
-                    <circle class="flight-window" cx="2" cy="0" r="1.5"></circle>
-                    <circle class="flight-window" cx="6" cy="0" r="1.5"></circle>
-                    <circle class="flight-window" cx="10" cy="0" r="1.5"></circle>
-                </g>
-            </svg>
+            <!-- A real satellite map (Leaflet + Esri World Imagery — no API
+                 key required, see js/focus.js's header) instead of a drawn
+                 illustration: the route from Bangkok to the current
+                 flight's real destination, a plane marker that moves along
+                 it as the phase progresses, and lit cabin-window dots for
+                 real fellow passengers on the same flight. All panning/
+                 zooming is disabled — it's a display, not an interactive
+                 map — and every bit of this is wrapped so a slow or
+                 missing connection can never affect the countdown itself,
+                 which is rendered separately either way. -->
+            <div id="flightMapContainer" class="flight-viz__map" aria-hidden="true"></div>
             <div class="flight-viz__route" aria-hidden="true">
                 <span class="flight-viz__code">BKK</span>
                 <span class="material-symbols-outlined" aria-hidden="true" style="font-size:0.9rem">flight</span>
@@ -1371,6 +1316,7 @@
 <script src="js/recap.js"></script>
 <script src="js/schedule.js"></script>
 <script src="js/flashcards.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="js/focus.js"></script>
 <script src="js/settings.js"></script>
 <script src="js/history.js"></script>
