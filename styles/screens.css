@@ -169,6 +169,15 @@ html.dark .schedule-block--teal { background: rgba(20,184,166,0.15); color: #5ee
        CDN, Esri's tile service having a bad day), so the worst case is a
        pleasant blue box instead of a blank/broken-looking one. */
     background: linear-gradient(160deg, var(--color-primary-container), var(--color-primary));
+    /* Leaflet's own controls (attribution, and zoom buttons if they were
+       ever re-enabled) use z-index values around 1000 internally — with
+       nothing else, those aren't scoped to this box at all and can end up
+       compared directly against a completely unrelated part of the page,
+       like an open modal sitting at this app's own --z-modal (130). This
+       gives the whole map its own self-contained stacking context so
+       nothing inside it can ever bleed out and cover something like a
+       boarding-pass dialog open above it. */
+    isolation: isolate;
 }
 /* The HUD (phase/countdown/goal) sits in the bottom-left corner of the map
    as a compact badge, deliberately *not* centered over it — a learner
@@ -179,7 +188,13 @@ html.dark .schedule-block--teal { background: rgba(20,184,166,0.15); color: #5ee
    position:absolute keeps .flight-viz's own height driven purely by the
    map's aspect-ratio, same as the plain progress ring this replaced. */
 .flight-viz__hud {
-    position: absolute; left: 0.75rem; bottom: 0.75rem; z-index: 500; text-align: left;
+    /* z-index kept small and local on purpose — this only ever needs to
+       sit above its sibling .flight-viz__map within .flight-viz, never
+       compared against this app's real layers (header/modal/toast, see
+       tokens.css's --z-header/--z-modal/--z-toast): a value like the 500
+       this used to be would sit *above* an open modal (--z-modal: 130)
+       dialog anywhere else on the page, exactly the bug this replaces. */
+    position: absolute; left: 0.75rem; bottom: 0.75rem; z-index: 2; text-align: left;
     background: rgba(0, 0, 0, 0.45); border-radius: var(--radius-lg); padding: 0.5rem 0.75rem; color: #fff;
     backdrop-filter: blur(2px);
     /* Bounded well short of the map's own width (not just "doesn't
@@ -224,7 +239,7 @@ html.dark .schedule-block--teal { background: rgba(20,184,166,0.15); color: #5ee
 .flight-window-dot.is-lit { background: #ffd54f; }
 
 .flight-viz__route {
-    position: absolute; top: 0.85rem; left: 50%; transform: translateX(-50%); z-index: 500;
+    position: absolute; top: 0.85rem; left: 50%; transform: translateX(-50%); z-index: 2;
     display: flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.9rem;
     background: rgba(0, 0, 0, 0.35); border-radius: var(--radius-full);
     color: #fff; font-weight: 700; font-size: 0.75rem; letter-spacing: 0.03em;
