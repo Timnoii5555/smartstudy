@@ -282,18 +282,33 @@ body.is-immersive-focus { overflow: hidden; }
 
 .flight-picker__label { font-size: 0.75rem; font-weight: 600; text-align: center; margin-bottom: 0.6rem; }
 .flight-picker {
-    display: flex; gap: 0.6rem; overflow-x: auto; padding: 0.2rem 0.1rem 0.75rem;
+    display: flex; gap: 0.65rem; overflow-x: auto; padding: 0.2rem 0.15rem 0.85rem;
     margin-bottom: 0.5rem; scroll-snap-type: x proximity;
 }
+/* Styled like an actual fare-picker card (flight number, a little route
+   diagram, a selected checkmark) rather than a plain labeled chip — this
+   is the same "curated flight" concept as before, just given the
+   ticket-booking look the reference video's whole aesthetic is built on. */
 .flight-chip {
-    scroll-snap-align: start; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 0.15rem;
-    min-width: 4.75rem; padding: 0.6rem 0.75rem; border-radius: var(--radius-lg);
+    scroll-snap-align: start; flex-shrink: 0; position: relative; text-align: left;
+    display: flex; flex-direction: column; gap: 0.3rem;
+    min-width: 7.5rem; padding: 0.75rem 0.85rem; border-radius: var(--radius-xl);
     border: 1.5px solid var(--color-border); background: var(--color-surface-lowest);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
-.flight-chip.is-selected { border-color: var(--color-primary); background: var(--color-primary-fixed); }
-.flight-chip__code { font-weight: 800; font-size: 0.8125rem; color: var(--color-primary); }
+.flight-chip.is-selected { border-color: var(--color-primary); background: var(--color-primary-fixed); box-shadow: 0 3px 10px color-mix(in srgb, var(--color-primary) 22%, transparent); }
+.flight-chip__flightno { font-size: 0.5625rem; font-weight: 700; letter-spacing: 0.06em; color: var(--color-outline); text-transform: uppercase; }
+.flight-chip__route { display: flex; align-items: center; gap: 0.3rem; }
+.flight-chip__route .material-symbols-outlined { font-size: 0.85rem; color: var(--color-primary); }
+.flight-chip__origin { font-size: 0.6875rem; font-weight: 600; color: var(--color-outline); }
+.flight-chip__code { font-family: var(--font-headline); font-weight: 800; font-size: 1rem; color: var(--color-primary); letter-spacing: 0.01em; }
 .flight-chip__name { font-size: 0.6875rem; color: var(--color-on-surface); white-space: nowrap; }
-.flight-chip__mins { font-size: 0.625rem; color: var(--color-outline); }
+.flight-chip__mins { font-size: 0.8125rem; font-weight: 700; }
+.flight-chip__check {
+    position: absolute; top: 0.5rem; right: 0.5rem; font-size: 1.1rem !important; color: var(--color-primary-solid);
+    opacity: 0; transform: scale(0.5); transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.flight-chip.is-selected .flight-chip__check { opacity: 1; transform: scale(1); }
 .focus-phase-badge { display: inline-flex; align-items: center; gap: 0.375rem; background: var(--color-primary-fixed); color: var(--color-primary); font-size: 0.6875rem; font-weight: 700; padding: 0.3rem 0.9rem; border-radius: var(--radius-full); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.75rem; }
 .focus-time-display { display: block; font-family: var(--font-headline); font-size: 3.75rem; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
 .focus-goal-label { font-size: 0.8125rem; font-weight: 500; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.15em; margin-top: 0.5rem; display: flex; align-items: center; justify-content: center; gap: 0.25rem; }
@@ -303,23 +318,6 @@ body.is-immersive-focus { overflow: hidden; }
 .focus-stats { margin-top: 3rem; width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 .focus-stat-card { padding: 1rem; border-radius: var(--radius-2xl); background: var(--color-surface-lowest); border: 1px solid var(--color-border); text-align: center; position: relative; overflow: hidden; }
 .focus-stat-card__accent { position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: var(--color-success); }
-.ambient-panel { width: 100%; padding: 1rem 1.25rem; border-radius: var(--radius-lg); background: var(--color-surface-low); border: 1px solid var(--color-border); display: flex; flex-direction: column; gap: 0.75rem; }
-.ambient-panel__row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
-.ambient-panel__types { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-.ambient-type-btn {
-    display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.4rem 0.8rem;
-    border-radius: var(--radius-full); border: 1px solid var(--color-border);
-    background: var(--color-surface-lowest); font-size: 0.75rem; font-weight: 600; white-space: nowrap;
-}
-.ambient-type-btn.is-active { background: var(--color-primary-solid); border-color: var(--color-primary-solid); color: #fff; }
-.ambient-type-btn--add { color: var(--color-primary); border-style: dashed; }
-.ambient-type-btn__remove {
-    font-size: 0.9rem !important; margin-left: 0.15rem; border-radius: 50%; opacity: 0.7;
-}
-.ambient-type-btn__remove:hover { opacity: 1; }
-.ambient-panel__volume { display: flex; align-items: center; gap: 0.5rem; }
-.ambient-panel__volume input[type=range] { width: 8rem; }
-
 /* ---------- Settings panel ---------- */
 .settings-section { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; }
 .settings-section__title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-outline); }

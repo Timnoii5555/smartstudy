@@ -49,11 +49,33 @@ one dependency" for a codebase built to need none of that. If this project
 ever does adopt real build tooling, porting `test-srs.html`'s assertions
 into actual Vitest specs is close to a copy-paste job.
 
-## Ambient full-screen focus mode
+## Ambient full-screen focus mode — now shipped
 
-Phase 1 lists this as explicitly optional ("time only, plus a small exit
-affordance"). Skipped for now under "when unsure whether to add something,
-don't."
+Phase 1 listed this as explicitly optional ("time only, plus a small exit
+affordance"), originally skipped under "when unsure whether to add
+something, don't." It shipped later in a themed form: screen 6's flight
+map can go full-screen (`js/focus.js`'s enterImmersive/exitImmersive),
+showing the timer/controls over the map with a minimize button, entered
+manually or automatically right after the boarding-pass check-in ritual.
+
+## Per-aircraft chat rooms — declined
+
+Requested directly: choosing an aircraft/airline with its own chat room for
+passengers to talk during a session. Not built — it's exactly the category
+the original pasted spec's non-negotiable rules rule out ("no chat/DMs...
+any room UI needs report/block unless it exposes zero identifying info"),
+which the leaderboard/points removal earlier in this project followed
+literally. Free-text chat between strangers on a study app aimed at TCAS
+exam takers (typically minors) needs real moderation infrastructure
+(report/block, rate limiting, abuse handling) that doesn't exist here, and
+building it unmoderated would be a real child-safety regression, not a
+design preference to weigh. The per-flight presence this app already has
+(a passenger count, lit cabin windows, and now real seat occupancy in the
+seat picker) stays the ceiling for this feature: real signal that other
+people are there, with zero identifying info and nothing to report or
+block. If real-time contact between learners is ever wanted, matched preset
+reactions (no free text) would be the smallest step that doesn't cross back
+into the same territory.
 
 ## Full per-session focus log
 

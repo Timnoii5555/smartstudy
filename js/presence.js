@@ -34,8 +34,16 @@
  * own document within it, e.g.:
  *   match /presence_flights/{flightId}/members/{id} {
  *     allow read: if true;
- *     allow write: if request.resource.data.keys().hasOnly(['lastHeartbeat']);
+ *     allow write: if request.resource.data.keys().hasOnly(['lastHeartbeat', 'seat']);
  *   }
+ * The optional `seat` field (added for the seat picker in js/focus.js)
+ * carries no identity on its own — just a seat label like "7D", never a
+ * name or this document's own opaque id — so it stays inside the same
+ * "nothing to report or block" guarantee as everything else here. A rule
+ * still listing only 'lastHeartbeat' (from before this field existed)
+ * rejects any write that includes 'seat', which fails soft exactly like
+ * every other call in this file: seats just show as open for everyone
+ * until that rule is updated.
  * Structuring this as one subcollection per flight (rather than one flat
  * collection with a `flightId` field) is deliberate too: it means "how
  * many people are on flight X" is a single-field range query
@@ -59,6 +67,7 @@
     let db = null;
     let heartbeatTimerId = null;
     let currentFlightId = null;
+    let currentSeat = null;
     let cachedId = null;
 
     function isAvailable() {
@@ -87,7 +96,13 @@
         const ref = membersRef(flightId);
         if (!isAvailable() || !ref) return;
         try {
-            await ref.doc(myPresenceId()).set({ lastHeartbeat: Date.now() });
+            const payload = { lastHeartbeat: Date.now() };
+            if (currentSeat) payload.seat = currentSeat;
+            // merge:true so a heartbeat that doesn't carry a seat (e.g. one
+            // fired right after a page reload, before this module's own
+            // in-memory currentSeat is set again) never wipes out the seat
+            // a previous heartbeat already wrote for this same document.
+            await ref.doc(myPresenceId()).set(payload, { merge: true });
         } catch (e) { console.warn('[presence] heartbeat failed (Firestore rules for "presence_flights" may not be set up yet)', e); }
     }
 
@@ -97,10 +112,14 @@
         try { await ref.doc(myPresenceId()).delete(); } catch (e) { /* best-effort — the 90s staleness filter covers this either way */ }
     }
 
-    /** Joins `flightId`'s shared room. Switching flights (calling this
-     *  again with a different id while already joined to one) leaves the
-     *  old room first, so a learner is never counted on two flights at once. */
-    function startHeartbeat(flightId) {
+    /** Joins `flightId`'s shared room, optionally tagging this learner's
+     *  own seat (see the header comment's `seat` field) so the seat picker
+     *  can mark it taken for anyone else looking at the same flight.
+     *  Switching flights (calling this again with a different id while
+     *  already joined to one) leaves the old room first, so a learner is
+     *  never counted on two flights at once. */
+    function startHeartbeat(flightId, seat) {
+        if (seat) currentSeat = seat;
         if (currentFlightId === flightId && heartbeatTimerId !== null) return;
         if (heartbeatTimerId !== null) stopHeartbeat();
         currentFlightId = flightId;
@@ -111,6 +130,7 @@
     function stopHeartbeat() {
         if (heartbeatTimerId !== null) { clearInterval(heartbeatTimerId); heartbeatTimerId = null; }
         if (currentFlightId !== null) { leave(currentFlightId); currentFlightId = null; }
+        currentSeat = null;
     }
 
     function isHeartbeatRunning() {
@@ -135,11 +155,37 @@
         }
     }
 
+    /** The seats currently held by *other* real learners on this flight —
+     *  everyone with a heartbeat in the last 90s, a seat on record, and an
+     *  id that isn't this device's own. Returns null (not []) when it
+     *  couldn't be checked at all, same distinction as fetchFlightCount, so
+     *  the seat picker can tell "genuinely open" apart from "couldn't ask"
+     *  — both leave every seat selectable, but for different reasons. */
+    async function fetchTakenSeats(flightId) {
+        const ref = membersRef(flightId);
+        if (!isAvailable() || !ref) return null;
+        try {
+            const cutoff = Date.now() - STALE_AFTER_MS;
+            const snap = await ref.where('lastHeartbeat', '>', cutoff).get();
+            const selfId = myPresenceId();
+            const seats = [];
+            snap.forEach((doc) => {
+                if (doc.id === selfId) return;
+                const seat = doc.data().seat;
+                if (seat) seats.push(seat);
+            });
+            return seats;
+        } catch (e) {
+            console.warn('[presence] taken-seats fetch failed (Firestore rules for "presence_flights" may not allow a seat field yet)', e);
+            return null;
+        }
+    }
+
     // Best-effort: if a heartbeat is active when the tab is actually being
     // torn down, try to leave immediately rather than waiting up to 90s to
     // age out of the count.
     global.addEventListener('pagehide', () => { if (isHeartbeatRunning()) stopHeartbeat(); });
 
-    TFS.Presence = { isAvailable, startHeartbeat, stopHeartbeat, isHeartbeatRunning, fetchFlightCount };
+    TFS.Presence = { isAvailable, startHeartbeat, stopHeartbeat, isHeartbeatRunning, fetchFlightCount, fetchTakenSeats };
 
 })(window);

@@ -205,7 +205,9 @@
                 hint: 'แตะที่นั่งที่ว่างเพื่อเลือก',
                 confirmBtn: 'ยืนยันที่นั่ง',
                 seatLabel: 'ที่นั่ง {seat}',
-                seatTakenLabel: 'ที่นั่ง {seat} ไม่ว่าง'
+                seatTakenLabel: 'ที่นั่ง {seat} ไม่ว่าง',
+                nose: 'หัวเครื่อง',
+                tail: 'ท้ายเครื่อง'
             },
             recap: {
                 streakLabel: 'วันติดต่อกัน',
@@ -552,7 +554,9 @@
                 hint: 'Tap an available seat to pick it',
                 confirmBtn: 'Confirm seat',
                 seatLabel: 'Seat {seat}',
-                seatTakenLabel: 'Seat {seat}, unavailable'
+                seatTakenLabel: 'Seat {seat}, unavailable',
+                nose: 'Nose',
+                tail: 'Tail'
             },
             recap: {
                 streakLabel: 'day streak',

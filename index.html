@@ -762,62 +762,19 @@
                 </button>
             </div>
 
-            <!-- Sound/co-study/ambient used to be three always-visible cards
-                 stacked here — real testers found the screen too busy with
-                 all of them open by default. They're unchanged underneath,
-                 just tucked behind one disclosure row so the screen reads
-                 clean at a glance and the options are still one tap away. -->
-            <button type="button" id="sessionSettingsToggleBtn" class="toggle-row session-settings-toggle" aria-expanded="false" aria-controls="sessionSettingsPanel">
+            <!-- The public co-study room toggle and the ambient sound panel
+                 that used to live here were both removed — real usage
+                 feedback was that neither pulled its weight against the
+                 clutter of always showing them. Presence itself (the lit
+                 cabin windows and taken seats elsewhere on this screen)
+                 stays, just automatic now instead of behind a toggle. -->
+            <button type="button" id="notifToggleBtn" class="toggle-row">
                 <span class="settings-row__left">
-                    <span class="settings-row__icon"><span class="material-symbols-outlined" aria-hidden="true">tune</span></span>
-                    <span style="font-weight:500" data-i18n="s6.sessionSettingsLabel">Session settings</span>
+                    <span class="settings-row__icon"><span class="material-symbols-outlined" aria-hidden="true" id="notifToggleIcon">notifications_active</span></span>
+                    <span style="font-weight:500" data-i18n="s6.soundToggleLabel">Play sound at time up</span>
                 </span>
-                <span class="material-symbols-outlined session-settings-toggle__chevron" aria-hidden="true">expand_more</span>
+                <span id="notifToggleSwitch" class="switch"><span class="switch__knob"></span></span>
             </button>
-
-            <div class="session-settings-panel" id="sessionSettingsPanel" hidden>
-                <button type="button" id="notifToggleBtn" class="toggle-row">
-                    <span class="settings-row__left">
-                        <span class="settings-row__icon"><span class="material-symbols-outlined" aria-hidden="true" id="notifToggleIcon">notifications_active</span></span>
-                        <span style="font-weight:500" data-i18n="s6.soundToggleLabel">Play sound at time up</span>
-                    </span>
-                    <span id="notifToggleSwitch" class="switch"><span class="switch__knob"></span></span>
-                </button>
-
-                <!-- Co-study presence (Phase 5, scoped to the public room only —
-                     see js/presence.js). Joining is implicit: this toggle plus an
-                     actually-running focus session adds you to the count; off by
-                     default, one tap to enable. No chat, no names, no list. -->
-                <button type="button" id="coStudyToggleBtn" class="toggle-row" hidden>
-                    <span class="settings-row__left">
-                        <span class="settings-row__icon"><span class="material-symbols-outlined" aria-hidden="true">groups</span></span>
-                        <span style="font-weight:500" data-i18n="s6.coStudyToggleLabel">Join the public focus room</span>
-                    </span>
-                    <span id="coStudyToggleSwitch" class="switch"><span class="switch__knob"></span></span>
-                </button>
-                <p id="coStudyCountText" class="text-outline" style="font-size:0.75rem;margin:-0.75rem 0 0 0.5rem" hidden></p>
-
-                <div class="ambient-panel">
-                    <div class="ambient-panel__row">
-                        <span class="settings-row__left">
-                            <span class="settings-row__icon"><span class="material-symbols-outlined" aria-hidden="true">graphic_eq</span></span>
-                            <span style="font-weight:500" data-i18n="s6.ambientLabel">Ambient sound</span>
-                        </span>
-                        <button type="button" id="ambientPlayBtn" class="icon-btn" style="background:var(--color-primary-fixed);color:var(--color-primary)" data-i18n-attr='{"aria-label":"aria.playAmbient"}' aria-label="Play ambient sound">
-                            <span class="material-symbols-outlined" aria-hidden="true" id="ambientPlayIcon">play_arrow</span>
-                        </button>
-                    </div>
-                    <div class="ambient-panel__types custom-scroll" id="ambientTypeGrid" role="radiogroup" aria-label="Ambient sound type"></div>
-                    <div class="ambient-panel__row">
-                        <div class="ambient-panel__volume">
-                            <span class="material-symbols-outlined text-outline" aria-hidden="true" style="font-size:1.1rem">volume_down</span>
-                            <label for="ambientVolumeSlider" class="sr-only" data-i18n-attr='{"aria-label":"aria.ambientVolume"}'>Volume</label>
-                            <input type="range" id="ambientVolumeSlider" min="0" max="1" step="0.01" value="0.5">
-                        </div>
-                    </div>
-                    <input type="file" id="ambientUploadInput" class="settings-file-input" accept="audio/*">
-                </div>
-            </div>
         </div>
 
         <div class="focus-stats">
@@ -1140,10 +1097,18 @@
             <p class="seat-picker__route" aria-hidden="true">BKK <span class="material-symbols-outlined" aria-hidden="true" style="font-size:0.8rem">flight</span> <span id="seatPickerDestCode">CNX</span></p>
 
             <div class="seat-picker__cabin custom-scroll">
+                <div class="seat-picker__section-label seat-picker__section-label--nose" aria-hidden="true">
+                    <span class="material-symbols-outlined" aria-hidden="true">arrow_drop_up</span>
+                    <span data-i18n="modalSeatPicker.nose">Nose</span>
+                </div>
                 <div class="seat-picker__cols" aria-hidden="true">
                     <span></span><span>A</span><span>C</span><span class="seat-picker__aisle"></span><span>D</span><span>F</span>
                 </div>
                 <div class="seat-picker__grid" id="seatPickerGrid" role="radiogroup" aria-label="Seat"></div>
+                <div class="seat-picker__section-label seat-picker__section-label--tail" aria-hidden="true">
+                    <span data-i18n="modalSeatPicker.tail">Tail</span>
+                    <span class="material-symbols-outlined" aria-hidden="true">arrow_drop_down</span>
+                </div>
             </div>
 
             <p class="seat-picker__hint text-outline" data-i18n="modalSeatPicker.hint">Tap an available seat to pick it</p>
@@ -1422,7 +1387,6 @@
 <script src="js/theme.js"></script>
 <script src="js/toast.js"></script>
 <script src="js/streak.js"></script>
-<script src="js/customSounds.js"></script>
 <!-- Firebase (Auth + Firestore only — no Storage, see js/auth.js) is entirely
      optional: see js/firebaseConfig.js. If these fail to load (offline, or
      blocked) js/auth.js catches it and the app runs on local-only profiles

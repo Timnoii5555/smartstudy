@@ -26,7 +26,7 @@
 // Bump this on any change to this file (or to the strategy above) so every
 // previously-installed service worker discards its old cache on its next
 // activate — see the comment on activate() below.
-const CACHE_VERSION = 'tfs-v3';
+const CACHE_VERSION = 'tfs-v4';
 
 const PRECACHE_URLS = [
     './',
@@ -47,7 +47,6 @@ const PRECACHE_URLS = [
     './js/theme.js',
     './js/toast.js',
     './js/streak.js',
-    './js/customSounds.js',
     './js/firebaseConfig.js',
     './js/auth.js',
     './js/presence.js',

@@ -242,20 +242,6 @@
     const focusImmersiveStartBtnText = document.getElementById('focusImmersiveStartBtnText');
     const focusImmersiveResetBtn = document.getElementById('focusImmersiveResetBtn');
 
-    // The three secondary controls (sound/co-study/ambient) used to always
-    // be visible here — collapsed behind one disclosure row instead, see
-    // the click handler further down, purely to declutter this screen.
-    const sessionSettingsToggleBtn = document.getElementById('sessionSettingsToggleBtn');
-    const sessionSettingsPanel = document.getElementById('sessionSettingsPanel');
-    if (sessionSettingsToggleBtn && sessionSettingsPanel) {
-        sessionSettingsToggleBtn.addEventListener('click', () => {
-            const willOpen = sessionSettingsPanel.hidden;
-            sessionSettingsPanel.hidden = !willOpen;
-            sessionSettingsToggleBtn.classList.toggle('is-open', willOpen);
-            sessionSettingsToggleBtn.setAttribute('aria-expanded', String(willOpen));
-        });
-    }
-
     const PHASE_KEY = { focus: 's6.phaseFocus', shortBreak: 's6.phaseShortBreak', longBreak: 's6.phaseLongBreak' };
 
     // ---------------------------------------------------------------- Full-screen "on the plane" mode
@@ -330,11 +316,17 @@
     // which is what makes "you're on the same plane as them" a meaningful
     // thing to show rather than a coincidence.
     const FLIGHTS = [
-        { id: 'hhq', minutes: 15, code: 'HHQ', name: { th: 'หัวหิน', en: 'Hua Hin' }, latlng: [12.5684, 99.9578] },
-        { id: 'cnx', minutes: 25, code: 'CNX', name: { th: 'เชียงใหม่', en: 'Chiang Mai' }, latlng: [18.7883, 98.9853] },
-        { id: 'hkt', minutes: 45, code: 'HKT', name: { th: 'ภูเก็ต', en: 'Phuket' }, latlng: [7.8804, 98.3923] },
-        { id: 'kbv', minutes: 60, code: 'KBV', name: { th: 'กระบี่', en: 'Krabi' }, latlng: [8.0863, 98.9063] },
-        { id: 'cei', minutes: 90, code: 'CEI', name: { th: 'เชียงราย', en: 'Chiang Rai' }, latlng: [19.9105, 99.8406] }
+        { id: 'tdx', minutes: 10, code: 'TDX', flightNo: 'FS101', name: { th: 'ตราด', en: 'Trat' }, latlng: [12.2728, 102.3189] },
+        { id: 'hhq', minutes: 15, code: 'HHQ', flightNo: 'FS115', name: { th: 'หัวหิน', en: 'Hua Hin' }, latlng: [12.5684, 99.9578] },
+        { id: 'utp', minutes: 20, code: 'UTP', flightNo: 'FS120', name: { th: 'พัทยา-อู่ตะเภา', en: 'Pattaya (U-Tapao)' }, latlng: [12.6799, 101.0050] },
+        { id: 'cnx', minutes: 25, code: 'CNX', flightNo: 'FS225', name: { th: 'เชียงใหม่', en: 'Chiang Mai' }, latlng: [18.7883, 98.9853] },
+        { id: 'urt', minutes: 35, code: 'URT', flightNo: 'FS135', name: { th: 'สุราษฎร์ธานี', en: 'Surat Thani' }, latlng: [9.1342, 99.1356] },
+        { id: 'hkt', minutes: 45, code: 'HKT', flightNo: 'FS345', name: { th: 'ภูเก็ต', en: 'Phuket' }, latlng: [7.8804, 98.3923] },
+        { id: 'uth', minutes: 50, code: 'UTH', flightNo: 'FS150', name: { th: 'อุดรธานี', en: 'Udon Thani' }, latlng: [17.3864, 102.7883] },
+        { id: 'kbv', minutes: 60, code: 'KBV', flightNo: 'FS460', name: { th: 'กระบี่', en: 'Krabi' }, latlng: [8.0863, 98.9063] },
+        { id: 'ubp', minutes: 75, code: 'UBP', flightNo: 'FS275', name: { th: 'อุบลราชธานี', en: 'Ubon Ratchathani' }, latlng: [15.2528, 104.8703] },
+        { id: 'cei', minutes: 90, code: 'CEI', flightNo: 'FS590', name: { th: 'เชียงราย', en: 'Chiang Rai' }, latlng: [19.9105, 99.8406] },
+        { id: 'hdy', minutes: 120, code: 'HDY', flightNo: 'FS620', name: { th: 'หาดใหญ่', en: 'Hat Yai' }, latlng: [6.9330, 100.3945] }
     ];
 
     function flightForMinutes(minutes) { return FLIGHTS.find(f => f.minutes === minutes) || null; }
@@ -342,8 +334,8 @@
     /** The nearest flight even when the current duration doesn't exactly
      *  match one (e.g. a custom value set in Settings) — used to still
      *  draw *some* reasonable route and destination code, but never for
-     *  passenger matching (see refreshCoStudyCount, which requires an
-     *  exact match). */
+     *  passenger matching (see refreshFlightPassengerCount, which requires
+     *  an exact match). */
     function nearestFlight(minutes) {
         return flightForMinutes(minutes)
             || FLIGHTS.reduce((best, f) => (Math.abs(f.minutes - minutes) < Math.abs(best.minutes - minutes) ? f : best), FLIGHTS[0]);
@@ -447,10 +439,11 @@
     }
 
     // How many real people are on this exact flight right now, including
-    // this learner — refreshed by refreshCoStudyCount() below whenever
-    // sharing is on and a flight matches; otherwise just "yourself" once a
-    // flight is selected at all, as flavor. renderFlightWindows() above is
-    // the only thing that reads this.
+    // this learner — refreshed by refreshFlightPassengerCount() below
+    // automatically whenever a flight matches (no toggle to opt into
+    // anymore, see that function); otherwise just "yourself" once a flight
+    // is selected at all, as flavor. renderFlightWindows() above is the
+    // only thing that reads this.
     let knownFlightPassengerCount = 1;
 
     /** The flight picker: only meaningful before a focus phase starts (you
@@ -475,9 +468,15 @@
                 attrs: { type: 'button', role: 'radio', 'aria-checked': String(isSelected) },
                 on: { click: () => selectFlight(flight) }
             }, [
-                U.el('span', { className: 'flight-chip__code', text: flight.code }),
+                U.el('span', { className: 'flight-chip__flightno', text: flight.flightNo }),
+                U.el('span', { className: 'flight-chip__route' }, [
+                    U.el('span', { className: 'flight-chip__origin', text: 'BKK' }),
+                    U.el('span', { className: 'material-symbols-outlined', attrs: { 'aria-hidden': 'true' }, text: 'flight' }),
+                    U.el('span', { className: 'flight-chip__code', text: flight.code })
+                ]),
                 U.el('span', { className: 'flight-chip__name', text: I18n.pick(flight.name) }),
-                U.el('span', { className: 'flight-chip__mins', text: I18n.t('s6.flightMinutes', { n: flight.minutes }) })
+                U.el('span', { className: 'flight-chip__mins', text: I18n.t('s6.flightMinutes', { n: flight.minutes }) }),
+                U.el('span', { className: 'material-symbols-outlined flight-chip__check', attrs: { 'aria-hidden': 'true' }, text: 'check_circle' })
             ]));
         });
     }
@@ -487,7 +486,7 @@
         State.commit({ settings: { pomodoro: { focusMin: flight.minutes } } });
         if (mode === 'focus') { accumulatedMs = 0; persistRuntime(); }
         render();
-        refreshCoStudyCount(); // this flight's passenger count may differ from the previous one
+        refreshFlightPassengerCount(); // this flight's passenger count may differ from the previous one
     }
 
     /** The flight the learner is currently ticketed for, if the duration
@@ -497,14 +496,18 @@
      *  exact rather than nearest-match). */
     function currentFocusFlight() { return flightForMinutes(pomodoroSettings().focusMin); }
 
-    /** Joins this flight's shared presence room if — and only if — the
-     *  learner has opted in, we're actually in the focus phase (not a
-     *  break), and the current duration exactly matches a curated flight
-     *  to join a room for. Safe to call unconditionally; no-ops otherwise. */
+    /** Joins this flight's shared presence room whenever we're actually in
+     *  the focus phase (not a break) and the current duration exactly
+     *  matches a curated flight to join a room for — automatic now, no
+     *  opt-in toggle (removed; see the "Flight passenger presence" section
+     *  further down for why). Safe to call unconditionally; no-ops
+     *  otherwise. `activeSeat` (set by showBoardingPass) tags this
+     *  learner's seat on their presence doc so real co-passengers show up
+     *  correctly taken in the seat picker. */
     function joinFlightHeartbeatIfEligible() {
         const flight = mode === 'focus' ? currentFocusFlight() : null;
-        if (flight && State.get().settings.coStudyPublicEnabled && TFS.Presence && TFS.Presence.isAvailable()) {
-            TFS.Presence.startHeartbeat(flight.id);
+        if (flight && TFS.Presence && TFS.Presence.isAvailable()) {
+            TFS.Presence.startHeartbeat(flight.id, activeSeat);
         }
     }
 
@@ -774,15 +777,22 @@
     }
     initTearGesture();
 
+    /** The seat for the flight about to start, set below whenever the
+     *  boarding pass is shown — read by joinFlightHeartbeatIfEligible()
+     *  (above) so a real learner's chosen seat shows up correctly taken to
+     *  anyone else looking at the seat picker for this same flight. */
+    let activeSeat = null;
+
     /** Step 2 of the check-in ritual (see showSeatPicker below, its only
      *  caller) — `seat` is whatever was actually picked there; `randomSeat()`
      *  is only a defensive fallback if the seat picker's elements are ever
      *  missing for some reason. */
     function showBoardingPass(seat) {
         const flight = currentFocusFlight() || nearestFlight(pomodoroSettings().focusMin);
+        activeSeat = seat || randomSeat();
         if (boardingPassDestCode) boardingPassDestCode.textContent = flight.code;
         if (boardingPassDestName) boardingPassDestName.textContent = I18n.pick(flight.name);
-        if (boardingPassSeat) boardingPassSeat.textContent = seat || randomSeat();
+        if (boardingPassSeat) boardingPassSeat.textContent = activeSeat;
         if (boardingPassDuration) boardingPassDuration.textContent = I18n.t('s6.flightMinutes', { n: flight.minutes });
         if (boardingPassDate) {
             const today = new Date();
@@ -809,41 +819,54 @@
     const SEAT_ROWS = 10;
     let pickedSeat = null;
 
-    /** Rebuilds the whole seat grid, with a handful of seats pre-marked
-     *  "taken" — regenerated fresh each time the picker opens, purely
-     *  decorative realism, the same spirit as the boarding pass's barcode. */
-    function renderSeatGrid() {
+    /** Rebuilds the whole seat grid with every seat available, then — if a
+     *  real flight and presence are both available — asynchronously marks
+     *  exactly the seats real co-passengers on *this* flight currently hold
+     *  as taken. No other real users right now (or no way to check) both
+     *  look identical on purpose: every seat stays open rather than faking
+     *  occupancy, so a genuinely empty flight really can pick any seat. */
+    function renderSeatGrid(flightId) {
         if (!seatPickerGrid) return;
         seatPickerGrid.innerHTML = '';
+        seatPickerGrid.dataset.flightId = flightId || '';
         pickedSeat = null;
         if (confirmSeatBtn) confirmSeatBtn.disabled = true;
-        const takenCount = 6 + Math.floor(Math.random() * 6);
-        const taken = new Set();
-        while (taken.size < takenCount) {
-            const r = 1 + Math.floor(Math.random() * SEAT_ROWS);
-            const l = SEAT_LETTERS[Math.floor(Math.random() * SEAT_LETTERS.length)];
-            taken.add(`${r}${l}`);
-        }
+
+        const seatButtons = new Map();
         for (let r = 1; r <= SEAT_ROWS; r++) {
             const rowEl = U.el('div', { className: 'seat-picker__row' });
             rowEl.appendChild(U.el('span', { className: 'seat-picker__row-num', text: U.pad2(r) }));
             SEAT_LETTERS.forEach((letter, i) => {
                 const seatId = `${r}${letter}`;
-                const isTaken = taken.has(seatId);
                 const btn = U.el('button', {
-                    className: 'seat-picker__seat' + (isTaken ? ' is-taken' : ''),
-                    attrs: {
-                        type: 'button', role: 'radio', 'aria-checked': 'false', disabled: isTaken,
-                        'aria-label': I18n.t(isTaken ? 'modalSeatPicker.seatTakenLabel' : 'modalSeatPicker.seatLabel', { seat: seatId })
-                    },
+                    className: 'seat-picker__seat',
+                    attrs: { type: 'button', role: 'radio', 'aria-checked': 'false', 'aria-label': I18n.t('modalSeatPicker.seatLabel', { seat: seatId }) },
                     text: letter,
-                    on: isTaken ? {} : { click: () => selectSeat(seatId, btn) }
+                    on: { click: () => selectSeat(seatId, btn) }
                 });
+                seatButtons.set(seatId, btn);
                 rowEl.appendChild(btn);
                 if (i === 1) rowEl.appendChild(U.el('span', { className: 'seat-picker__aisle' }));
             });
             seatPickerGrid.appendChild(rowEl);
         }
+
+        if (!flightId || !TFS.Presence || !TFS.Presence.isAvailable()) return;
+        TFS.Presence.fetchTakenSeats(flightId).then((taken) => {
+            if (!taken || !taken.length) return; // null (couldn't check) or genuinely empty — both mean every seat stays open
+            // The learner may have reopened the picker (or it moved to a
+            // different flight) before this resolved — only apply a result
+            // that still matches what's actually on screen.
+            if (seatPickerGrid.dataset.flightId !== flightId) return;
+            taken.forEach((seatId) => {
+                const btn = seatButtons.get(seatId);
+                if (!btn || btn.classList.contains('is-selected')) return; // unknown seat id, or already this learner's own pick
+                btn.classList.add('is-taken');
+                btn.disabled = true;
+                btn.setAttribute('aria-disabled', 'true');
+                btn.setAttribute('aria-label', I18n.t('modalSeatPicker.seatTakenLabel', { seat: seatId }));
+            });
+        }).catch((e) => console.warn('[focus] Could not check real seat occupancy for this flight.', e));
     }
 
     function selectSeat(seatId, btnEl) {
@@ -868,7 +891,10 @@
         if (!seatPickerModal || !seatPickerGrid) { showBoardingPass(randomSeat()); return; }
         const flight = currentFocusFlight() || nearestFlight(pomodoroSettings().focusMin);
         if (seatPickerDestCode) seatPickerDestCode.textContent = flight.code;
-        renderSeatGrid();
+        // Only a curated flight (an exact duration match) has a real shared
+        // room to check — see currentFocusFlight()'s own comment — so a
+        // custom duration's seat picker just shows every seat open.
+        renderSeatGrid(currentFocusFlight() ? flight.id : null);
         TFS.Modal.open(seatPickerModal);
     }
 
@@ -961,312 +987,48 @@
         render();
     });
 
-    // ---------------------------------------------------------------- Ambient sound (Web Audio)
-
-    // ScriptProcessorNode is deprecated in favor of AudioWorklet, but AudioWorklet
-    // requires fetching a separate module file via `audioContext.audioWorklet.addModule()`
-    // — which fails under file:// the same way fetch() does. ScriptProcessorNode
-    // still works everywhere and needs no extra file, so it is the pragmatic choice
-    // for an app meant to be opened straight from disk with zero server.
+    // ---------------------------------------------------------------- Flight passenger presence (per-flight — see js/presence.js)
     //
-    // Six generated sounds ship out of the box, each just a different filter
-    // (+ optional slow LFO amplitude wobble) over the same underlying noise
-    // source — no audio files to bundle, so the app stays a handful of KB.
-    // A learner can also upload their own file (js/customSounds.js); that
-    // path bypasses the noise graph entirely and loops a decoded AudioBuffer.
-    const BUILTIN_AMBIENT_TYPES = {
-        brown: { icon: 'water_drop', filterType: 'lowpass', freq: 400, q: 0.7, label: { th: 'เสียงสีน้ำตาล', en: 'Brown noise' } },
-        rain: { icon: 'rainy', filterType: 'bandpass', freq: 2500, q: 0.7, label: { th: 'เสียงฝน', en: 'Rain' } },
-        white: { icon: 'blur_on', filterType: 'highpass', freq: 20, q: 0.0001, label: { th: 'เสียงสีขาว', en: 'White noise' } },
-        ocean: { icon: 'waves', filterType: 'lowpass', freq: 600, q: 0.8, lfo: { freq: 0.15, depth: 0.55 }, label: { th: 'คลื่นทะเล', en: 'Ocean waves' } },
-        wind: { icon: 'air', filterType: 'bandpass', freq: 800, q: 0.5, lfo: { freq: 0.4, depth: 0.35 }, label: { th: 'เสียงลม', en: 'Wind' } },
-        cafe: { icon: 'local_cafe', filterType: 'bandpass', freq: 1200, q: 0.3, lfo: { freq: 1.3, depth: 0.15 }, label: { th: 'ร้านกาแฟ', en: 'Café murmur' } }
-    };
+    // Used to be two separate opt-in toggles here (ambient sound, and a
+    // "join the public focus room" switch for this count) — both removed
+    // after real usage feedback that neither pulled its weight against the
+    // clutter of always showing them. Presence itself wasn't the problem,
+    // just the manual toggle for it: joining is automatic now, the same
+    // way the flight-map's lit cabin windows and the seat picker's taken
+    // seats already read from it passively, with nothing to switch on.
 
-    let audioCtx = null, gainNode = null;
-    let noiseNode = null, filterNode = null, modGain = null, lfoOsc = null, lfoDepthGain = null;
-    let customSourceNode = null, customSourceLoadToken = 0;
-    let ambientPlaying = false;
+    let flightPassengerIntervalId = null;
 
-    function ensureAudioCtx() {
-        if (audioCtx) return;
-        audioCtx = new (global.AudioContext || global.webkitAudioContext)();
-        gainNode = audioCtx.createGain();
-        gainNode.gain.value = State.get().settings.ambientVolume;
-        gainNode.connect(audioCtx.destination);
-        audioCtx.suspend(); // start silent until the user presses play
-    }
-
-    function teardownBuiltinGraph() {
-        if (noiseNode) { noiseNode.disconnect(); noiseNode.onaudioprocess = null; noiseNode = null; }
-        if (filterNode) { filterNode.disconnect(); filterNode = null; }
-        if (lfoOsc) { try { lfoOsc.stop(); } catch (e) { /* already stopped */ } lfoOsc.disconnect(); lfoOsc = null; }
-        if (lfoDepthGain) { lfoDepthGain.disconnect(); lfoDepthGain = null; }
-        if (modGain) { modGain.disconnect(); modGain = null; }
-    }
-
-    function teardownCustomSource() {
-        if (customSourceNode) {
-            try { customSourceNode.stop(); } catch (e) { /* already stopped */ }
-            customSourceNode.disconnect();
-            customSourceNode = null;
-        }
-    }
-
-    function buildBuiltinGraph(cfg) {
-        teardownCustomSource();
-        teardownBuiltinGraph();
-        modGain = audioCtx.createGain();
-        modGain.gain.value = 1;
-        filterNode = audioCtx.createBiquadFilter();
-        noiseNode = audioCtx.createScriptProcessor(4096, 1, 1);
-        let lastOut = 0;
-        noiseNode.onaudioprocess = (e) => {
-            const output = e.outputBuffer.getChannelData(0);
-            for (let i = 0; i < output.length; i++) {
-                const white = Math.random() * 2 - 1;
-                lastOut = (lastOut + 0.02 * white) / 1.02;
-                output[i] = lastOut * 3.5;
-            }
-        };
-        noiseNode.connect(filterNode);
-        filterNode.connect(modGain);
-        modGain.connect(gainNode);
-
-        filterNode.type = cfg.filterType;
-        filterNode.frequency.value = cfg.freq;
-        filterNode.Q.value = cfg.q;
-
-        if (cfg.lfo) {
-            lfoOsc = audioCtx.createOscillator();
-            lfoOsc.frequency.value = cfg.lfo.freq;
-            lfoDepthGain = audioCtx.createGain();
-            lfoDepthGain.gain.value = cfg.lfo.depth;
-            lfoOsc.connect(lfoDepthGain);
-            lfoDepthGain.connect(modGain.gain);
-            lfoOsc.start();
-        }
-    }
-
-    async function buildCustomGraph(soundId) {
-        teardownBuiltinGraph();
-        teardownCustomSource();
-        const token = ++customSourceLoadToken;
-        try {
-            const blob = await TFS.CustomSounds.getSoundBlob(soundId);
-            if (!blob) throw new Error('sound_not_found');
-            const arrayBuffer = await blob.arrayBuffer();
-            const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-            if (token !== customSourceLoadToken) return; // a newer selection superseded this one mid-decode
-            customSourceNode = audioCtx.createBufferSource();
-            customSourceNode.buffer = audioBuffer;
-            customSourceNode.loop = true;
-            customSourceNode.connect(gainNode);
-            customSourceNode.start(0);
-        } catch (e) {
-            console.warn('[focus] Could not play custom ambient sound, falling back to brown noise.', e);
-            TFS.Toast.error(I18n.t('s6.ambientCustomError'));
-            State.commit({ settings: { ambientType: 'brown' } });
-            buildBuiltinGraph(BUILTIN_AMBIENT_TYPES.brown);
-            renderAmbientUI();
-            renderAmbientTypeGrid();
-        }
-    }
-
-    function applyAmbientType(type) {
-        ensureAudioCtx();
-        if (typeof type === 'string' && type.indexOf('custom:') === 0) {
-            buildCustomGraph(type.slice('custom:'.length));
-        } else {
-            buildBuiltinGraph(BUILTIN_AMBIENT_TYPES[type] || BUILTIN_AMBIENT_TYPES.brown);
-        }
-    }
-
-    function stopAmbient() {
-        if (audioCtx && ambientPlaying) audioCtx.suspend();
-        ambientPlaying = false;
-        renderAmbientUI();
-    }
-
-    function toggleAmbient() {
-        ensureAudioCtx();
-        if (!noiseNode && !customSourceNode) applyAmbientType(State.get().settings.ambientType);
-        if (ambientPlaying) { audioCtx.suspend(); ambientPlaying = false; }
-        else { audioCtx.resume(); ambientPlaying = true; }
-        renderAmbientUI();
-    }
-
-    const ambientPlayBtn = document.getElementById('ambientPlayBtn');
-    const ambientPlayIcon = document.getElementById('ambientPlayIcon');
-    const ambientTypeGrid = document.getElementById('ambientTypeGrid');
-    const ambientVolumeSlider = document.getElementById('ambientVolumeSlider');
-    const ambientUploadInput = document.getElementById('ambientUploadInput');
-
-    function selectAmbientType(type) {
-        State.commit({ settings: { ambientType: type } });
-        applyAmbientType(type);
-        renderAmbientUI();
-        renderAmbientTypeGrid(); // rebuild so `is-active` moves to the newly picked button
-    }
-
-    async function renderAmbientTypeGrid() {
-        ambientTypeGrid.innerHTML = '';
-        const currentType = State.get().settings.ambientType;
-
-        Object.entries(BUILTIN_AMBIENT_TYPES).forEach(([key, cfg]) => {
-            ambientTypeGrid.appendChild(U.el('button', {
-                className: 'ambient-type-btn' + (currentType === key ? ' is-active' : ''),
-                attrs: { type: 'button' },
-                on: { click: () => selectAmbientType(key) }
-            }, [
-                U.el('span', { className: 'material-symbols-outlined', attrs: { 'aria-hidden': 'true', style: 'font-size:1.1rem' }, text: cfg.icon }),
-                U.el('span', { text: I18n.pick(cfg.label) })
-            ]));
-        });
-
-        if (TFS.CustomSounds.isSupported()) {
-            let customSounds = [];
-            try { customSounds = await TFS.CustomSounds.listSounds(); } catch (e) { /* IndexedDB unavailable — just show none */ }
-
-            customSounds.forEach(sound => {
-                const key = 'custom:' + sound.id;
-                ambientTypeGrid.appendChild(U.el('button', {
-                    className: 'ambient-type-btn ambient-type-btn--custom' + (currentType === key ? ' is-active' : ''),
-                    attrs: { type: 'button', title: sound.name },
-                    on: { click: () => selectAmbientType(key) }
-                }, [
-                    U.el('span', { className: 'material-symbols-outlined', attrs: { 'aria-hidden': 'true', style: 'font-size:1.1rem' }, text: 'music_note' }),
-                    U.el('span', { text: sound.name, attrs: { style: 'max-width:6rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap' } }),
-                    U.el('span', {
-                        className: 'material-symbols-outlined ambient-type-btn__remove', attrs: { 'aria-hidden': 'true', style: 'font-size:0.95rem' }, text: 'close',
-                        on: { click: (e) => { e.stopPropagation(); removeCustomSound(sound.id, key, currentType); } }
-                    })
-                ]));
-            });
-
-            ambientTypeGrid.appendChild(U.el('button', {
-                className: 'ambient-type-btn ambient-type-btn--add', attrs: { type: 'button' },
-                on: { click: () => ambientUploadInput.click() }
-            }, [
-                U.el('span', { className: 'material-symbols-outlined', attrs: { 'aria-hidden': 'true', style: 'font-size:1.1rem' }, text: 'add' }),
-                U.el('span', { text: I18n.t('s6.ambientAddCustom') })
-            ]));
-        }
-    }
-
-    async function removeCustomSound(soundId, key, currentType) {
-        await TFS.CustomSounds.deleteSound(soundId);
-        if (currentType === key) selectAmbientType('brown');
-        renderAmbientTypeGrid();
-    }
-
-    ambientUploadInput.addEventListener('change', async () => {
-        const file = ambientUploadInput.files[0];
-        ambientUploadInput.value = '';
-        if (!file) return;
-        const name = file.name.replace(/\.[^/.]+$/, '').slice(0, 30) || 'Custom sound';
-        try {
-            const id = await TFS.CustomSounds.addSound(name, file);
-            await renderAmbientTypeGrid();
-            selectAmbientType('custom:' + id);
-            TFS.Toast.success(I18n.t('s6.ambientUploadSuccess'));
-        } catch (e) {
-            console.error('[focus] Failed to store custom ambient sound', e);
-            TFS.Toast.error(I18n.t('s6.ambientUploadError'));
-        }
-    });
-
-    function renderAmbientUI() {
-        ambientPlayIcon.textContent = ambientPlaying ? 'pause' : 'play_arrow';
-        // Keep both the live attribute (for right now) and the data-i18n-attr
-        // hint (so a later language switch's document-wide re-translation still
-        // gets it right) in sync. `I18n.applyTranslations` only ever matches
-        // *descendants* of the root passed to it via querySelectorAll, never the
-        // root element itself, so it cannot be used to re-translate this button.
-        const labelKey = ambientPlaying ? 'aria.pauseAmbient' : 'aria.playAmbient';
-        ambientPlayBtn.setAttribute('data-i18n-attr', JSON.stringify({ 'aria-label': labelKey }));
-        ambientPlayBtn.setAttribute('aria-label', I18n.t(labelKey));
-        ambientVolumeSlider.value = State.get().settings.ambientVolume;
-    }
-
-    ambientPlayBtn.addEventListener('click', toggleAmbient);
-    ambientVolumeSlider.addEventListener('input', () => {
-        const v = parseFloat(ambientVolumeSlider.value);
-        if (gainNode) gainNode.gain.value = v;
-    });
-    ambientVolumeSlider.addEventListener('change', () => {
-        State.commit({ settings: { ambientVolume: parseFloat(ambientVolumeSlider.value) } });
-    });
-
-    // ---------------------------------------------------------------- Co-study presence (per-flight — see js/presence.js)
-    //
-    // "Join this flight" replaces the earlier single global room: presence
-    // is now scoped to the exact flight ticketed (same duration = same
-    // curated destination), so "you're on the same plane" is literally
-    // true for anyone else currently seeing the same count, not just a
-    // coincidence of being on the app at the same time.
-
-    const coStudyToggleBtn = document.getElementById('coStudyToggleBtn');
-    const coStudyToggleSwitch = document.getElementById('coStudyToggleSwitch');
-    const coStudyCountText = document.getElementById('coStudyCountText');
-    let coStudyCountIntervalId = null;
-
-    function renderCoStudyToggle() {
-        const on = State.get().settings.coStudyPublicEnabled;
-        coStudyToggleSwitch.classList.toggle('is-on', on);
-        coStudyToggleBtn.setAttribute('aria-pressed', String(on));
-    }
-
-    async function refreshCoStudyCount() {
+    /** How many real people are on this exact flight right now, including
+     *  this learner once their own session is running — see
+     *  knownFlightPassengerCount's own comment for who reads this. */
+    async function refreshFlightPassengerCount() {
         const flight = mode === 'focus' ? currentFocusFlight() : null;
-        const enabled = State.get().settings.coStudyPublicEnabled;
-        if (!flight || !enabled || !TFS.Presence || !TFS.Presence.isAvailable()) {
-            coStudyCountText.hidden = true;
-            knownFlightPassengerCount = 1; // just yourself, as flavor — see renderFlightWindows()
+        if (!flight || !TFS.Presence || !TFS.Presence.isAvailable()) {
+            knownFlightPassengerCount = 1; // just yourself, as flavor
             renderFlightWindows(knownFlightPassengerCount);
             return;
         }
         const n = await TFS.Presence.fetchFlightCount(flight.id);
         if (!isActive()) return; // the learner navigated away while this was in flight
-        if (n === null) { coStudyCountText.hidden = true; return; }
+        if (n === null) return; // couldn't check — leave the last known count as-is rather than guess
 
         // A heartbeat only exists once a session is actually running (see
         // start()), so `n` only counts *this* learner once they've joined —
         // before that, `n` is purely "other people already flying" and
-        // needs +1 for the window/count display to read as "yourself plus
+        // needs +1 for the window display to read as "yourself plus
         // however many others", the same framing either way.
-        const totalIncludingSelf = isRunning() ? n : n + 1;
-        knownFlightPassengerCount = totalIncludingSelf;
+        knownFlightPassengerCount = isRunning() ? n : n + 1;
         renderFlightWindows(knownFlightPassengerCount);
-
-        coStudyCountText.hidden = false;
-        coStudyCountText.textContent = totalIncludingSelf > 1
-            ? I18n.t('s6.coStudyCountActive', { n: totalIncludingSelf - 1 })
-            : I18n.t('s6.coStudyCountAlone');
     }
 
-    coStudyToggleBtn.addEventListener('click', () => {
-        const next = !State.get().settings.coStudyPublicEnabled;
-        State.commit({ settings: { coStudyPublicEnabled: next } });
-        renderCoStudyToggle();
-        // Only actually join/leave a room if a session is running right now
-        // — otherwise this just sets the preference for next time.
-        const flight = mode === 'focus' ? currentFocusFlight() : null;
-        if (isRunning() && flight) { next ? TFS.Presence.startHeartbeat(flight.id) : TFS.Presence.stopHeartbeat(); }
-        refreshCoStudyCount();
-    });
-
-    function initCoStudyUI() {
-        const available = TFS.Presence && TFS.Presence.isAvailable();
-        coStudyToggleBtn.hidden = !available;
-        if (!available) { coStudyCountText.hidden = true; return; }
-        renderCoStudyToggle();
-        refreshCoStudyCount();
-        if (coStudyCountIntervalId === null) coStudyCountIntervalId = setInterval(refreshCoStudyCount, 30000);
+    function initFlightPassengerUpdates() {
+        refreshFlightPassengerCount();
+        if (flightPassengerIntervalId === null) flightPassengerIntervalId = setInterval(refreshFlightPassengerCount, 30000);
     }
 
-    function teardownCoStudyUI() {
-        if (coStudyCountIntervalId !== null) { clearInterval(coStudyCountIntervalId); coStudyCountIntervalId = null; }
+    function teardownFlightPassengerUpdates() {
+        if (flightPassengerIntervalId !== null) { clearInterval(flightPassengerIntervalId); flightPassengerIntervalId = null; }
     }
 
     // ---------------------------------------------------------------- Wiring
@@ -1279,9 +1041,7 @@
             TFS.Nav.show(); TFS.Nav.setActive('focus');
             loadRuntimeFromState();
             render();
-            renderAmbientUI();
-            renderAmbientTypeGrid();
-            initCoStudyUI();
+            initFlightPassengerUpdates();
             // Leaflet sizes itself against its container at creation time;
             // re-checking on every re-entry to this screen (a standard
             // Leaflet pattern for a map inside a show/hide container) fixes
@@ -1291,15 +1051,14 @@
         },
         onLeave: () => {
             // Leaving the focus screen for another in-app screen pauses the
-            // run and stops ambient audio — see the file header for why this
-            // is a deliberate product choice, not the bug this file fixes.
-            // Immersive mode is forced closed too: it's fixed-position and
-            // otherwise wouldn't be torn down by this screen simply being
-            // hidden, which would leave the whole app unscrollable behind it.
+            // run — see the file header for why this is a deliberate
+            // product choice, not the bug this file fixes. Immersive mode
+            // is forced closed too: it's fixed-position and otherwise
+            // wouldn't be torn down by this screen simply being hidden,
+            // which would leave the whole app unscrollable behind it.
             exitImmersive();
             pause();
-            stopAmbient();
-            teardownCoStudyUI();
+            teardownFlightPassengerUpdates();
         }
     });
 
