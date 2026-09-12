@@ -55,7 +55,7 @@
                 compareUs1: 'ระบบสร้างแผนให้จากวันสอบของคุณเอง',
                 compareUs2: 'คะแนนรวมที่นับความสม่ำเสมอด้วย ไม่ใช่แค่ % เนื้อหา',
                 compareUs3: 'เสียงสังเคราะห์สดด้วย Web Audio ไม่มีไฟล์เลย',
-                compareUs4: 'ดูว่าตอนนี้มีคนกำลังโฟกัสอยู่กี่คน หรือชวนเพื่อนมาอ่านด้วยกันในห้องส่วนตัว — ไม่มีการจัดอันดับใครแข่งกับใคร',
+                compareUs4: 'ดูว่าตอนนี้มีคนกำลังโฟกัสอยู่ด้วยกันกี่คนแบบไม่ระบุตัวตน — ไม่มีชื่อ ไม่มีแชท ไม่มีการจัดอันดับใครแข่งกับใคร',
                 finalTitle: 'พร้อมวางแผนสอบให้เป็นระบบแล้วหรือยัง?',
                 footerNote: 'สร้างมาเพื่อนักเรียนที่กำลังเตรียมสอบ TCAS'
             },
@@ -244,7 +244,18 @@
                 send: 'เปิดอีเมล',
                 errEmpty: 'กรุณาพิมพ์ข้อความก่อนส่งครับ'
             },
-            modalAddCard: { title: 'เพิ่มคำศัพท์ใหม่', termLabel: 'คำศัพท์', defLabel: 'ความหมาย', exampleLabel: 'ตัวอย่างประโยค', save: 'เพิ่มคำศัพท์', errRequired: 'กรุณากรอกคำศัพท์และความหมายให้ครบครับ' },
+            modalAddCard: { title: 'เพิ่มคำศัพท์ใหม่', termLabel: 'คำศัพท์', defLabel: 'ความหมาย', exampleLabel: 'ตัวอย่างประโยค', save: 'เพิ่มคำศัพท์', errRequired: 'กรุณากรอกคำศัพท์และความหมายให้ครบครับ', bulkImportLink: 'วางคำศัพท์หลายคำพร้อมกันแทน' },
+            modalBulkImport: {
+                title: 'นำเข้าคำศัพท์หลายคำ',
+                hint: 'วางทีละบรรทัด คั่นคำศัพท์กับความหมายด้วย "|" แท็บ หรือ " - "',
+                placeholder: 'apple | แอปเปิ้ล\nbanana - กล้วย',
+                previewBtn: 'ดูตัวอย่างก่อนนำเข้า',
+                confirmBtn: 'นำเข้าคำศัพท์',
+                errNoneParsed: 'ไม่พบคำศัพท์ที่แยกได้เลย ลองตรวจสอบตัวคั่นอีกครั้งครับ',
+                summary: 'พบคำศัพท์ {n} คำ พร้อมนำเข้า',
+                summaryWithSkipped: 'พบคำศัพท์ {n} คำ พร้อมนำเข้า (ข้าม {skipped} บรรทัดที่แยกไม่ได้)',
+                importedToast: 'นำเข้าคำศัพท์ {n} คำเรียบร้อยแล้ว 🎉'
+            },
             modalAddDeck: { title: 'สร้างชุดคำศัพท์', nameLabel: 'ชื่อชุดคำศัพท์', namePlaceholder: 'เช่น สังคมศึกษา, ชีววิทยา', errRequired: 'กรุณาตั้งชื่อชุดคำศัพท์ครับ', errExists: 'ชื่อชุดคำศัพท์นี้มีอยู่แล้วครับ' },
             s5: {
                 title: 'คลังศัพท์', deckLabel: 'ชุดคำศัพท์:', progressCount: '{current} / {total} คำ',
@@ -269,6 +280,10 @@
                 mainGoal: 'เป้าหมายหลัก',
                 start: 'เริ่มจับเวลา', pause: 'หยุดพัก', resume: 'ทำต่อ', reset: 'รีเซ็ต',
                 soundToggleLabel: 'เสียงแจ้งเตือนเมื่อครบเวลา',
+                coStudyToggleLabel: 'เข้าร่วมห้องโฟกัสรวม (ไม่มีชื่อ ไม่มีแชท)',
+                coStudyCountActive: '🟢 มีคนกำลังโฟกัสอยู่ตอนนี้ {n} คน',
+                coStudyCountAlone: 'ตอนนี้ยังไม่มีใครอยู่ในห้องเลย — เป็นคนแรกได้เลย!',
+                coStudyUnavailable: 'ฟีเจอร์นี้ยังไม่พร้อมใช้งานในตอนนี้',
                 ambientLabel: 'เสียงบรรยากาศ (Ambient)', ambientBrown: 'เสียงสีน้ำตาล', ambientRain: 'เสียงฝน',
                 ambientAddCustom: 'เพิ่มเสียงของฉัน', ambientUploadSuccess: 'เพิ่มเสียงเรียบร้อยแล้ว',
                 ambientUploadError: 'ไม่สามารถบันทึกไฟล์เสียงนี้ได้', ambientCustomError: 'เล่นไฟล์เสียงนี้ไม่ได้ ขอเปลี่ยนเป็นเสียงสีน้ำตาลแทน',
@@ -346,7 +361,7 @@
                 compareUs1: 'The plan is generated for you from your exam date.',
                 compareUs2: 'A composite score that also rewards consistency.',
                 compareUs3: 'Sound synthesized live with Web Audio — zero files.',
-                compareUs4: 'See how many others are focusing right now, or study together in a private room — never a public ranking.',
+                compareUs4: "See an anonymous live count of how many others are focusing right now — no names, no chat, never a public ranking.",
                 finalTitle: 'Ready to plan your exam prep properly?',
                 footerNote: 'Built for students preparing for TCAS.'
             },
@@ -535,7 +550,18 @@
                 send: 'Open email',
                 errEmpty: 'Please type a message before sending.'
             },
-            modalAddCard: { title: 'Add new word', termLabel: 'Term', defLabel: 'Definition', exampleLabel: 'Example sentence', save: 'Add word', errRequired: 'Please fill in both the term and the definition.' },
+            modalAddCard: { title: 'Add new word', termLabel: 'Term', defLabel: 'Definition', exampleLabel: 'Example sentence', save: 'Add word', errRequired: 'Please fill in both the term and the definition.', bulkImportLink: 'Paste in multiple words at once instead' },
+            modalBulkImport: {
+                title: 'Bulk import',
+                hint: 'One word per line. Separate the term and definition with a "|", a tab, or " - ".',
+                placeholder: 'apple | an apple\nbanana - a banana',
+                previewBtn: 'Preview before importing',
+                confirmBtn: 'Import',
+                errNoneParsed: "Couldn't parse any words from that — check your separators and try again.",
+                summary: '{n} words found, ready to import.',
+                summaryWithSkipped: '{n} words found, ready to import ({skipped} line(s) skipped — no separator found).',
+                importedToast: 'Imported {n} words 🎉'
+            },
             modalAddDeck: { title: 'Create deck', nameLabel: 'Deck name', namePlaceholder: 'e.g. Social Studies, Biology', errRequired: 'Please name your deck.', errExists: 'A deck with this name already exists.' },
             s5: {
                 title: 'Vocabulary', deckLabel: 'Deck:', progressCount: '{current} / {total} words',
@@ -560,6 +586,10 @@
                 mainGoal: 'Main goal',
                 start: 'Start', pause: 'Pause', resume: 'Resume', reset: 'Reset',
                 soundToggleLabel: 'Play a sound when time is up',
+                coStudyToggleLabel: 'Join the public focus room (no names, no chat)',
+                coStudyCountActive: '🟢 {n} people focusing right now',
+                coStudyCountAlone: "Nobody's in the room yet — be the first!",
+                coStudyUnavailable: "This feature isn't available right now",
                 ambientLabel: 'Ambient sound', ambientBrown: 'Brown noise', ambientRain: 'Rain',
                 ambientAddCustom: 'Add my own sound', ambientUploadSuccess: 'Sound added successfully.',
                 ambientUploadError: 'Could not save that sound file.', ambientCustomError: "Couldn't play that sound file — switched back to brown noise.",

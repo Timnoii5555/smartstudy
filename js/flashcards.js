@@ -308,6 +308,95 @@
         render();
     });
 
+    // ---------------------------------------------------------------- Bulk import
+
+    /** Splits a line on the FIRST occurrence of `sep` only, so a separator
+     *  character that happens to also appear inside the definition itself
+     *  never gets treated as a second split point. */
+    function splitOnFirst(line, sep) {
+        const idx = line.indexOf(sep);
+        if (idx === -1) return null;
+        return [line.slice(0, idx).trim(), line.slice(idx + sep.length).trim()];
+    }
+
+    function parseBulkImportLine(line) {
+        return splitOnFirst(line, '|') || splitOnFirst(line, '\t') || splitOnFirst(line, ' - ');
+    }
+
+    /** One line per card: `term | definition`, `term<TAB>definition`, or
+     *  `term - definition` (tried in that order). Blank lines are ignored;
+     *  a line with no recognized separator, or an empty term/definition on
+     *  either side of one, is reported back as skipped rather than silently
+     *  dropped, so the preview step can say so plainly. */
+    function parseBulkImportText(text) {
+        const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        const valid = [];
+        const skipped = [];
+        lines.forEach(line => {
+            const pair = parseBulkImportLine(line);
+            if (pair && pair[0] && pair[1]) valid.push({ term: pair[0], def: pair[1] });
+            else skipped.push(line);
+        });
+        return { valid, skipped };
+    }
+
+    const bulkImportModal = document.getElementById('bulkImportModal');
+    const bulkImportTextarea = document.getElementById('bulkImportTextarea');
+    const bulkImportPasteStep = document.getElementById('bulkImportPasteStep');
+    const bulkImportPreviewStep = document.getElementById('bulkImportPreviewStep');
+    const bulkImportPreviewSummary = document.getElementById('bulkImportPreviewSummary');
+    const bulkImportPreviewList = document.getElementById('bulkImportPreviewList');
+    let bulkImportParsedValid = [];
+
+    function openBulkImportModal() {
+        if (!getCurrentDeckId()) { TFS.Toast.warn(I18n.t('s5.selectDeckFirst')); return; }
+        bulkImportTextarea.value = '';
+        bulkImportPasteStep.hidden = false;
+        bulkImportPreviewStep.hidden = true;
+        TFS.Modal.open(bulkImportModal);
+    }
+
+    document.getElementById('openBulkImportFromAddBtn').addEventListener('click', () => {
+        TFS.Modal.close(addFcModal);
+        setTimeout(openBulkImportModal, 200);
+    });
+    document.getElementById('closeBulkImportBtn').addEventListener('click', () => TFS.Modal.close(bulkImportModal));
+
+    document.getElementById('bulkImportPreviewBtn').addEventListener('click', () => {
+        const { valid, skipped } = parseBulkImportText(bulkImportTextarea.value);
+        if (valid.length === 0) { TFS.Toast.error(I18n.t('modalBulkImport.errNoneParsed')); return; }
+        bulkImportParsedValid = valid;
+
+        bulkImportPreviewSummary.textContent = skipped.length > 0
+            ? I18n.t('modalBulkImport.summaryWithSkipped', { n: valid.length, skipped: skipped.length })
+            : I18n.t('modalBulkImport.summary', { n: valid.length });
+
+        bulkImportPreviewList.innerHTML = '';
+        valid.forEach(pair => {
+            bulkImportPreviewList.appendChild(U.el('div', { className: 'search-result-item w-full', attrs: { style: 'cursor:default' } }, [
+                U.el('span', {}, [
+                    U.el('h3', { attrs: { style: 'font-weight:700;font-size:0.875rem' }, text: pair.term }),
+                    U.el('p', { className: 'text-outline', attrs: { style: 'font-size:0.75rem' }, text: pair.def })
+                ])
+            ]));
+        });
+
+        bulkImportPasteStep.hidden = true;
+        bulkImportPreviewStep.hidden = false;
+    });
+
+    document.getElementById('bulkImportBackBtn').addEventListener('click', () => {
+        bulkImportPasteStep.hidden = false;
+        bulkImportPreviewStep.hidden = true;
+    });
+
+    document.getElementById('bulkImportConfirmBtn').addEventListener('click', () => {
+        bulkImportParsedValid.forEach(pair => addCardToCurrentDeck(pair.term, pair.def, ''));
+        TFS.Toast.success(I18n.t('modalBulkImport.importedToast', { n: bulkImportParsedValid.length }));
+        TFS.Modal.close(bulkImportModal);
+        render();
+    });
+
     // ---------------------------------------------------------------- Review UI
 
     const flashcardInner = document.getElementById('flashcardInner');

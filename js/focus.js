@@ -100,6 +100,7 @@
         if (isRunning()) {
             requestWakeLock();
             ensureRenderInterval();
+            if (State.get().settings.coStudyPublicEnabled && TFS.Presence && TFS.Presence.isAvailable()) TFS.Presence.startHeartbeat();
             // A locked phone or a killed tab can mean the phase boundary was
             // already crossed while we were away — catch up once, immediately.
             creditElapsedFocusTime();
@@ -293,6 +294,7 @@
         lastCreditMs = runStartedAtMs;
         requestWakeLock();
         ensureRenderInterval();
+        if (State.get().settings.coStudyPublicEnabled && TFS.Presence && TFS.Presence.isAvailable()) TFS.Presence.startHeartbeat();
         persistRuntime();
         render();
     }
@@ -304,6 +306,7 @@
         runStartedAtMs = null;
         releaseWakeLock();
         clearRenderInterval();
+        if (TFS.Presence) TFS.Presence.stopHeartbeat();
         persistRuntime();
         render();
     }
@@ -317,6 +320,7 @@
         const elapsedMs = getElapsedMsInPhase();
         releaseWakeLock();
         clearRenderInterval();
+        if (TFS.Presence) TFS.Presence.stopHeartbeat();
         runStartedAtMs = null;
         if (mode === 'focus' && elapsedMs > 0 && elapsedMs < MIN_PARTIAL_SECONDS * 1000) {
             addSecondsToToday(-Math.floor(elapsedMs / 1000));
@@ -631,6 +635,50 @@
         State.commit({ settings: { ambientVolume: parseFloat(ambientVolumeSlider.value) } });
     });
 
+    // ---------------------------------------------------------------- Co-study presence (public room only — see js/presence.js)
+
+    const coStudyToggleBtn = document.getElementById('coStudyToggleBtn');
+    const coStudyToggleSwitch = document.getElementById('coStudyToggleSwitch');
+    const coStudyCountText = document.getElementById('coStudyCountText');
+    let coStudyCountIntervalId = null;
+
+    function renderCoStudyToggle() {
+        const on = State.get().settings.coStudyPublicEnabled;
+        coStudyToggleSwitch.classList.toggle('is-on', on);
+        coStudyToggleBtn.setAttribute('aria-pressed', String(on));
+    }
+
+    async function refreshCoStudyCount() {
+        const n = await TFS.Presence.fetchCount();
+        if (!isActive()) return; // the learner navigated away while this was in flight
+        if (n === null) { coStudyCountText.hidden = true; return; }
+        coStudyCountText.hidden = false;
+        coStudyCountText.textContent = n > 0 ? I18n.t('s6.coStudyCountActive', { n }) : I18n.t('s6.coStudyCountAlone');
+    }
+
+    coStudyToggleBtn.addEventListener('click', () => {
+        const next = !State.get().settings.coStudyPublicEnabled;
+        State.commit({ settings: { coStudyPublicEnabled: next } });
+        renderCoStudyToggle();
+        // Only actually join/leave the count if a session is running right
+        // now — otherwise this just sets the preference for next time.
+        if (isRunning()) { next ? TFS.Presence.startHeartbeat() : TFS.Presence.stopHeartbeat(); }
+        refreshCoStudyCount();
+    });
+
+    function initCoStudyUI() {
+        const available = TFS.Presence && TFS.Presence.isAvailable();
+        coStudyToggleBtn.hidden = !available;
+        if (!available) { coStudyCountText.hidden = true; return; }
+        renderCoStudyToggle();
+        refreshCoStudyCount();
+        if (coStudyCountIntervalId === null) coStudyCountIntervalId = setInterval(refreshCoStudyCount, 30000);
+    }
+
+    function teardownCoStudyUI() {
+        if (coStudyCountIntervalId !== null) { clearInterval(coStudyCountIntervalId); coStudyCountIntervalId = null; }
+    }
+
     // ---------------------------------------------------------------- Wiring
 
     I18n.onChange(() => { if (isActive()) render(); });
@@ -643,6 +691,7 @@
             render();
             renderAmbientUI();
             renderAmbientTypeGrid();
+            initCoStudyUI();
         },
         onLeave: () => {
             // Leaving the focus screen for another in-app screen pauses the
@@ -650,6 +699,7 @@
             // is a deliberate product choice, not the bug this file fixes.
             pause();
             stopAmbient();
+            teardownCoStudyUI();
         }
     });
 

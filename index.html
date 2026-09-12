@@ -126,7 +126,7 @@
                     <p data-i18n="landing.compareUs1">The plan is generated for you from your exam date.</p>
                     <p data-i18n="landing.compareUs2">A composite score that also rewards consistency.</p>
                     <p data-i18n="landing.compareUs3">Sound synthesized live with Web Audio — zero files.</p>
-                    <p data-i18n="landing.compareUs4">See how many others are focusing right now, or study together in a private room — never a public ranking.</p>
+                    <p data-i18n="landing.compareUs4">See an anonymous live count of how many others are focusing right now — no names, no chat, never a public ranking.</p>
                 </div>
             </div>
         </section>
@@ -703,6 +703,19 @@
                 <span id="notifToggleSwitch" class="switch"><span class="switch__knob"></span></span>
             </button>
 
+            <!-- Co-study presence (Phase 5, scoped to the public room only —
+                 see js/presence.js). Joining is implicit: this toggle plus an
+                 actually-running focus session adds you to the count; off by
+                 default, one tap to enable. No chat, no names, no list. -->
+            <button type="button" id="coStudyToggleBtn" class="toggle-row" hidden>
+                <span class="settings-row__left">
+                    <span class="settings-row__icon"><span class="material-symbols-outlined" aria-hidden="true">groups</span></span>
+                    <span style="font-weight:500" data-i18n="s6.coStudyToggleLabel">Join the public focus room</span>
+                </span>
+                <span id="coStudyToggleSwitch" class="switch"><span class="switch__knob"></span></span>
+            </button>
+            <p id="coStudyCountText" class="text-outline" style="font-size:0.75rem;margin:-0.75rem 0 0.75rem 0.5rem" hidden></p>
+
             <div class="ambient-panel">
                 <div class="ambient-panel__row">
                     <span class="settings-row__left">
@@ -1048,9 +1061,36 @@
                 <input type="text" id="fcInputEx" class="input">
             </div>
         </div>
-        <div class="modal-actions" style="margin-top:0">
+        <button type="button" id="openBulkImportFromAddBtn" class="auth-link" data-i18n="modalAddCard.bulkImportLink">Paste in multiple words at once instead</button>
+        <div class="modal-actions" style="margin-top:0.5rem">
             <button type="button" id="closeAddFcBtn" class="btn btn--ghost btn--flex" data-i18n="common.cancel">Cancel</button>
             <button type="button" id="saveAddFcBtn" class="btn btn--primary btn--flex" data-i18n="modalAddCard.save">Add</button>
+        </div>
+    </div>
+</div>
+
+<div id="bulkImportModal" class="modal-overlay hidden">
+    <div class="modal-panel modal-panel--sheet" data-modal-panel>
+        <div class="modal-header">
+            <h2 class="modal-title"><span class="material-symbols-outlined" aria-hidden="true">upload_file</span> <span data-i18n="modalBulkImport.title">Bulk import</span></h2>
+            <button type="button" id="closeBulkImportBtn" class="modal-close" data-i18n-attr='{"aria-label":"aria.closeDialog"}' aria-label="Close"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">close</span></button>
+        </div>
+
+        <div id="bulkImportPasteStep">
+            <p class="text-outline" style="font-size:0.8125rem;margin-bottom:0.75rem" data-i18n="modalBulkImport.hint">One word per line. Separate the term and definition with a "|", a tab, or " - ".</p>
+            <textarea id="bulkImportTextarea" rows="9" class="textarea" style="font-family:monospace;font-size:0.8125rem" data-i18n-attr='{"placeholder":"modalBulkImport.placeholder"}' placeholder="apple | an apple&#10;banana - a banana"></textarea>
+            <button type="button" id="bulkImportPreviewBtn" class="btn btn--primary btn--block" style="margin-top:1.25rem">
+                <span data-i18n="modalBulkImport.previewBtn">Preview</span><span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+            </button>
+        </div>
+
+        <div id="bulkImportPreviewStep" hidden>
+            <p id="bulkImportPreviewSummary" class="text-outline" style="font-size:0.8125rem;margin-bottom:0.75rem"></p>
+            <div id="bulkImportPreviewList" class="flex flex-col gap-2 custom-scroll" style="max-height:16rem;overflow-y:auto;margin-bottom:1.25rem"></div>
+            <div class="modal-actions" style="margin-top:0">
+                <button type="button" id="bulkImportBackBtn" class="btn btn--ghost btn--flex" data-i18n="common.back">Back</button>
+                <button type="button" id="bulkImportConfirmBtn" class="btn btn--primary btn--flex" data-i18n="modalBulkImport.confirmBtn">Import</button>
+            </div>
         </div>
     </div>
 </div>
@@ -1191,6 +1231,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="js/firebaseConfig.js"></script>
 <script src="js/auth.js"></script>
+<script src="js/presence.js"></script>
 <script src="js/modal.js"></script>
 <script src="js/router.js"></script>
 <script src="js/profile.js"></script>

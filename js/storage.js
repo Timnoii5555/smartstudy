@@ -114,6 +114,10 @@
                 soundEnabled: true,
                 ambientType: 'brown', // 'brown' | 'rain'
                 ambientVolume: 0.5,
+                // Opt-in only, off by default (see js/presence.js) — joining
+                // the public "how many people are focusing right now" count
+                // is never automatic.
+                coStudyPublicEnabled: false,
                 pomodoro: { focusMin: 25, shortBreakMin: 5, longBreakMin: 15, cyclesBeforeLongBreak: 4 }
             },
             plan: {
