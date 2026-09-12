@@ -537,6 +537,41 @@ input[type=range]::-moz-range-track { height: 0.5rem; background: var(--color-su
 .scenario-chip.is-selected { background: #ffd54f; border-color: #ffd54f; color: #17181c; }
 .seat-picker #confirmSeatBtn { flex-shrink: 0; }
 .seat-picker #confirmSeatBtn:disabled { opacity: 0.4; }
+
+/* ---------- Pilot club ("Mine" — screen 6's profile hub, see js/focus.js) ---------- */
+
+.pilot-card {
+    background: linear-gradient(155deg, #17181c, #2a2c33); border-radius: var(--radius-xl);
+    padding: 1.75rem 1.25rem; text-align: center; color: #fff; margin-bottom: 1.5rem;
+}
+.pilot-card__seal {
+    width: 2.75rem; height: 2.75rem; border-radius: 50%; margin: 0 auto 0.75rem;
+    background: linear-gradient(155deg, #d9a94e, #b8843a); display: flex; align-items: center; justify-content: center;
+    color: #17181c; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+.pilot-card__club { font-size: 0.6875rem; font-weight: 800; letter-spacing: 0.12em; color: #d9a94e; text-transform: uppercase; }
+.pilot-card__member { font-size: 1.125rem; font-weight: 700; margin-top: 0.35rem; }
+.pilot-card__style-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.pilot-card__style-btn {
+    flex: 1; min-width: 5.5rem; display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+    padding: 0.75rem 0.5rem; border-radius: var(--radius-lg); border: 1.5px solid var(--color-border);
+    background: var(--color-surface-lowest); font-size: 0.75rem; font-weight: 600;
+}
+.pilot-card__style-btn.is-selected { border-color: var(--color-primary); background: var(--color-primary-fixed); color: var(--color-primary); }
+.pilot-card__scenarios { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.pilot-card__scenario-chip {
+    display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.45rem 0.8rem;
+    border-radius: var(--radius-full); background: var(--color-surface-low); font-size: 0.75rem; font-weight: 600; color: var(--color-outline);
+}
+.pilot-card__scenario-chip .material-symbols-outlined { font-size: 1rem; }
+.flight-log-entry {
+    display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+    padding: 0.75rem 0.9rem; border-radius: var(--radius-lg); background: var(--color-surface-low);
+}
+.flight-log-entry__route { font-weight: 700; font-size: 0.875rem; display: flex; align-items: center; gap: 0.35rem; }
+.flight-log-entry__route .material-symbols-outlined { font-size: 0.9rem; color: var(--color-primary); }
+.flight-log-entry__meta { font-size: 0.6875rem; color: var(--color-outline); margin-top: 0.15rem; }
+.flight-log-entry__mins { font-weight: 700; font-size: 0.8125rem; color: var(--color-primary); white-space: nowrap; }
 .modal-actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
 .modal-panel__icon { width: 4rem; height: 4rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; }
 .modal-panel__icon--warn { background: color-mix(in srgb, var(--color-danger) 12%, transparent); color: var(--color-danger); }

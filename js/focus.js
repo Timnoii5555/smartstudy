@@ -359,6 +359,47 @@
     let flightMap = null, flightRouteLine = null, flightTrailLine = null, flightPlaneMarker = null, flightDestMarker = null, flightOriginMarker = null;
     let mapDrawnFlightId = null; // which flight's route is currently on the map
     let mapDrawnOriginId = null; // which departure airport it's currently drawn from — either changing means a redraw
+    let mapTileLayer = null; // the currently-attached tile layer, so a style change can swap it without rebuilding the whole map
+    let mapStyleApplied = null; // which style key mapTileLayer currently is
+
+    // Real, free tile providers, no API key — three genuinely different
+    // looks (see Settings' "Home map style"), matching the reference
+    // video's picker in spirit (its exact "Monochrome"/"Terra" styles are
+    // Apple Maps' own and aren't available outside a native iOS app).
+    const MAP_STYLES = {
+        satellite: {
+            url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+            attribution: 'Imagery &copy; Esri', maxZoom: 12
+        },
+        standard: {
+            url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            attribution: '&copy; OpenStreetMap contributors', maxZoom: 12
+        },
+        monochrome: {
+            url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+            attribution: '&copy; OpenStreetMap contributors &copy; CARTO', maxZoom: 12
+        }
+    };
+
+    function currentMapStyleKey() {
+        const key = State.get().settings.mapStyle;
+        return MAP_STYLES[key] ? key : 'satellite';
+    }
+
+    /** Swaps the map's tile layer to match Settings' chosen style — safe to
+     *  call whenever (a no-op if it's already the current one), so render()
+     *  picking this up via State.subscribe() needs no special-casing. */
+    function applyMapStyle() {
+        if (!flightMap) return;
+        const key = currentMapStyleKey();
+        if (key === mapStyleApplied) return;
+        const cfg = MAP_STYLES[key];
+        const next = L.tileLayer(cfg.url, { attribution: cfg.attribution, maxZoom: cfg.maxZoom });
+        next.addTo(flightMap);
+        if (mapTileLayer) flightMap.removeLayer(mapTileLayer);
+        mapTileLayer = next;
+        mapStyleApplied = key;
+    }
 
     function buildPlaneIcon() {
         const windows = new Array(WINDOW_COUNT).fill('<span class="flight-window-dot"></span>').join('');
@@ -384,10 +425,7 @@
                 doubleClickZoom: false, boxZoom: false, keyboard: false, tap: false
             }).setView(origin, 6);
 
-            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-                attribution: 'Imagery &copy; Esri',
-                maxZoom: 12
-            }).addTo(flightMap);
+            applyMapStyle();
 
             flightRouteLine = L.polyline([origin, origin], { color: '#000', weight: 5, opacity: 0.22, interactive: false }).addTo(flightMap);
             flightTrailLine = L.polyline([origin, origin], { color: '#fff', weight: 3, interactive: false }).addTo(flightMap);
@@ -444,6 +482,7 @@
         try {
             const map = ensureFlightMap();
             if (!map) return;
+            applyMapStyle();
             updateFlightRoute(flight);
 
             const remaining = getRemainingSeconds();
@@ -588,6 +627,26 @@
         } catch (e) { console.error('[focus] tick threw', e); }
     }
 
+    /** Appends one entry to the "Mine" flight log (js/settings.js reads it),
+     *  capped at the most recent 20 — same bounded-array spirit as
+     *  flashcards.js's reviewLog, so this never grows without limit.
+     *  `minutes` is however long the phase actually ran, which can be less
+     *  than the full ticketed length for a partial session (see reset()'s
+     *  own caller). Never logs a break, or a session too short to have
+     *  meant anything. */
+    function logFlight(minutes) {
+        if (!minutes || minutes < 1) return;
+        const flight = currentFocusFlight() || nearestFlight(minutes);
+        const origin = originAirport();
+        const entry = {
+            dateISO: U.formatDateISO(new Date()),
+            originCode: origin.code, destCode: flight.code, destName: I18n.pick(flight.name),
+            minutes, seat: activeSeat, scenarioId: activeScenario.id
+        };
+        const log = [...State.get().focus.flightLog, entry].slice(-20);
+        State.commit({ focus: { flightLog: log } });
+    }
+
     function completePhase() {
         // A phase ending (landing for a break, or a break ending) always
         // drops back to the normal screen — the toast/stats right after
@@ -595,6 +654,7 @@
         exitImmersive();
         playNotificationSound();
         if (mode === 'focus') {
+            logFlight(pomodoroSettings().focusMin);
             cyclesCompletedToday++;
             const cycles = pomodoroSettings().cyclesBeforeLongBreak;
             mode = (cyclesCompletedToday % cycles === 0) ? 'longBreak' : 'shortBreak';
@@ -657,6 +717,8 @@
         runStartedAtMs = null;
         if (mode === 'focus' && elapsedMs > 0 && elapsedMs < MIN_PARTIAL_SECONDS * 1000) {
             addSecondsToToday(-Math.floor(elapsedMs / 1000));
+        } else if (mode === 'focus' && elapsedMs >= MIN_PARTIAL_SECONDS * 1000) {
+            logFlight(Math.round(elapsedMs / 60000)); // however long it actually ran, not the full ticketed length
         }
         accumulatedMs = 0;
         persistRuntime();
@@ -1134,5 +1196,10 @@
             teardownFlightPassengerUpdates();
         }
     });
+
+    // A small read-only surface for js/pilotClub.js ("Mine") — the
+    // scenario list and map style keys, so that file doesn't need its own
+    // copy of either to stay in sync with.
+    TFS.Focus = { SCENARIOS, MAP_STYLE_KEYS: Object.keys(MAP_STYLES) };
 
 })(window);

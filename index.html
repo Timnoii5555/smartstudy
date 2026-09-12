@@ -678,9 +678,14 @@
                 <span class="material-symbols-outlined" aria-hidden="true">menu_book</span>
                 <h1 data-i18n="brand.short">Smart Study</h1>
             </button>
-            <button type="button" class="icon-btn js-open-settings" data-i18n-attr='{"aria-label":"aria.openSettings"}' aria-label="Settings">
-                <span class="material-symbols-outlined" aria-hidden="true">settings</span>
-            </button>
+            <div style="display:flex;gap:0.5rem">
+                <button type="button" id="openPilotClubBtn" class="icon-btn" data-i18n-attr='{"aria-label":"modalPilotClub.title"}' aria-label="Mine">
+                    <span class="material-symbols-outlined" aria-hidden="true">badge</span>
+                </button>
+                <button type="button" class="icon-btn js-open-settings" data-i18n-attr='{"aria-label":"aria.openSettings"}' aria-label="Settings">
+                    <span class="material-symbols-outlined" aria-hidden="true">settings</span>
+                </button>
+            </div>
         </div>
     </header>
 
@@ -1444,6 +1449,45 @@
     </div>
 </div>
 
+<!-- "Mine": a flight-themed profile hub (js/pilotClub.js) — a membership
+     card for delight, a couple of preference shortcuts that don't fit
+     inline on screen6, and the flight log (js/focus.js's logFlight()).
+     Full Settings stays the real control panel; the gear icon here just
+     jumps to it, same as the reference video's own "Mine ⚙️" pairing. -->
+<div id="pilotClubModal" class="modal-overlay hidden">
+    <div class="modal-panel modal-panel--sheet custom-scroll" data-modal-panel style="max-height:88vh">
+        <div class="modal-header">
+            <h2 class="modal-title"><span class="material-symbols-outlined" aria-hidden="true">badge</span> <span data-i18n="modalPilotClub.title">Mine</span></h2>
+            <div style="display:flex;align-items:center;gap:0.5rem">
+                <button type="button" id="openSettingsFromClubBtn" class="icon-btn" data-i18n-attr='{"aria-label":"aria.openSettings"}' aria-label="Settings"><span class="material-symbols-outlined" aria-hidden="true">settings</span></button>
+                <button type="button" id="closePilotClubBtn" class="modal-close" data-i18n-attr='{"aria-label":"aria.closeDialog"}' aria-label="Close"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">close</span></button>
+            </div>
+        </div>
+
+        <div class="pilot-card">
+            <div class="pilot-card__seal" aria-hidden="true"><span class="material-symbols-outlined">flight</span></div>
+            <p class="pilot-card__club" data-i18n="modalPilotClub.clubName">FOCUSFLIGHT CLUB</p>
+            <p class="pilot-card__member" id="pilotCardMemberName">-</p>
+        </div>
+
+        <div class="settings-section">
+            <span class="settings-section__title" data-i18n="modalPilotClub.mapStyle">Home map style</span>
+            <div class="pilot-card__style-row" id="clubMapStyleRow" role="radiogroup" aria-label="Map style"></div>
+        </div>
+
+        <div class="settings-section">
+            <span class="settings-section__title" data-i18n="modalPilotClub.scenarios">Scenarios</span>
+            <div class="pilot-card__scenarios" id="pilotCardScenarios" aria-hidden="true"></div>
+        </div>
+
+        <div class="settings-section">
+            <span class="settings-section__title" data-i18n="modalPilotClub.flightLog">Flight log</span>
+            <div id="flightLogContainer" class="flex flex-col gap-2"></div>
+            <p id="flightLogEmpty" class="text-outline" style="font-size:0.8125rem;text-align:center;padding:1rem 0" data-i18n="modalPilotClub.flightLogEmpty">No flights yet — finish a focus session to log your first one.</p>
+        </div>
+    </div>
+</div>
+
 <script src="js/errorBoundary.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/storage.js"></script>
@@ -1483,6 +1527,7 @@
 <script src="js/flashcards.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="js/focus.js"></script>
+<script src="js/pilotClub.js"></script>
 <script src="js/settings.js"></script>
 <script src="js/history.js"></script>
 <script src="js/app.js"></script>

@@ -122,6 +122,9 @@
                 // js/geo.js) — Bangkok Suvarnabhumi by default, changeable
                 // any time from Settings.
                 departureAirportId: 'bkk',
+                // The flight map's tile style (js/focus.js's MAP_STYLES) —
+                // 'satellite' | 'standard' | 'monochrome'.
+                mapStyle: 'satellite',
                 // Off by default, one reminder a day at most (js/reminder.js)
                 // — matches this app's own notification rule. null = off;
                 // "HH:MM" = fire (at most) once, the first time the app is
@@ -173,7 +176,12 @@
                 runStartedAtMs: null,       // epoch ms the current run segment began, or null while paused — see js/focus.js
                 accumulatedMs: 0,           // ms of the current phase already elapsed from previous run segments
                 lastCreditAtMs: null,       // last time totals above were credited, so a reload never double-counts or drops time
-                lastActiveDateISO: null
+                lastActiveDateISO: null,
+                // {dateISO, originCode, destCode, destName, minutes, seat, scenarioId}[],
+                // capped at the most recent 20 entries (js/focus.js's logFlight())
+                // — the "Mine" flight log, same bounded-array spirit as
+                // flashcards.reviewLog above.
+                flightLog: []
             },
             ui: {
                 lastScreen: 'screen1'

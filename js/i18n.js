@@ -222,6 +222,16 @@
                 locationDenied: 'ไม่สามารถเข้าถึงตำแหน่งได้ ลองค้นหาหรือเลือกจากรายการแทนได้ครับ',
                 selectedToast: 'เปลี่ยนต้นทางเป็น {code} แล้ว'
             },
+            modalPilotClub: {
+                title: 'ของฉัน',
+                clubName: 'FOCUSFLIGHT CLUB',
+                guestMember: 'นักบินรับเชิญ',
+                mapStyle: 'สไตล์แผนที่หลัก',
+                styleSatellite: 'ดาวเทียม', styleStandard: 'มาตรฐาน', styleMonochrome: 'โทนเดียว',
+                scenarios: 'สิ่งที่โฟกัสได้',
+                flightLog: 'ประวัติการบิน',
+                flightLogEmpty: 'ยังไม่มีเที่ยวบิน — โฟกัสให้จบสักรอบเพื่อบันทึกเที่ยวบินแรกของคุณ'
+            },
             recap: {
                 streakLabel: 'วันติดต่อกัน',
                 weekLabel: 'เวลาโฟกัสสัปดาห์นี้',
@@ -588,6 +598,16 @@
                 searchPlaceholder: 'Search airport / city',
                 locationDenied: "Couldn't access your location — try searching or picking from the list instead.",
                 selectedToast: 'Departure set to {code}'
+            },
+            modalPilotClub: {
+                title: 'Mine',
+                clubName: 'FOCUSFLIGHT CLUB',
+                guestMember: 'Guest Pilot',
+                mapStyle: 'Home map style',
+                styleSatellite: 'Satellite', styleStandard: 'Standard', styleMonochrome: 'Monochrome',
+                scenarios: 'Focus scenarios',
+                flightLog: 'Flight log',
+                flightLogEmpty: 'No flights yet — finish a focus session to log your first one.'
             },
             recap: {
                 streakLabel: 'day streak',
