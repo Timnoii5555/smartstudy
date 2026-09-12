@@ -116,7 +116,14 @@
         sendForgotPasswordBtn.disabled = true;
         try {
             await Auth.resetPassword(email);
-            TFS.Toast.success(I18n.t('modalForgotPassword.sent'));
+            // Longer than the default 4s, and phrased carefully: Firebase's
+            // modern SDK resolves this successfully even for an email that
+            // was never signed up (deliberately, so a stranger can't probe
+            // which addresses have accounts) — so "sent" here only means the
+            // request went through, not that a real inbox will receive
+            // anything. Spam folders are also the #1 real-world cause of
+            // "it said sent but nothing arrived".
+            TFS.Toast.success(I18n.t('modalForgotPassword.sent'), 9000);
             TFS.Modal.close(forgotPasswordModal);
         } catch (e) {
             // Firebase deliberately reports "user not found" here too in newer

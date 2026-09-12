@@ -204,23 +204,39 @@ html.dark .schedule-block--teal { background: rgba(20,184,166,0.15); color: #5ee
 .landing-section { max-width: 68rem; margin: 0 auto 5rem; }
 .landing-section__title { font-size: 1.5rem; font-weight: 800; text-align: center; margin-bottom: 2.25rem; }
 
-.landing-feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
-@media (max-width: 56rem) { .landing-feature-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 34rem) { .landing-feature-grid { grid-template-columns: 1fr; } }
-.landing-feature-card {
-    position: relative; padding: 1.75rem 1.5rem; border-radius: var(--radius-xl);
+.landing-steps { display: flex; align-items: stretch; gap: 1.5rem; margin-top: 0.5rem; }
+@media (max-width: 56rem) { .landing-steps { flex-direction: column; gap: 1.75rem; } }
+.landing-step {
+    position: relative; flex: 1; padding: 1.75rem 1.5rem; border-radius: var(--radius-xl);
     background: var(--color-surface-lowest); box-shadow: var(--shadow-sm); border: 1px solid var(--color-border);
+    display: flex; flex-direction: column; gap: 0.6rem;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
-.landing-feature-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
-.landing-feature-card--new { border-color: var(--color-primary); }
-.landing-feature-card__badge {
+.landing-step:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.landing-step__num {
+    position: absolute; top: -0.8rem; left: 1.5rem; width: 1.85rem; height: 1.85rem; border-radius: 50%;
+    background: var(--color-primary-solid); color: #fff; font-weight: 800; font-size: 0.8125rem; font-family: var(--font-headline);
+    display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm);
+}
+.landing-step__icon { font-size: 1.75rem; color: var(--color-primary); margin-top: 0.75rem; }
+.landing-step h4 { font-size: 1rem; font-weight: 700; margin: 0; }
+.landing-step p { font-size: 0.8125rem; color: var(--color-outline); line-height: 1.55; margin: 0; }
+.landing-step--new { border-color: var(--color-primary); }
+.landing-step__badge {
     position: absolute; top: 1rem; right: 1rem; font-size: 0.625rem; font-weight: 800; letter-spacing: 0.03em;
     color: #fff; background: var(--color-primary-solid); padding: 0.2rem 0.55rem; border-radius: var(--radius-full);
 }
-.landing-feature-card__icon { font-size: 1.75rem; color: var(--color-primary); margin-bottom: 0.9rem; display: block; }
-.landing-feature-card h4 { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
-.landing-feature-card p { font-size: 0.8125rem; color: var(--color-outline); line-height: 1.55; margin: 0; }
+/* A lightweight connector arrow between steps, drawn as ligature text in the
+   icon font itself (no extra markup) — hidden once steps stack vertically. */
+.landing-step:not(:last-child)::after {
+    content: 'arrow_forward'; font-family: 'Material Symbols Outlined'; position: absolute;
+    top: 50%; right: -1.65rem; transform: translateY(-50%); color: var(--color-outline-variant); font-size: 1.25rem; z-index: 2;
+}
+@media (max-width: 56rem) {
+    .landing-step:not(:last-child)::after {
+        content: 'arrow_downward'; top: auto; bottom: -1.4rem; right: 50%; transform: translateX(50%);
+    }
+}
 
 .landing-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
 @media (max-width: 40rem) { .landing-compare { grid-template-columns: 1fr; } }
