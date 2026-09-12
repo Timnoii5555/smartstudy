@@ -731,6 +731,13 @@
             </div>
         </div>
 
+        <!-- Only shown before a focus phase starts (see js/focus.js's
+             renderFlightPicker) — "book" one of a few curated durations
+             instead of only adjusting a number in Settings. Picking a chip
+             sets settings.pomodoro.focusMin directly. -->
+        <p class="flight-picker__label text-outline" id="flightPickerLabel" hidden data-i18n="s6.flightPickerLabel">Choose your flight</p>
+        <div class="flight-picker custom-scroll" id="flightPickerRow" role="radiogroup" aria-labelledby="flightPickerLabel" hidden></div>
+
         <div class="focus-controls">
             <div class="focus-controls__row">
                 <button type="button" id="focusResetBtn" class="focus-reset-btn" title="Reset" data-i18n-attr='{"aria-label":"s6.reset"}' aria-label="Reset">

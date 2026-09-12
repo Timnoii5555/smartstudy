@@ -103,7 +103,7 @@
         if (isRunning()) {
             requestWakeLock();
             ensureRenderInterval();
-            if (State.get().settings.coStudyPublicEnabled && TFS.Presence && TFS.Presence.isAvailable()) TFS.Presence.startHeartbeat();
+            joinFlightHeartbeatIfEligible();
             // A locked phone or a killed tab can mean the phase boundary was
             // already crossed while we were away — catch up once, immediately.
             creditElapsedFocusTime();
@@ -228,28 +228,41 @@
 
     const PHASE_KEY = { focus: 's6.phaseFocus', shortBreak: 's6.phaseShortBreak', longBreak: 's6.phaseLongBreak' };
 
-    // ---------------------------------------------------------------- "Flight Focus"-style route visual
+    // ---------------------------------------------------------------- "Flight Focus"-style route visual + flight picker
 
     const flightPathEl = document.getElementById('flightPath');
     const flightPlaneEl = document.getElementById('flightPlane');
     const flightDestCodeEl = document.getElementById('flightDestCode');
+    const flightPickerRow = document.getElementById('flightPickerRow');
+    const flightPickerLabel = document.getElementById('flightPickerLabel');
     let flightPathLength = null;
 
-    // Purely decorative flavor text (a nod to the viral "flight tracker
-    // timer" format) — not real airport/flight data, just a fun label
-    // picked deterministically from how long the current phase is, longer
-    // phases getting a "farther" destination.
-    const FLIGHT_DESTINATIONS = [
-        { maxMin: 7, code: 'HHQ' },
-        { maxMin: 20, code: 'UTP' },
-        { maxMin: 30, code: 'CNX' },
-        { maxMin: 50, code: 'HKT' },
-        { maxMin: 75, code: 'KBV' },
-        { maxMin: Infinity, code: 'CEI' }
+    // A handful of curated study-session lengths, each given a (purely
+    // decorative — not real airport/flight data) destination, the same
+    // spirit as the video that inspired this. Picking one sets the focus
+    // duration to exactly that many minutes, so two learners who pick the
+    // same flight are — by definition — running the same timer length,
+    // which is what makes "you're on the same plane as them" a meaningful
+    // thing to show rather than a coincidence.
+    const FLIGHTS = [
+        { id: 'hhq', minutes: 15, code: 'HHQ', name: { th: 'หัวหิน', en: 'Hua Hin' } },
+        { id: 'cnx', minutes: 25, code: 'CNX', name: { th: 'เชียงใหม่', en: 'Chiang Mai' } },
+        { id: 'hkt', minutes: 45, code: 'HKT', name: { th: 'ภูเก็ต', en: 'Phuket' } },
+        { id: 'kbv', minutes: 60, code: 'KBV', name: { th: 'กระบี่', en: 'Krabi' } },
+        { id: 'cei', minutes: 90, code: 'CEI', name: { th: 'เชียงราย', en: 'Chiang Rai' } }
     ];
-    function destinationCodeForMinutes(minutes) {
-        const match = FLIGHT_DESTINATIONS.find(d => minutes <= d.maxMin);
-        return match ? match.code : FLIGHT_DESTINATIONS[FLIGHT_DESTINATIONS.length - 1].code;
+
+    function flightForMinutes(minutes) { return FLIGHTS.find(f => f.minutes === minutes) || null; }
+
+    /** The nearest flight's code even when the current duration doesn't
+     *  exactly match one (e.g. a custom value set in Settings) — purely for
+     *  the destination label on the map, never used for passenger matching
+     *  (see renderFlightPassengers below, which requires an exact match). */
+    function nearestFlightCode(minutes) {
+        const exact = flightForMinutes(minutes);
+        if (exact) return exact.code;
+        const closest = FLIGHTS.reduce((best, f) => (Math.abs(f.minutes - minutes) < Math.abs(best.minutes - minutes) ? f : best), FLIGHTS[0]);
+        return closest.code;
     }
 
     /** Moves the plane along the fixed route path to reflect how far into
@@ -269,11 +282,67 @@
         const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI;
         flightPlaneEl.setAttribute('transform', `translate(${p1.x},${p1.y}) rotate(${angle})`);
 
-        if (flightDestCodeEl) flightDestCodeEl.textContent = destinationCodeForMinutes(Math.round(total / 60));
+        if (flightDestCodeEl) flightDestCodeEl.textContent = nearestFlightCode(Math.round(total / 60));
+    }
+
+    /** The flight picker: only meaningful before a focus phase starts (you
+     *  can't change your ticket mid-flight) and only for the focus phase
+     *  itself, not breaks — breaks stay whatever length Settings has them
+     *  at. Selecting a chip sets settings.pomodoro.focusMin directly, so
+     *  every other part of the app (streak, stats, the timer engine
+     *  itself) needs no separate concept of "which flight" at all. */
+    function renderFlightPicker() {
+        if (!flightPickerRow) return;
+        const show = mode === 'focus' && !isRunning();
+        flightPickerRow.hidden = !show;
+        if (flightPickerLabel) flightPickerLabel.hidden = !show;
+        if (!show) return;
+
+        const currentMinutes = pomodoroSettings().focusMin;
+        flightPickerRow.innerHTML = '';
+        FLIGHTS.forEach((flight) => {
+            const isSelected = flight.minutes === currentMinutes;
+            flightPickerRow.appendChild(U.el('button', {
+                className: 'flight-chip' + (isSelected ? ' is-selected' : ''),
+                attrs: { type: 'button', role: 'radio', 'aria-checked': String(isSelected) },
+                on: { click: () => selectFlight(flight) }
+            }, [
+                U.el('span', { className: 'flight-chip__code', text: flight.code }),
+                U.el('span', { className: 'flight-chip__name', text: I18n.pick(flight.name) }),
+                U.el('span', { className: 'flight-chip__mins', text: I18n.t('s6.flightMinutes', { n: flight.minutes }) })
+            ]));
+        });
+    }
+
+    function selectFlight(flight) {
+        if (isRunning()) return;
+        State.commit({ settings: { pomodoro: { focusMin: flight.minutes } } });
+        if (mode === 'focus') { accumulatedMs = 0; persistRuntime(); }
+        render();
+        refreshCoStudyCount(); // this flight's passenger count may differ from the previous one
+    }
+
+    /** The flight the learner is currently ticketed for, if the duration
+     *  exactly matches one of the curated FLIGHTS — null for a custom
+     *  duration set via Settings, in which case there's no shared room to
+     *  join (see js/presence.js's file header for why matching has to be
+     *  exact rather than nearest-match). */
+    function currentFocusFlight() { return flightForMinutes(pomodoroSettings().focusMin); }
+
+    /** Joins this flight's shared presence room if — and only if — the
+     *  learner has opted in, we're actually in the focus phase (not a
+     *  break), and the current duration exactly matches a curated flight
+     *  to join a room for. Safe to call unconditionally; no-ops otherwise. */
+    function joinFlightHeartbeatIfEligible() {
+        const flight = mode === 'focus' ? currentFocusFlight() : null;
+        if (flight && State.get().settings.coStudyPublicEnabled && TFS.Presence && TFS.Presence.isAvailable()) {
+            TFS.Presence.startHeartbeat(flight.id);
+        }
     }
 
     function render() {
         renderFlightPlane();
+        renderFlightPicker();
 
         const goal = State.get().plan.dailyGoalSeconds;
         focusTimerDisplay.textContent = U.formatSecondsToHMS(getRemainingSeconds());
@@ -319,6 +388,10 @@
             const cycles = pomodoroSettings().cyclesBeforeLongBreak;
             mode = (cyclesCompletedToday % cycles === 0) ? 'longBreak' : 'shortBreak';
             TFS.Toast.info(I18n.t('s6.phaseCompleteFocus'));
+            // Landed for a break — a flight's shared room only makes sense
+            // while actually mid-focus, so leave it rather than keep
+            // pinging a room for a flight that's no longer in the air.
+            if (TFS.Presence) TFS.Presence.stopHeartbeat();
         } else {
             mode = 'focus';
             TFS.Toast.info(I18n.t('s6.phaseCompleteBreak'));
@@ -327,7 +400,10 @@
         // Auto-advance into the next phase without requiring another tap —
         // but only if a session was actually running; completing a phase
         // that was reached via the day-rollover reset above never auto-runs.
-        if (isRunning()) { runStartedAtMs = Date.now(); lastCreditMs = runStartedAtMs; }
+        if (isRunning()) {
+            runStartedAtMs = Date.now(); lastCreditMs = runStartedAtMs;
+            if (mode === 'focus') joinFlightHeartbeatIfEligible(); // break just ended — back in the air
+        }
         persistRuntime();
     }
 
@@ -337,7 +413,7 @@
         lastCreditMs = runStartedAtMs;
         requestWakeLock();
         ensureRenderInterval();
-        if (State.get().settings.coStudyPublicEnabled && TFS.Presence && TFS.Presence.isAvailable()) TFS.Presence.startHeartbeat();
+        joinFlightHeartbeatIfEligible();
         persistRuntime();
         render();
     }
@@ -678,7 +754,13 @@
         State.commit({ settings: { ambientVolume: parseFloat(ambientVolumeSlider.value) } });
     });
 
-    // ---------------------------------------------------------------- Co-study presence (public room only — see js/presence.js)
+    // ---------------------------------------------------------------- Co-study presence (per-flight — see js/presence.js)
+    //
+    // "Join this flight" replaces the earlier single global room: presence
+    // is now scoped to the exact flight ticketed (same duration = same
+    // curated destination), so "you're on the same plane" is literally
+    // true for anyone else currently seeing the same count, not just a
+    // coincidence of being on the app at the same time.
 
     const coStudyToggleBtn = document.getElementById('coStudyToggleBtn');
     const coStudyToggleSwitch = document.getElementById('coStudyToggleSwitch');
@@ -692,20 +774,28 @@
     }
 
     async function refreshCoStudyCount() {
-        const n = await TFS.Presence.fetchCount();
+        const flight = mode === 'focus' ? currentFocusFlight() : null;
+        const enabled = State.get().settings.coStudyPublicEnabled;
+        if (!flight || !enabled || !TFS.Presence || !TFS.Presence.isAvailable()) { coStudyCountText.hidden = true; return; }
+        const n = await TFS.Presence.fetchFlightCount(flight.id);
         if (!isActive()) return; // the learner navigated away while this was in flight
         if (n === null) { coStudyCountText.hidden = true; return; }
         coStudyCountText.hidden = false;
-        coStudyCountText.textContent = n > 0 ? I18n.t('s6.coStudyCountActive', { n }) : I18n.t('s6.coStudyCountAlone');
+        // `n` includes this learner's own heartbeat once joined, so the
+        // "with you" count is n-1 — never claim company that isn't there.
+        coStudyCountText.textContent = n > 1
+            ? I18n.t('s6.coStudyCountActive', { n: n - 1 })
+            : I18n.t('s6.coStudyCountAlone');
     }
 
     coStudyToggleBtn.addEventListener('click', () => {
         const next = !State.get().settings.coStudyPublicEnabled;
         State.commit({ settings: { coStudyPublicEnabled: next } });
         renderCoStudyToggle();
-        // Only actually join/leave the count if a session is running right
-        // now — otherwise this just sets the preference for next time.
-        if (isRunning()) { next ? TFS.Presence.startHeartbeat() : TFS.Presence.stopHeartbeat(); }
+        // Only actually join/leave a room if a session is running right now
+        // — otherwise this just sets the preference for next time.
+        const flight = mode === 'focus' ? currentFocusFlight() : null;
+        if (isRunning() && flight) { next ? TFS.Presence.startHeartbeat(flight.id) : TFS.Presence.stopHeartbeat(); }
         refreshCoStudyCount();
     });
 
