@@ -180,14 +180,23 @@ html.dark .schedule-block--teal { background: rgba(20,184,166,0.15); color: #5ee
    route/plane around its edges visible rather than fully covered. */
 .flight-viz__hud {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 500; text-align: center;
-    background: rgba(0, 0, 0, 0.4); border-radius: var(--radius-xl); padding: 1rem 1.5rem; color: #fff;
+    background: rgba(0, 0, 0, 0.4); border-radius: var(--radius-xl); padding: 0.75rem 1rem; color: #fff;
     backdrop-filter: blur(2px);
+    /* Bounded to the map itself (not just centered with no limit) — an
+       absolutely-positioned, shrink-to-fit element like this has no
+       relationship to its parent's width otherwise, so wide content (the
+       big timer digits, at the font size below) could overflow past the
+       map's rounded edges rather than ever being constrained by them. */
+    max-width: calc(100% - 1.5rem); box-sizing: border-box;
 }
 /* .focus-phase-badge keeps its own self-contained pill colors (fine on any
    backdrop); the plain-text pieces need an explicit override here since
    they'd otherwise inherit dark, surface-toned colors meant for a light
-   card, illegible against this panel's dark background. */
-.flight-viz__hud .focus-time-display { color: #fff; }
+   card, illegible against this panel's dark background. The time display
+   is also noticeably smaller than its usual 3.75rem here — that size was
+   tuned for the old fixed 18-20rem square ring, and doesn't reliably fit
+   "0:25:00" within this map's own width on a narrow phone. */
+.flight-viz__hud .focus-time-display { color: #fff; font-size: 2.75rem; }
 .flight-viz__hud .focus-goal-label { color: rgba(255, 255, 255, 0.85); }
 /* Leaflet renders its own tiles/panes/controls inside — round its outer
    frame to match the card, and keep its (required, see js/focus.js's
