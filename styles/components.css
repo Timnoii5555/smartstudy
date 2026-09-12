@@ -484,23 +484,24 @@ input[type=range]::-moz-range-track { height: 0.5rem; background: var(--color-su
 .seat-picker__header { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
 .seat-picker__title { display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 700; color: #fff; margin: 0; }
 .seat-picker__route { text-align: center; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.04em; color: rgba(255, 255, 255, 0.6); display: flex; align-items: center; justify-content: center; gap: 0.35rem; margin: 0.5rem 0 1rem; }
-/* A subtle fuselage frame around the grid, with plain "Nose"/"Tail" labels
-   bookending the rows — enough to read as "you're inside a plane, this is
-   the front, this is the back" without a literal outline shape, which
-   would risk looking broken across phone widths with no way to check one
-   by one here. */
-.seat-picker__cabin {
-    flex: 1; min-height: 0; overflow-y: auto; overflow-x: auto;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
-    border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1.25rem; padding: 0.85rem 0.75rem;
+.seat-picker__cabin { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; }
+/* An actual fuselage silhouette, drawn from a reference screenshot: a
+   domed nose (the elliptical top corners below), a two-pane cockpit
+   window, then straight sides down to a rounded tail. It's one tall shape
+   that scrolls as a whole — the dome and tail move out of view with the
+   rows between them, the same way the reference does. */
+.seat-picker__fuselage {
+    position: relative; max-width: 20rem; margin: 0 auto;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 50% 50% 1.5rem 1.5rem / 5.5rem 5.5rem 1.5rem 1.5rem;
+    padding: 4rem 0.75rem 2rem;
 }
-.seat-picker__section-label {
-    display: flex; align-items: center; justify-content: center; gap: 0.15rem;
-    font-size: 0.625rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255, 255, 255, 0.35);
-}
-.seat-picker__section-label .material-symbols-outlined { font-size: 1rem; }
-.seat-picker__section-label--nose { margin-bottom: 0.35rem; }
-.seat-picker__section-label--tail { margin-top: 0.5rem; }
+.seat-picker__cockpit { position: absolute; top: 1.75rem; left: 50%; transform: translateX(-50%); display: flex; gap: 0.25rem; width: 4.5rem; height: 1.35rem; }
+.seat-picker__cockpit-pane { flex: 1; background: rgba(255, 255, 255, 0.16); }
+.seat-picker__cockpit-pane--l { clip-path: polygon(0 100%, 100% 100%, 65% 0, 0 35%); border-radius: 0.4rem 0 0 0; }
+.seat-picker__cockpit-pane--r { clip-path: polygon(0 100%, 100% 100%, 100% 35%, 35% 0); border-radius: 0 0.4rem 0 0; }
+.seat-picker__tailcone { height: 3rem; }
 .seat-picker__cols, .seat-picker__row {
     display: grid; grid-template-columns: 1.75rem repeat(2, 2.75rem) 1rem repeat(2, 2.75rem);
     justify-content: center; align-items: center; gap: 0.4rem;

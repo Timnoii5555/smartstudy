@@ -1097,17 +1097,21 @@
             <p class="seat-picker__route" aria-hidden="true">BKK <span class="material-symbols-outlined" aria-hidden="true" style="font-size:0.8rem">flight</span> <span id="seatPickerDestCode">CNX</span></p>
 
             <div class="seat-picker__cabin custom-scroll">
-                <div class="seat-picker__section-label seat-picker__section-label--nose" aria-hidden="true">
-                    <span class="material-symbols-outlined" aria-hidden="true">arrow_drop_up</span>
-                    <span data-i18n="modalSeatPicker.nose">Nose</span>
-                </div>
-                <div class="seat-picker__cols" aria-hidden="true">
-                    <span></span><span>A</span><span>C</span><span class="seat-picker__aisle"></span><span>D</span><span>F</span>
-                </div>
-                <div class="seat-picker__grid" id="seatPickerGrid" role="radiogroup" aria-label="Seat"></div>
-                <div class="seat-picker__section-label seat-picker__section-label--tail" aria-hidden="true">
-                    <span data-i18n="modalSeatPicker.tail">Tail</span>
-                    <span class="material-symbols-outlined" aria-hidden="true">arrow_drop_down</span>
+                <!-- An actual fuselage silhouette (dome nose + cockpit windows,
+                     tapered tail) instead of plain text "Nose"/"Tail" labels —
+                     see js/focus.js's header for why the first version played
+                     it safe with text; this shape is drawn straight from a
+                     reference screenshot instead of guessed blind. -->
+                <div class="seat-picker__fuselage">
+                    <div class="seat-picker__cockpit" aria-hidden="true">
+                        <span class="seat-picker__cockpit-pane seat-picker__cockpit-pane--l"></span>
+                        <span class="seat-picker__cockpit-pane seat-picker__cockpit-pane--r"></span>
+                    </div>
+                    <div class="seat-picker__cols" aria-hidden="true">
+                        <span></span><span>A</span><span>C</span><span class="seat-picker__aisle"></span><span>D</span><span>F</span>
+                    </div>
+                    <div class="seat-picker__grid" id="seatPickerGrid" role="radiogroup" aria-label="Seat"></div>
+                    <div class="seat-picker__tailcone" aria-hidden="true"></div>
                 </div>
             </div>
 
