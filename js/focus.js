@@ -197,20 +197,25 @@
         if (wakeLockSentinel) { wakeLockSentinel.release().catch(() => {}); wakeLockSentinel = null; }
     }
     // The OS releases a wake lock the instant a tab is hidden; re-acquire it
-    // when the learner comes back to a still-running session.
+    // when the learner comes back to a still-running session. Wrapped in
+    // try/catch because this is a raw event listener with nothing upstream
+    // (unlike router.js/state.js's own listener dispatch) to stop a thrown
+    // error here from becoming a fully uncaught exception.
     document.addEventListener('visibilitychange', () => {
-        if (!isActive()) return;
-        if (document.visibilityState === 'visible') {
-            creditElapsedFocusTime();
-            if (isRunning() && getRemainingSeconds() <= 0) completePhase();
-            if (isRunning()) requestWakeLock();
-            render();
-        } else if (isRunning()) {
-            // About to be backgrounded/suspended: checkpoint now so nothing
-            // that already elapsed is lost if the tab gets killed outright.
-            creditElapsedFocusTime();
-            persistRuntime();
-        }
+        try {
+            if (!isActive()) return;
+            if (document.visibilityState === 'visible') {
+                creditElapsedFocusTime();
+                if (isRunning() && getRemainingSeconds() <= 0) completePhase();
+                if (isRunning()) requestWakeLock();
+                render();
+            } else if (isRunning()) {
+                // About to be backgrounded/suspended: checkpoint now so nothing
+                // that already elapsed is lost if the tab gets killed outright.
+                creditElapsedFocusTime();
+                persistRuntime();
+            }
+        } catch (e) { console.error('[focus] visibilitychange handler threw', e); }
     });
 
     // ---------------------------------------------------------------- DOM refs
@@ -271,18 +276,30 @@
      *  as the countdown itself so it's never a step behind it. */
     function renderFlightPlane() {
         if (!flightPathEl || !flightPlaneEl) return;
-        if (flightPathLength === null) flightPathLength = flightPathEl.getTotalLength();
-
         const total = durationForMode(mode);
-        const remaining = getRemainingSeconds();
-        const progress = total > 0 ? U.clamp(1 - remaining / total, 0, 1) : 0;
-        const len = flightPathLength * progress;
-        const p1 = flightPathEl.getPointAtLength(len);
-        const p2 = flightPathEl.getPointAtLength(Math.min(flightPathLength, len + 1));
-        const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI;
-        flightPlaneEl.setAttribute('transform', `translate(${p1.x},${p1.y}) rotate(${angle})`);
-
         if (flightDestCodeEl) flightDestCodeEl.textContent = nearestFlightCode(Math.round(total / 60));
+
+        // SVG geometry queries (getTotalLength/getPointAtLength) are the one
+        // part of this screen that isn't fully reliable across browsers —
+        // some WebKit versions can throw on a <path> that was only just
+        // made visible (a display:none -> block flip, exactly what
+        // switching screens does) before layout has caught up. None of
+        // that should ever be able to take the rest of the timer down with
+        // it — remaining time, phase, and goal are the parts that actually
+        // matter and are rendered separately in render() regardless of
+        // whether the plane itself could be positioned this pass.
+        try {
+            if (flightPathLength === null) flightPathLength = flightPathEl.getTotalLength();
+            const remaining = getRemainingSeconds();
+            const progress = total > 0 ? U.clamp(1 - remaining / total, 0, 1) : 0;
+            const len = flightPathLength * progress;
+            const p1 = flightPathEl.getPointAtLength(len);
+            const p2 = flightPathEl.getPointAtLength(Math.min(flightPathLength, len + 1));
+            const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI;
+            flightPlaneEl.setAttribute('transform', `translate(${p1.x},${p1.y}) rotate(${angle})`);
+        } catch (e) {
+            console.warn('[focus] Could not position the flight-path plane this render (will retry next tick).', e);
+        }
     }
 
     /** The flight picker: only meaningful before a focus phase starts (you
@@ -341,9 +358,13 @@
     }
 
     function render() {
-        renderFlightPlane();
-        renderFlightPicker();
-
+        // The parts that actually matter — remaining time, phase, goal,
+        // the start/pause button — always run first and unconditionally,
+        // regardless of whether the decorative flight visual below them
+        // succeeds. That order is deliberate defense in depth: renderFlightPlane()
+        // already guards its own risky SVG calls, but nothing about the
+        // countdown itself should ever be allowed to depend on a map
+        // animation rendering correctly.
         const goal = State.get().plan.dailyGoalSeconds;
         focusTimerDisplay.textContent = U.formatSecondsToHMS(getRemainingSeconds());
         focusPhaseLabel.textContent = I18n.t(PHASE_KEY[mode]);
@@ -365,6 +386,8 @@
         }
 
         renderSoundToggle();
+        renderFlightPlane();
+        renderFlightPicker();
     }
 
     function ensureRenderInterval() {
@@ -375,10 +398,16 @@
         if (renderIntervalId !== null) { clearInterval(renderIntervalId); renderIntervalId = null; }
     }
 
+    // Wrapped for the same reason as the visibilitychange listener above:
+    // this runs once a second via setInterval with nothing upstream to
+    // catch a thrown error, and it would do so every single second a
+    // session is running if it ever regressed.
     function tick() {
-        creditElapsedFocusTime();
-        if (isRunning() && getRemainingSeconds() <= 0) completePhase();
-        render();
+        try {
+            creditElapsedFocusTime();
+            if (isRunning() && getRemainingSeconds() <= 0) completePhase();
+            render();
+        } catch (e) { console.error('[focus] tick threw', e); }
     }
 
     function completePhase() {
