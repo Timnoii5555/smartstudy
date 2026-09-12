@@ -975,6 +975,22 @@
     </div>
 </div>
 
+<div id="overloadModal" class="modal-overlay hidden">
+    <div class="modal-panel modal-panel--sm" data-modal-panel>
+        <div class="modal-header">
+            <h2 class="modal-title"><span class="material-symbols-outlined" aria-hidden="true" style="color:#b45309">schedule</span> <span data-i18n="modalOverload.title">Tight schedule</span></h2>
+            <button type="button" id="closeOverloadBtn" class="modal-close" data-i18n-attr='{"aria-label":"aria.closeDialog"}' aria-label="Close"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">close</span></button>
+        </div>
+        <p id="overloadMessage" class="text-outline" style="font-size:0.875rem;margin-bottom:1.5rem"></p>
+        <div class="flex flex-col gap-2">
+            <button type="button" id="overloadIncreaseHoursBtn" class="btn btn--primary btn--block">
+                <span class="material-symbols-outlined" aria-hidden="true">add_circle</span> <span data-i18n="modalOverload.increaseHours">Increase daily hours</span>
+            </button>
+            <button type="button" id="overloadChangeSubjectBtn" class="btn btn--outline btn--block" data-i18n="modalOverload.changeSubject">Choose a different subject</button>
+        </div>
+    </div>
+</div>
+
 <div id="congratsModal" class="modal-overlay hidden">
     <div class="modal-panel modal-panel--sm text-center" data-modal-panel>
         <div class="modal-panel__icon modal-panel__icon--success"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:2.5rem;font-variation-settings:'FILL' 1">workspace_premium</span></div>

@@ -336,7 +336,57 @@
             completedTopicIds: alreadyDone
         });
         State.commit({ plan: { readingPlan: plan } });
-        TFS.Router.show('screen3');
+
+        // Surface an overload as soon as the plan is created, not buried
+        // somewhere later — but never block: the plan above is already
+        // saved and perfectly usable (the overflow just landed on the last
+        // eligible day), this is purely an actionable heads-up.
+        if (plan.overloadMinutes > 0) {
+            showOverloadModal(plan);
+        } else {
+            TFS.Router.show('screen3');
+        }
+    });
+
+    const overloadModal = document.getElementById('overloadModal');
+    const overloadMessage = document.getElementById('overloadMessage');
+
+    function showOverloadModal(plan) {
+        const needHours = plan.totalContentMinutes / 60;
+        const capacityHours = (plan.eligibleContentDays * Math.max(1, Math.round((State.get().plan.dailyGoalSeconds || 0) / 60))) / 60;
+        const gapHours = plan.overloadMinutes / 60;
+        overloadMessage.textContent = I18n.t('modalOverload.message', {
+            needHours: I18n.formatNumber(needHours, { maximumFractionDigits: 1 }),
+            haveHours: I18n.formatNumber(State.get().plan.dailyGoalSeconds / 3600, { maximumFractionDigits: 1 }),
+            capacityHours: I18n.formatNumber(capacityHours, { maximumFractionDigits: 1 }),
+            gapHours: I18n.formatNumber(gapHours, { maximumFractionDigits: 1 })
+        });
+        TFS.Modal.open(overloadModal);
+    }
+
+    document.getElementById('closeOverloadBtn').addEventListener('click', () => { TFS.Modal.close(overloadModal); TFS.Router.show('screen3'); });
+
+    document.getElementById('overloadIncreaseHoursBtn').addEventListener('click', () => {
+        TFS.Modal.close(overloadModal);
+        // Suggest just enough daily time to cover the remaining content
+        // across the days actually available, rounded up to the slider's
+        // own 0.5h step, capped at its max — stays on screen 2 so the
+        // learner can see the new number and regenerate.
+        const plan = State.get().plan.readingPlan;
+        if (plan && plan.eligibleContentDays > 0) {
+            const neededHrs = plan.totalContentMinutes / 60 / plan.eligibleContentDays;
+            const snapped = Math.min(12, Math.max(1, Math.ceil(neededHrs / 0.5) * 0.5));
+            timeSlider.value = snapped;
+            updateHoursDisplay(snapped);
+            updateCalcText();
+            State.commit({ plan: { dailyGoalSeconds: Math.round(snapped * 3600) } });
+            TFS.Toast.info(I18n.t('s2.overloadHoursNudged', { hrs: I18n.formatNumber(snapped, { maximumFractionDigits: 1 }) }));
+        }
+    });
+
+    document.getElementById('overloadChangeSubjectBtn').addEventListener('click', () => {
+        TFS.Modal.close(overloadModal);
+        TFS.Router.show('screen1');
     });
 
     I18n.onChange(() => {

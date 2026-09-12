@@ -108,6 +108,7 @@
                 calcDaysLeft: 'เหลือเวลา {days} วัน (รวมเวลาอ่าน {total} ชม.)',
                 generate: 'สร้างแผนการเรียนอัจฉริยะ',
                 errSelectDate: 'เลือกวันสอบก่อนครับ 📅',
+                overloadHoursNudged: 'ปรับเป็น {hrs} ชม./วันให้แล้ว กด "สร้างแผนการอ่าน" อีกครั้งได้เลยครับ',
                 orderSection: 'ลำดับการอ่าน',
                 orderHint: 'อยากให้เราจัดลำดับหัวข้อในแต่ละวันแบบไหน?'
             },
@@ -179,6 +180,11 @@
                 title: 'จุดอ่อน', hint: 'เรียงชุดคำศัพท์ตามความแม่นยำใน 30 วันล่าสุด จากน้อยไปมาก แตะเพื่อทบทวนได้เลย',
                 empty: 'ยังไม่มีข้อมูลการทบทวนพอที่จะวิเคราะห์ ลองทบทวนคำศัพท์สักชุดก่อนนะครับ',
                 reviewCount: 'ทบทวนไปแล้ว {n} ครั้ง'
+            },
+            modalOverload: {
+                title: 'ตารางค่อนข้างแน่น',
+                message: 'เนื้อหาที่เหลือต้องใช้เวลาอ่านรวมประมาณ {needHours} ชม. แต่จากจำนวนวันที่เหลือถึงวันสอบและเวลาที่ตั้งไว้ตอนนี้ ({haveHours} ชม./วัน) จะรวมได้ประมาณ {capacityHours} ชม. เท่านั้น (ขาดไปประมาณ {gapHours} ชม.) ลองเลือกทางใดทางหนึ่งด้านล่างได้เลยครับ',
+                increaseHours: 'เพิ่มเวลาอ่านต่อวัน', changeSubject: 'เลือกวิชาอื่นหรือลดเนื้อหา'
             },
             modalDeleteCard: { title: 'ลบคำศัพท์', selectLabel: 'เลือกคำศัพท์ที่ต้องการลบ', warning: '*การลบคำศัพท์จะไม่สามารถกู้คืนได้', ok: 'ลบคำศัพท์' },
             modalCustomSubject: {
@@ -379,6 +385,7 @@
                 calcDaysLeft: '{days} days left (total study time: {total} hrs)',
                 generate: 'Generate my smart study plan',
                 errSelectDate: 'Please choose your exam date first 📅',
+                overloadHoursNudged: 'Set to {hrs}h/day — tap "Generate my study plan" again to rebuild it.',
                 orderSection: 'Reading order',
                 orderHint: 'How should we sequence your topics day to day?'
             },
@@ -450,6 +457,11 @@
                 title: 'Weak spots', hint: 'Decks sorted by your accuracy over the last 30 days — lowest first. Tap one to review it now.',
                 empty: "Not enough review data yet to analyze — review a deck first.",
                 reviewCount: '{n} reviews'
+            },
+            modalOverload: {
+                title: 'Tight schedule',
+                message: "The remaining content needs about {needHours}h of reading, but the days left before your exam at {haveHours}h/day only add up to about {capacityHours}h (a gap of about {gapHours}h). Pick one of the options below.",
+                increaseHours: 'Increase daily hours', changeSubject: 'Choose a different subject or trim content'
             },
             modalDeleteCard: { title: 'Delete word', selectLabel: 'Choose a word to delete', warning: '*This cannot be undone.', ok: 'Delete word' },
             modalCustomSubject: {

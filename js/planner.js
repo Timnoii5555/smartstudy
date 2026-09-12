@@ -37,15 +37,33 @@
     }
 
     /**
-     * Greedily pack ordered topics into days from `todayDate` up to (but not
-     * including) `examDateISO`, filling each day up to `dailyGoalSeconds`
-     * worth of estimated minutes before spilling into the next day. If the
-     * subject has more content than days-until-exam allow, the overflow is
-     * crammed onto the final available day rather than scheduled past the
-     * exam or silently dropped — better a heavy last day than a plan that
-     * quietly leaves topics unread.
+     * Packs ordered topics into days from `todayDate` up to (but not
+     * including) `examDateISO`, at most `dailyGoalSeconds` worth of
+     * estimated minutes per day. Three rules beyond simple greedy packing:
      *
-     * Returns `{ subjectId, orderStrategy, generatedAt, days: [{dateISO, topicIds}] }`,
+     * 1. **Spread, don't cram.** When there's real slack (more days
+     *    available than the content actually needs at a steady daily
+     *    pace), content is spaced out across the *whole* window instead of
+     *    finishing in the first few days and leaving the rest of, say, a
+     *    3-week runway completely empty. If that spacing estimate turns
+     *    out too generous, the previously-skipped days quietly absorb the
+     *    overflow before anything is ever crammed or dropped.
+     * 2. **Rest days.** Roughly one day in seven gets zero new material,
+     *    as long as the window is long enough to spare it.
+     * 3. **A review-only day before the exam.** The single calendar day
+     *    right before `examDateISO` never gets new material — there's
+     *    nothing to review yet if this is the very first plan, but once a
+     *    plan has been running a while that day is deliberately left open
+     *    for revisiting what's already been read.
+     *
+     * If the subject genuinely has more content than the window can hold
+     * even using every eligible day at full daily capacity, the overflow is
+     * crammed onto the last eligible day (never past the exam, never
+     * silently dropped) and reported back as `overloadMinutes` so the
+     * caller can show an actionable warning instead of a silently
+     * overloaded day.
+     *
+     * Returns `{ subjectId, orderStrategy, generatedAt, days: [{dateISO, topicIds}], overloadMinutes }`,
      * or null if there is no subject to plan for.
      */
     function buildReadingPlan({ subject, examDateISO, dailyGoalSeconds, orderStrategy, todayDate, completedTopicIds = [] }) {
@@ -54,7 +72,7 @@
         const remaining = subject.topics.filter(t => !completedTopicIds.includes(t.id));
 
         if (remaining.length === 0) {
-            return { subjectId: subject.id, orderStrategy, generatedAt: U.formatDateISO(today0), days: [] };
+            return { subjectId: subject.id, orderStrategy, generatedAt: U.formatDateISO(today0), days: [], overloadMinutes: 0 };
         }
 
         const ordered = orderTopics(remaining, orderStrategy);
@@ -62,39 +80,105 @@
         // Days available to study BEFORE the exam (today counts, exam day itself doesn't).
         const daysAvailable = examDate ? Math.max(1, Math.ceil((examDate - today0) / 86400000)) : Infinity;
         const dailyBudgetMin = Math.max(15, Math.round((dailyGoalSeconds || 4.5 * 3600) / 60));
+        const totalContentMin = ordered.reduce((sum, t) => sum + (t.estMinutes || 120), 0);
 
-        const days = [];
-        let cursor = 0;
-        let dayOffset = 0;
+        // A rest-day cadence and a reserved pre-exam review day only make
+        // sense with a real, finite deadline that has room to spare — a
+        // same-week cram has neither. Without an exam date at all, plan far
+        // enough ahead (at the stated daily pace) to fit everything.
+        const planHorizon = isFinite(daysAvailable) ? daysAvailable : Math.ceil(totalContentMin / dailyBudgetMin) + 1;
+        const reservedReviewOffset = (isFinite(daysAvailable) && daysAvailable > 1) ? daysAvailable - 1 : -1;
+        const isRestOffset = (o) => o > 0 && o % 7 === 6 && o !== reservedReviewOffset;
 
-        while (cursor < ordered.length) {
-            const dateISO = U.formatDateISO(U.addDays(today0, dayOffset));
+        const contentOffsets = [];
+        for (let o = 0; o < planHorizon; o++) {
+            if (o !== reservedReviewOffset && !isRestOffset(o)) contentOffsets.push(o);
+        }
+        // A pathologically short window (e.g. the exam is tomorrow) can leave
+        // no "normal" content day once the review day is reserved — use
+        // every day rather than schedule nothing.
+        if (contentOffsets.length === 0) { for (let o = 0; o < planHorizon; o++) contentOffsets.push(o); }
+
+        // Roughly how many days the content needs at a steady full-budget
+        // pace; a rough under-estimate is fine — see the "reserve" pass below.
+        const neededDays = Math.max(1, Math.ceil(totalContentMin / dailyBudgetMin));
+        const stride = Math.max(1, Math.floor(contentOffsets.length / neededDays));
+        const activeOffsets = new Set();
+        contentOffsets.forEach((o, i) => { if (i % stride === 0) activeOffsets.add(o); });
+
+        function packDay(cursorRef) {
             let budgetLeft = dailyBudgetMin;
             const topicIds = [];
-
-            while (cursor < ordered.length) {
-                const topic = ordered[cursor];
+            while (cursorRef.i < ordered.length) {
+                const topic = ordered[cursorRef.i];
                 const est = topic.estMinutes || 120;
-                // Always seat at least one topic per day, even one bigger than the
-                // whole daily budget, so a single long topic can never stall the loop.
+                // Always seat at least one topic per day, even one bigger than
+                // the whole daily budget, so a single long topic can never
+                // stall the loop.
                 if (topicIds.length > 0 && est > budgetLeft) break;
                 topicIds.push(topic.id);
                 budgetLeft -= est;
-                cursor++;
+                cursorRef.i++;
             }
+            return topicIds;
+        }
 
-            days.push({ dateISO, topicIds });
-            dayOffset++;
+        const days = [];
+        const cursor = { i: 0 };
 
-            if (isFinite(daysAvailable) && dayOffset >= daysAvailable && cursor < ordered.length) {
-                // Out of days before the exam — pile whatever's left onto the last day.
-                const lastDay = days[days.length - 1];
-                while (cursor < ordered.length) { lastDay.topicIds.push(ordered[cursor].id); cursor++; }
-                break;
+        // Pass 1: spaced-out days only (rest days and the reserved review
+        // day always stay empty; non-selected content days are left empty
+        // too, on purpose, as spacing).
+        for (let o = 0; o < planHorizon && cursor.i < ordered.length; o++) {
+            const dateISO = U.formatDateISO(U.addDays(today0, o));
+            if (o === reservedReviewOffset || isRestOffset(o) || !activeOffsets.has(o)) {
+                days.push({ dateISO, topicIds: [] });
+                continue;
+            }
+            days.push({ dateISO, topicIds: packDay(cursor) });
+        }
+
+        // Pass 2: the spacing estimate undershot — fill in the previously-
+        // skipped content-eligible days too, in calendar order, before
+        // resorting to genuine overload. Rest days and the review day are
+        // still never touched.
+        if (cursor.i < ordered.length) {
+            for (let o = 0; o < days.length && cursor.i < ordered.length; o++) {
+                if (o === reservedReviewOffset || isRestOffset(o)) continue;
+                if (days[o].topicIds.length > 0) continue; // already packed in pass 1
+                days[o].topicIds = packDay(cursor);
             }
         }
 
-        return { subjectId: subject.id, orderStrategy, generatedAt: U.formatDateISO(today0), days };
+        // Genuine overload: every eligible day is already at full capacity
+        // and content is still left over. Pile it onto the last eligible
+        // day rather than scheduling past the exam or dropping it, and
+        // report how much didn't fit so the caller can act on it.
+        let overloadMinutes = 0;
+        if (cursor.i < ordered.length) {
+            let idx = -1;
+            for (let o = days.length - 1; o >= 0; o--) {
+                if (o !== reservedReviewOffset && !isRestOffset(o)) { idx = o; break; }
+            }
+            if (idx === -1) {
+                days.push({ dateISO: U.formatDateISO(U.addDays(today0, days.length)), topicIds: [] });
+                idx = days.length - 1;
+            }
+            while (cursor.i < ordered.length) {
+                overloadMinutes += (ordered[cursor.i].estMinutes || 120);
+                days[idx].topicIds.push(ordered[cursor.i].id);
+                cursor.i++;
+            }
+        }
+
+        return {
+            subjectId: subject.id, orderStrategy, generatedAt: U.formatDateISO(today0), days, overloadMinutes,
+            // Exposed so a caller (onboarding.js) can build an accurate,
+            // actionable overload message — e.g. "you'd need N hours/day" —
+            // without having to re-derive the same numbers itself.
+            totalContentMinutes: totalContentMin,
+            eligibleContentDays: contentOffsets.length
+        };
     }
 
     /** Topic ids scheduled for exactly this date. */
