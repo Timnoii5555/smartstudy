@@ -5,22 +5,32 @@ but deliberately not built, per the "no feature creep — write it here
 instead" rule. Each entry says what it is and why it was left out, so a
 later pass can pick any of these up with full context.
 
-## Private co-study rooms
+## Private co-study rooms — a scoped-safe version shipped instead
 
 The spec describes invite-link-only private rooms (max 12 members, nicknames
 + binary studying/not-studying status, a creator who can remove members,
 per-member report/leave, 7-day link expiry with regeneration) on top of the
-public "how many people are focusing" count. Only the public count shipped
-(`js/presence.js`).
+public "how many people are focusing" count.
 
-Why: the public count needs zero per-user-facing surface — no names, no
-list, nothing to report — so it carries none of the child-safety review
-weight a private room with a visible member list and a report/block
-affordance does. That's real design and implementation work (room
-creation/joining UI, invite-link generation and parsing, membership
-subcollections, expiry handling, the report/block flow itself) on top of
-everything else in this pass. It's the single largest piece of the original
-spec left undone.
+What shipped instead (`js/groups.js` + `js/groupsUI.js`, requested directly
+as "study groups" alongside a reference app's fuller version): named,
+shareable rooms — a join code or a public-groups browse list, a daily goal,
+a live "studying now" headcount — but every member stays exactly as
+anonymous as the public flight-presence count already is. No nicknames, no
+member list, no per-member anything, no creator role, no camera ("Cam
+Study" in that reference — a live-video feature not built at all, full
+stop: recording/streaming video of what could be minors studying alone at
+home is a real child-safety risk, not a convenience trade-off), no
+ranking/leaderboard (this app's own non-negotiable rule).
+
+Why stop there: this app's own rule is that any room UI needs a
+report/block flow *unless* it exposes zero identifying info. Anonymous
+groups (like the public count before them) need none of that review
+weight. The moment a nickname or a visible member list gets added, that
+changes — a member list, per-member report/leave, a creator role, and the
+report/block flow itself is still real, separate future work, and needs to
+build the moderation half alongside it, not skip that part the way it
+would be tempting to under time pressure.
 
 ## Sub-25-minute scheduling blocks
 

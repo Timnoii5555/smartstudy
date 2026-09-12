@@ -679,6 +679,9 @@
                 <h1 data-i18n="brand.short">Smart Study</h1>
             </button>
             <div style="display:flex;gap:0.5rem">
+                <button type="button" id="openStudyGroupsBtn" class="icon-btn" data-i18n-attr='{"aria-label":"modalGroups.title"}' aria-label="Study groups">
+                    <span class="material-symbols-outlined" aria-hidden="true">groups</span>
+                </button>
                 <button type="button" id="openPilotClubBtn" class="icon-btn" data-i18n-attr='{"aria-label":"modalPilotClub.title"}' aria-label="Mine">
                     <span class="material-symbols-outlined" aria-hidden="true">badge</span>
                 </button>
@@ -1488,6 +1491,74 @@
     </div>
 </div>
 
+<!-- Study groups (js/groups.js + js/groupsUI.js) — deliberately scoped down
+     from the reference: no camera ("Cam Study"), no ranking, and for now
+     no member list/nicknames either, so every member stays exactly as
+     anonymous as the per-flight presence count already is (see
+     js/groups.js's own header for why that's what keeps this feature out
+     of "needs a report/block flow" territory). A named-members version is
+     real future work, tracked in FUTURE_IDEAS.md, that has to build that
+     flow alongside it rather than skip it. -->
+<div id="studyGroupsModal" class="modal-overlay hidden">
+    <div class="modal-panel modal-panel--sheet custom-scroll" data-modal-panel style="max-height:88vh">
+        <div class="modal-header">
+            <h2 class="modal-title"><span class="material-symbols-outlined" aria-hidden="true">groups</span> <span data-i18n="modalGroups.title">Study groups</span></h2>
+            <button type="button" id="closeStudyGroupsBtn" class="modal-close" data-i18n-attr='{"aria-label":"aria.closeDialog"}' aria-label="Close"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">close</span></button>
+        </div>
+
+        <div id="groupsViewList">
+            <div class="modal-actions" style="margin:0 0 1.25rem">
+                <input type="text" id="groupJoinCodeInput" class="input flex-1" maxlength="6" style="text-transform:uppercase" data-i18n-attr='{"placeholder":"modalGroups.codePlaceholder"}' placeholder="Join code">
+                <button type="button" id="groupJoinCodeBtn" class="btn btn--primary" data-i18n="modalGroups.joinBtn">Join</button>
+            </div>
+            <button type="button" id="groupCreateBtn" class="btn btn--outline btn--block" style="margin-bottom:1.25rem">
+                <span class="material-symbols-outlined" aria-hidden="true">add_circle</span> <span data-i18n="modalGroups.createBtn">Create a group</span>
+            </button>
+            <span class="settings-section__title" data-i18n="modalGroups.publicSection">Public groups</span>
+            <div id="groupsPublicList" class="flex flex-col gap-2 custom-scroll" style="max-height:14rem;overflow-y:auto;margin-top:0.6rem"></div>
+            <p id="groupsPublicEmpty" class="text-outline" style="font-size:0.8125rem;text-align:center;padding:1rem 0" hidden data-i18n="modalGroups.publicEmpty">No public groups yet — be the first to create one.</p>
+        </div>
+
+        <div id="groupsViewCreate" hidden>
+            <button type="button" id="groupsBackFromCreateBtn" class="btn btn--ghost" style="margin-bottom:1rem;padding-left:0">
+                <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span> <span data-i18n="common.back">Back</span>
+            </button>
+            <div class="field" style="margin-bottom:1rem">
+                <label class="field__label" for="groupNameInput" data-i18n="modalGroups.nameLabel">Group name</label>
+                <input type="text" id="groupNameInput" class="input" maxlength="40">
+            </div>
+            <div class="field" style="margin-bottom:1rem">
+                <label class="field__label" for="groupGoalInput" data-i18n="modalGroups.goalLabel">Daily goal (minutes)</label>
+                <input type="number" id="groupGoalInput" class="input" min="10" max="600" value="60">
+            </div>
+            <button type="button" id="groupIsPublicToggle" class="toggle-row" style="margin-bottom:1.25rem">
+                <span style="font-weight:500" data-i18n="modalGroups.publicToggle">List this group publicly</span>
+                <span class="switch"><span class="switch__knob"></span></span>
+            </button>
+            <button type="button" id="groupCreateSubmitBtn" class="btn btn--primary btn--block" data-i18n="modalGroups.createBtn">Create a group</button>
+        </div>
+
+        <div id="groupsViewDetail" hidden>
+            <div class="pilot-card">
+                <p class="pilot-card__club" id="groupDetailName">Group name</p>
+                <p class="pilot-card__member" id="groupDetailStudyingNow">0 studying now</p>
+            </div>
+            <div class="settings-section">
+                <span class="settings-section__title" data-i18n="modalGroups.goalLabel">Daily goal (minutes)</span>
+                <p id="groupDetailGoal" style="font-weight:700;font-size:1rem;margin-top:0.35rem">60 min</p>
+            </div>
+            <div class="settings-section" id="groupDetailCodeSection">
+                <span class="settings-section__title" data-i18n="modalGroups.codeLabel">Join code</span>
+                <p id="groupDetailCode" style="font-weight:800;font-size:1.5rem;letter-spacing:0.15em;text-align:center;margin-top:0.35rem">ABC123</p>
+                <p class="text-outline" style="font-size:0.75rem;text-align:center;margin-top:0.25rem" data-i18n="modalGroups.codeHint">Share this code so friends can join.</p>
+            </div>
+            <button type="button" id="groupLeaveBtn" class="btn btn--ghost btn--block" style="color:var(--color-danger)">
+                <span class="material-symbols-outlined" aria-hidden="true">logout</span> <span data-i18n="modalGroups.leaveBtn">Leave this group</span>
+            </button>
+        </div>
+    </div>
+</div>
+
 <script src="js/errorBoundary.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/storage.js"></script>
@@ -1512,6 +1583,7 @@
 <script src="js/firebaseConfig.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/presence.js"></script>
+<script src="js/groups.js"></script>
 <script src="js/modal.js"></script>
 <script src="js/router.js"></script>
 <script src="js/profile.js"></script>
@@ -1528,6 +1600,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="js/focus.js"></script>
 <script src="js/pilotClub.js"></script>
+<script src="js/groupsUI.js"></script>
 <script src="js/settings.js"></script>
 <script src="js/history.js"></script>
 <script src="js/app.js"></script>

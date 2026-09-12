@@ -186,6 +186,15 @@
             ui: {
                 lastScreen: 'screen1'
             },
+            groups: {
+                // The one study group this device currently belongs to, if
+                // any — js/groups.js. Cached locally (name alongside the id)
+                // purely so the UI has something to show before a network
+                // round-trip; joinCode is never stored here since it isn't
+                // needed once already joined.
+                currentGroupId: null,
+                currentGroupName: null
+            },
             streak: {
                 current: 0,               // consecutive days with >=15 min of real focus time, ending today or yesterday
                 longest: 0,               // best streak ever, kept even after the current one breaks
