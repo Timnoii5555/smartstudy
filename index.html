@@ -27,9 +27,10 @@
         var data = raw ? JSON.parse(raw) : null;
         var themeSetting = (data && data.settings && data.settings.theme) || 'system';
         var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        var isDark = themeSetting === 'dark' || (themeSetting === 'system' && prefersDark);
-        document.documentElement.classList.toggle('dark', isDark);
-        document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+        var effective = (themeSetting === 'dark' || themeSetting === 'paper' || themeSetting === 'night') ? themeSetting
+            : (themeSetting === 'light' ? 'light' : (prefersDark ? 'dark' : 'light'));
+        if (effective !== 'light') document.documentElement.classList.add(effective);
+        document.documentElement.style.colorScheme = (effective === 'night') ? 'dark' : (effective === 'paper' ? 'light' : effective);
 
         var lang = (data && data.settings && data.settings.language) || (navigator.language || 'th').toLowerCase().indexOf('en') === 0 ? 'en' : 'th';
         document.documentElement.setAttribute('lang', lang);
@@ -1093,6 +1094,8 @@
             <div class="settings-theme-toggle">
                 <button type="button" id="themeBtnLight" data-theme="light"><span class="material-symbols-outlined" aria-hidden="true">light_mode</span><span data-i18n="settings.themeLight">Light</span></button>
                 <button type="button" id="themeBtnDark" data-theme="dark"><span class="material-symbols-outlined" aria-hidden="true">dark_mode</span><span data-i18n="settings.themeDark">Dark</span></button>
+                <button type="button" id="themeBtnPaper" data-theme="paper"><span class="material-symbols-outlined" aria-hidden="true">auto_stories</span><span data-i18n="settings.themePaper">Paper</span></button>
+                <button type="button" id="themeBtnNight" data-theme="night"><span class="material-symbols-outlined" aria-hidden="true">bedtime</span><span data-i18n="settings.themeNight">Night</span></button>
                 <button type="button" id="themeBtnSystem" data-theme="system"><span class="material-symbols-outlined" aria-hidden="true">contrast</span><span data-i18n="settings.themeSystem">System</span></button>
             </div>
         </div>
@@ -1167,6 +1170,7 @@
     </div>
 </div>
 
+<script src="js/errorBoundary.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/storage.js"></script>
 <script src="data/subjects.js"></script>

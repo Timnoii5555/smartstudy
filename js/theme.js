@@ -14,17 +14,23 @@
 
     const mediaQuery = global.matchMedia ? global.matchMedia('(prefers-color-scheme: dark)') : null;
 
+    // 'paper' (warm/cream, low-contrast) and 'night' (very dark, desaturated,
+    // minimal blue light) are explicit choices only — unlike 'dark', neither
+    // is ever inferred from the OS's light/dark preference, since there is
+    // no OS-level equivalent of either to follow.
+    const EXPLICIT_THEMES = ['light', 'dark', 'paper', 'night'];
+
     function effectiveTheme(setting) {
-        if (setting === 'dark' || setting === 'light') return setting;
+        if (EXPLICIT_THEMES.includes(setting)) return setting;
         return (mediaQuery && mediaQuery.matches) ? 'dark' : 'light';
     }
 
     function apply(setting) {
         const eff = effectiveTheme(setting);
-        document.documentElement.classList.toggle('dark', eff === 'dark');
+        ['dark', 'paper', 'night'].forEach(cls => document.documentElement.classList.toggle(cls, eff === cls));
         document.documentElement.setAttribute('data-theme-setting', setting);
         // Keep the native UI (scrollbars, form controls) in sync with the theme too.
-        document.documentElement.style.colorScheme = eff;
+        document.documentElement.style.colorScheme = (eff === 'night') ? 'dark' : (eff === 'paper' ? 'light' : eff);
     }
 
     function setTheme(setting) {

@@ -18,6 +18,8 @@
     const langBtnEn = document.getElementById('langBtnEn');
     const themeBtnLight = document.getElementById('themeBtnLight');
     const themeBtnDark = document.getElementById('themeBtnDark');
+    const themeBtnPaper = document.getElementById('themeBtnPaper');
+    const themeBtnNight = document.getElementById('themeBtnNight');
     const themeBtnSystem = document.getElementById('themeBtnSystem');
     const dailyGoalInput = document.getElementById('settingsDailyGoalHours');
     const examDateBtn = document.getElementById('settingsExamDateBtn');
@@ -37,6 +39,8 @@
         const theme = s.settings.theme;
         themeBtnLight.classList.toggle('is-active', theme === 'light');
         themeBtnDark.classList.toggle('is-active', theme === 'dark');
+        themeBtnPaper.classList.toggle('is-active', theme === 'paper');
+        themeBtnNight.classList.toggle('is-active', theme === 'night');
         themeBtnSystem.classList.toggle('is-active', theme === 'system');
 
         dailyGoalInput.value = (s.plan.dailyGoalSeconds / 3600).toFixed(1).replace(/\.0$/, '');
@@ -65,6 +69,8 @@
 
     themeBtnLight.addEventListener('click', () => { TFS.Theme.setTheme('light'); render(); });
     themeBtnDark.addEventListener('click', () => { TFS.Theme.setTheme('dark'); render(); });
+    themeBtnPaper.addEventListener('click', () => { TFS.Theme.setTheme('paper'); render(); });
+    themeBtnNight.addEventListener('click', () => { TFS.Theme.setTheme('night'); render(); });
     themeBtnSystem.addEventListener('click', () => { TFS.Theme.setTheme('system'); render(); });
 
     dailyGoalInput.addEventListener('change', () => {

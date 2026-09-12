@@ -31,7 +31,10 @@
 
 .icon-btn {
     display: inline-flex; align-items: center; justify-content: center;
-    width: 2.5rem; height: 2.5rem; border-radius: var(--radius-full);
+    /* 2.75rem = 44px at the default root size — the minimum touch target
+       this app targets everywhere (a smaller 2.5rem/40px version of this
+       button used to fall just short of that on every screen). */
+    width: 2.75rem; height: 2.75rem; border-radius: var(--radius-full);
     background: transparent; border: none; color: var(--color-outline);
     transition: background-color 0.15s ease, color 0.15s ease;
 }
@@ -81,7 +84,14 @@
 .btn--sm { padding: 0.6rem 1rem; font-size: 0.875rem; border-radius: var(--radius-md); }
 .btn--block { width: 100%; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.btn--pill-white { background: #fff; color: var(--color-outline); border: 1px solid var(--color-border); }
+/* Fixed dark text, not a theme token: this pill's background is
+   deliberately always white (it's meant to sit on top of a colored banner
+   regardless of theme — see .read-ahead-card), so its text needs to stay
+   readable against literal white specifically, not against this theme's
+   surface color. `--color-outline` alone dropped well under the 4.5:1
+   minimum in the dark/night themes, since it's tuned for light text on a
+   dark surface, the opposite of this button. */
+.btn--pill-white { background: #fff; color: #3a3d42; border: 1px solid var(--color-border); }
 
 /* ---------- Cards / surfaces ---------- */
 
@@ -351,7 +361,8 @@ input[type=range]::-moz-range-track { height: 0.5rem; background: var(--color-su
 .modal-panel__icon--warn { background: color-mix(in srgb, var(--color-danger) 12%, transparent); color: var(--color-danger); }
 .modal-panel__icon--success { background: color-mix(in srgb, var(--color-success) 15%, transparent); color: var(--color-success); }
 .modal-close {
-    width: 2rem; height: 2rem; border-radius: 50%; background: var(--color-surface-high); border: none;
+    /* 2.75rem = 44px, this app's minimum touch target (see .icon-btn) */
+    width: 2.75rem; height: 2.75rem; border-radius: 50%; background: var(--color-surface-high); border: none;
     display: flex; align-items: center; justify-content: center; color: var(--color-outline);
 }
 

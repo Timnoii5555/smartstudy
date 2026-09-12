@@ -279,7 +279,7 @@
             },
             settings: {
                 title: 'ตั้งค่า', language: 'ภาษา', theme: 'ธีม',
-                themeLight: 'สว่าง', themeDark: 'มืด', themeSystem: 'ตามระบบ',
+                themeLight: 'สว่าง', themeDark: 'มืด', themePaper: 'กระดาษ', themeNight: 'กลางคืน', themeSystem: 'ตามระบบ',
                 dailyGoal: 'เป้าหมายชั่วโมงอ่านต่อวัน', examDate: 'วันสอบ',
                 pomodoroSection: 'ตั้งเวลาโฟกัส (Pomodoro)',
                 focusMin: 'ช่วงโฟกัส (นาที)', shortBreakMin: 'พักสั้น (นาที)',
@@ -570,7 +570,7 @@
             },
             settings: {
                 title: 'Settings', language: 'Language', theme: 'Theme',
-                themeLight: 'Light', themeDark: 'Dark', themeSystem: 'Follow system',
+                themeLight: 'Light', themeDark: 'Dark', themePaper: 'Paper', themeNight: 'Night', themeSystem: 'Follow system',
                 dailyGoal: 'Daily study goal (hours)', examDate: 'Exam date',
                 pomodoroSection: 'Focus timer (Pomodoro)',
                 focusMin: 'Focus length (min)', shortBreakMin: 'Short break (min)',
