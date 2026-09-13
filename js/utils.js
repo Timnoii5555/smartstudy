@@ -131,6 +131,36 @@
         return `${pad2(h)}:${pad2(m)}`;
     }
 
+    /** Glides an element's text from whatever number it last showed (tracked
+     *  in a data attribute, so this is safe to call from a render() that
+     *  runs on every state change) up/down to `toValue`, instead of the
+     *  flat instant jump `el.textContent = value` gives — a small, cheap
+     *  bit of "feels alive" polish for dashboard-style numbers (percentages,
+     *  counts, hours). No-ops straight to the final text if the value
+     *  hasn't actually changed, or if the OS-level reduced-motion
+     *  preference is on, so it never fights that setting the way a plain
+     *  CSS transition already doesn't need to worry about. */
+    function animateCountUp(el, toValue, { duration = 600, formatFn } = {}) {
+        const format = formatFn || ((n) => String(n));
+        const fromValue = Number(el.dataset.countValue);
+        const startValue = Number.isFinite(fromValue) ? fromValue : toValue;
+        el.dataset.countValue = String(toValue);
+        if (startValue === toValue) { el.textContent = format(toValue); return; }
+        const reduceMotion = global.matchMedia && global.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduceMotion) { el.textContent = format(toValue); return; }
+        const startTime = (global.performance || Date).now();
+        const raf = global.requestAnimationFrame || ((fn) => setTimeout(fn, 16));
+        function step() {
+            const elapsed = (global.performance || Date).now() - startTime;
+            const t = Math.min(1, elapsed / duration);
+            const eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
+            const current = Math.round(startValue + (toValue - startValue) * eased);
+            el.textContent = format(current);
+            if (t < 1) raf(step);
+        }
+        raf(step);
+    }
+
     // Note: there is no HTML-escaping helper here on purpose. Every render in
     // this app builds DOM nodes with `el()` (below) and assigns user-provided
     // text via `.textContent`, never by concatenating it into an HTML string —
@@ -213,7 +243,7 @@
         uuid, clamp, pad2, debounce, haversineKm,
         formatDateISO, parseISODate, isSameDate, startOfDay, addDays, startOfWeekMonday,
         formatSecondsToHMS, formatSecondsToHHMM, timeStrToMinutes, minutesToTimeStr,
-        qsa, el, downloadText, readFileAsText, isStorageAvailable, isAtomicPath
+        qsa, el, downloadText, readFileAsText, isStorageAvailable, isAtomicPath, animateCountUp
     };
 
 })(window);

@@ -313,6 +313,15 @@ input[type=range]::-moz-range-track { height: 0.5rem; background: var(--color-su
     display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.75rem; font-weight: 700;
     color: #b45309; background: color-mix(in srgb, #b45309 12%, transparent);
     padding: 0.35rem 0.75rem; border-radius: var(--radius-full); white-space: nowrap;
+    /* A slow, gentle "ping" ring — this badge only shows at all once a
+       streak is actually active, so it's a small nudge of life toward
+       something worth noticing rather than decoration for its own sake. */
+    animation: streak-pulse 2.5s ease-out infinite;
+}
+@keyframes streak-pulse {
+    0% { box-shadow: 0 0 0 0 color-mix(in srgb, #b45309 40%, transparent); }
+    70% { box-shadow: 0 0 0 6px color-mix(in srgb, #b45309 0%, transparent); }
+    100% { box-shadow: 0 0 0 0 color-mix(in srgb, #b45309 0%, transparent); }
 }
 
 /* ---------- Focus garden (screen 3) — see js/garden.js ---------- */
@@ -582,7 +591,18 @@ input[type=range]::-moz-range-track { height: 0.5rem; background: var(--color-su
 .modal-actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
 .modal-panel__icon { width: 4rem; height: 4rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; }
 .modal-panel__icon--warn { background: color-mix(in srgb, var(--color-danger) 12%, transparent); color: var(--color-danger); }
-.modal-panel__icon--success { background: color-mix(in srgb, var(--color-success) 15%, transparent); color: var(--color-success); }
+/* A little bounce-in on open (the modal panel is removed from the DOM's
+   render tree by .modal-overlay.hidden, so this animation genuinely
+   replays fresh every time the celebration is shown, not just once ever). */
+.modal-panel__icon--success {
+    background: color-mix(in srgb, var(--color-success) 15%, transparent); color: var(--color-success);
+    animation: icon-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes icon-pop {
+    0% { transform: scale(0); opacity: 0; }
+    60% { transform: scale(1.15); opacity: 1; }
+    100% { transform: scale(1); }
+}
 .modal-close {
     /* 2.75rem = 44px, this app's minimum touch target (see .icon-btn) */
     width: 2.75rem; height: 2.75rem; border-radius: 50%; background: var(--color-surface-high); border: none;

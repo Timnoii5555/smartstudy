@@ -29,7 +29,11 @@
             try { prev.onLeave(); } catch (e) { console.error('[router] onLeave threw for', currentId, e); }
         }
 
-        screens.forEach((s, sid) => { s.el.style.display = sid === id ? 'block' : 'none'; });
+        // classList (not inline style) so screens.css's fade/slide-in
+        // animation on .is-active actually gets to run — assigning
+        // style.display directly would win the cascade over any CSS rule
+        // and there'd be nothing left to animate.
+        screens.forEach((s, sid) => { s.el.classList.toggle('is-active', sid === id); });
         currentId = id;
 
         const next = screens.get(id);

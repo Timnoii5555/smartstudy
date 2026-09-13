@@ -7,6 +7,17 @@
  */
 
 .screen { display: none; }
+/* A short fade+rise instead of an instant cut whenever js/router.js
+   switches screens — the single biggest "feels alive vs. feels flat"
+   signal in an app this simple, and free of layout risk since it's pure
+   opacity/transform on an element that's already about to be shown.
+   prefers-reduced-motion (styles/base.css's blanket rule) already
+   collapses this to an instant, motionless appearance. */
+.screen.is-active { display: block; animation: screen-enter 0.32s cubic-bezier(0.22, 1, 0.36, 1); }
+@keyframes screen-enter {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 .screen__main { flex-grow: 1; padding-top: 6rem; padding-bottom: 8rem; padding-left: 1.5rem; padding-right: 1.5rem; width: 100%; }
 
 /* ---------- Screen 1: subject picker ---------- */
@@ -34,6 +45,11 @@
 .progress-ring { position: relative; width: 12rem; height: 12rem; margin-bottom: 1.5rem; }
 .progress-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
 .progress-ring__track { color: var(--color-surface-highest); }
+/* Glides to its new value instead of snapping — the ring is redrawn on
+   every relevant state change (a lesson ticked off, a screen revisit),
+   so a static jump was one of the flattest, least alive moments on the
+   whole dashboard. */
+#progressCircle { transition: stroke-dashoffset 0.7s cubic-bezier(0.22, 1, 0.36, 1); }
 .progress-ring__value-wrap { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .progress-ring__pct { font-family: var(--font-headline); font-size: 2.75rem; font-weight: 800; color: var(--color-primary); }
 .progress-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; width: 100%; margin-top: 1rem; }

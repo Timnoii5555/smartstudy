@@ -282,7 +282,7 @@
         const completed = Object.keys(progress).length;
         const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
 
-        progressPercentText.textContent = percent + '%';
+        U.animateCountUp(progressPercentText, percent, { formatFn: (n) => n + '%' });
         completedLessonsText.textContent = String(completed);
         miniProgressBar.style.width = percent + '%';
         progressCircle.setAttribute('stroke-dasharray', RING_CIRCUMFERENCE.toFixed(2));
