@@ -333,6 +333,11 @@
 
     function renderCollection(container) {
         if (!container) return;
+        // Cleared here too (TFS.Themes.renderInto already clears before the
+        // first call) because picking a character/pet re-invokes this
+        // function directly on the same container to redraw the new
+        // selection — without this it would double up instead of replacing.
+        container.innerHTML = '';
 
         const charSection = document.createElement('div');
         charSection.className = 'paper-collection__section';
