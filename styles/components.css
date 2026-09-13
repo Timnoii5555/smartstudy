@@ -599,6 +599,13 @@ input[type=range]::-moz-range-track { height: 0.5rem; background: var(--color-su
 .mint-collection__card .mint-scene__svg-wrap { width: 4.5rem; height: 4.5rem; }
 .mint-collection__name { font-size: 0.75rem; font-weight: 700; }
 .mint-collection__meta { font-size: 0.625rem; color: var(--color-outline); }
+.mint-summary {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.75rem; border-radius: var(--radius-2xl); background: var(--color-surface-low);
+}
+.mint-summary__svg-wrap { width: 3.5rem; height: 3.5rem; flex-shrink: 0; }
+.mint-summary__name { font-size: 0.8125rem; font-weight: 700; }
+.mint-summary__stage { font-size: 0.75rem; color: var(--color-outline); }
 
 /* Night — a week's stars against the sky, see js/gimmicks/night.js */
 .night-scene {
@@ -633,6 +640,12 @@ input[type=range]::-moz-range-track { height: 0.5rem; background: var(--color-su
 .night-collection__info { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
 .night-collection__name { font-size: 0.8125rem; font-weight: 700; }
 .night-collection__meta { font-size: 0.6875rem; color: var(--color-outline); }
+.night-summary {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.75rem; border-radius: var(--radius-2xl); background: var(--color-surface-low);
+}
+.night-summary__svg-wrap { width: 5rem; aspect-ratio: 5 / 3; border-radius: var(--radius-md); overflow: hidden; flex-shrink: 0; }
+.night-summary__label { font-size: 0.8125rem; font-weight: 600; color: var(--color-outline); }
 .modal-actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
 .modal-panel__icon { width: 4rem; height: 4rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; }
 .modal-panel__icon--warn { background: color-mix(in srgb, var(--color-danger) 12%, transparent); color: var(--color-danger); }

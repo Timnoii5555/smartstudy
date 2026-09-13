@@ -10,7 +10,7 @@
  * TFS.Themes.notify*() and the right implementation (or a safe no-op)
  * runs.
  *
- * Every theme registers a gimmick object implementing all 7 hooks — empty
+ * Every theme registers a gimmick object implementing all 8 hooks — empty
  * ones are fine ("ธีมไหนไม่ใช้ hook ไหน ปล่อยว่าง" — a theme that doesn't use
  * a hook just leaves it empty), never partial: registerGimmick() rejects
  * an object missing one, so a call site can never hit "not a function"
@@ -19,6 +19,15 @@
  * with a real scene, one theme (and one commit) at a time, in the order
  * the phase brief specifies (Mint first to prove the architecture, Pixel
  * last as the most involved).
+ *
+ * The gimmick's visuals are only ever allowed to actually show in 3
+ * places — the Focus screen's scene, the home/summary screen's recap
+ * widget, and that theme's own collection page — everywhere else
+ * (task list, flashcards, settings) stays visually identical across
+ * all 4 themes, changed only by color tokens. renderSummary() is the
+ * hook for the second of those 3 (added after Mint and Night had
+ * already shipped their focus scene and collection page — both were
+ * retrofitted with it in the same pass that added this hook).
  */
 (function (global) {
     'use strict';
@@ -54,7 +63,7 @@
     const NOOP_GIMMICK = {
         onSessionStart() {}, onSessionComplete() {}, onTaskComplete() {},
         onDayRollover() {}, onWeekRollover() {},
-        renderFocusScene() {}, renderCollection() {}
+        renderFocusScene() {}, renderSummary() {}, renderCollection() {}
     };
     const HOOK_NAMES = Object.keys(NOOP_GIMMICK);
 
@@ -89,14 +98,14 @@
 
     // ---------------------------------------------------------------- Lifecycle dispatch
     //
-    // The data-collecting hooks (everything except the two render*() calls
-    // below) go to *every* theme's gimmick, not just the active one — "even
+    // The data-collecting hooks (everything except the three render*()
+    // calls) go to *every* theme's gimmick, not just the active one — "even
     // if the learner only ever uses one theme, the others still collect in
     // the background" is one of this phase's controlling rules, so a
     // finished session/task has to reach all 4 regardless of which theme
-    // happens to be on screen when it happens. Only renderFocusScene() and
-    // renderCollection() are current-theme-only, since only one theme's
-    // visuals are ever actually showing.
+    // happens to be on screen when it happens. renderFocusScene(),
+    // renderSummary() and renderCollection() are current-theme-only, since
+    // only one theme's visuals are ever actually showing.
     //
     // Every call is wrapped per-theme — one gimmick throwing must never
     // break the real feature it's decorating, nor stop the other 3 themes
@@ -117,9 +126,29 @@
     function notifyDayRollover() { broadcast('onDayRollover'); }
     function notifyWeekRollover() { broadcast('onWeekRollover'); }
 
+    /** Shared plumbing for all 3 render slots (Focus scene, summary
+     *  widget, collection page): clear the container first — so a stale
+     *  render from a theme switched away from never lingers behind a
+     *  still-implementing (no-op) gimmick — delegate to the current
+     *  theme's hook, hide the container if it rendered nothing, and never
+     *  let a throwing gimmick take the real screen around it down with
+     *  it. Every call site (js/focus.js, js/dashboard.js, js/settings.js)
+     *  uses this instead of repeating the same try/catch by hand. */
+    function renderInto(container, hookName, ...args) {
+        if (!container) return;
+        container.innerHTML = '';
+        try {
+            currentGimmick()[hookName](container, ...args);
+            container.hidden = container.innerHTML.trim() === '';
+        } catch (e) {
+            console.error(`[themes] current gimmick's ${hookName} failed to render.`, e);
+            container.hidden = true;
+        }
+    }
+
     TFS.Themes = {
         ORDER, DEFAULT, DEFINITIONS,
-        registerGimmick, currentId, currentDefinition, currentGimmick,
+        registerGimmick, currentId, currentDefinition, currentGimmick, renderInto,
         notifySessionStart, notifySessionComplete, notifyTaskComplete, notifyDayRollover, notifyWeekRollover
     };
 

@@ -349,13 +349,7 @@
             if (!TFS.Themes) return;
             const def = TFS.Themes.currentDefinition();
             if (themeCollectionTitle) themeCollectionTitle.querySelector('span:last-child').textContent = I18n.pick(def.collectionName);
-            // Cleared here (not left to each gimmick) so a theme whose
-            // collection isn't built yet can never leave a *different*
-            // theme's leftover content on screen — same reasoning as
-            // js/focus.js's refreshThemeGimmickScene().
-            themeCollectionBody.innerHTML = '';
-            try { TFS.Themes.currentGimmick().renderCollection(themeCollectionBody); }
-            catch (e) { console.error('[settings] Theme collection failed to render.', e); }
+            TFS.Themes.renderInto(themeCollectionBody, 'renderCollection');
             TFS.Modal.open(themeCollectionModal);
         });
     }

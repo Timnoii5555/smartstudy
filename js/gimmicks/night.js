@@ -202,6 +202,30 @@
         container.appendChild(wrap);
     }
 
+    /** The home dashboard's compact recap widget (the 2nd of the gimmick's
+     *  3 allowed homes, alongside the Focus scene and the collection
+     *  page) — a smaller sky thumbnail with no moon, since the moon is
+     *  the Focus scene's own decorative detail, not something worth
+     *  repeating in a glanced-at widget. Never hidden for having zero
+     *  stars — an empty sky is still "this week so far", unlike Mint's
+     *  no-subject-chosen case which has nothing to show at all. */
+    function renderSummary(container) {
+        if (!container) return;
+        rolloverIfNeeded();
+        const sky = State.get().nightSky;
+        const wrap = document.createElement('div');
+        wrap.className = 'night-summary';
+        const svgWrap = document.createElement('div');
+        svgWrap.className = 'night-summary__svg-wrap';
+        svgWrap.appendChild(buildSkySvg(sky.stars));
+        wrap.appendChild(svgWrap);
+        const label = document.createElement('p');
+        label.className = 'night-summary__label';
+        label.textContent = I18n.t('nightSky.starsThisWeek', { n: sky.stars.length });
+        wrap.appendChild(label);
+        container.appendChild(wrap);
+    }
+
     function renderCollection(container) {
         if (!container) return;
         rolloverIfNeeded();
@@ -241,7 +265,7 @@
 
     TFS.Themes && TFS.Themes.registerGimmick('night', {
         onSessionStart() {}, onSessionComplete, onTaskComplete() {}, onDayRollover() { rolloverIfNeeded(); }, onWeekRollover() { rolloverIfNeeded(); },
-        renderFocusScene, renderCollection
+        renderFocusScene, renderSummary, renderCollection
     });
 
 })(window);

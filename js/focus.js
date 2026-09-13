@@ -240,16 +240,10 @@
      *  subject chosen yet) just leaves the container empty and hidden. */
     function refreshThemeGimmickScene() {
         if (!themeGimmickSceneEl || !TFS.Themes || !isActive()) return;
-        // Cleared here, not left to each gimmick, so switching to a theme
-        // whose gimmick is still the no-op stub (nothing built for it yet)
-        // can never leave a *previous* theme's scene stuck on screen —
-        // the stub does nothing at all, on purpose, so it can never clean
-        // up after a different gimmick either.
-        themeGimmickSceneEl.innerHTML = '';
-        try {
-            TFS.Themes.currentGimmick().renderFocusScene(themeGimmickSceneEl);
-            themeGimmickSceneEl.hidden = themeGimmickSceneEl.innerHTML.trim() === '';
-        } catch (e) { console.error('[focus] Theme gimmick scene failed to render.', e); themeGimmickSceneEl.hidden = true; }
+        // Clearing-before-render, the empty-if-blank check and the throw
+        // guard all live in TFS.Themes.renderInto() now (shared with the
+        // summary widget and the collection page) — see js/themes.js.
+        TFS.Themes.renderInto(themeGimmickSceneEl, 'renderFocusScene');
     }
     const displayFocusGoal = document.getElementById('displayFocusGoal');
 

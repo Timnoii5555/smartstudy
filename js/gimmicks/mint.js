@@ -246,6 +246,43 @@
         container.appendChild(wrap);
     }
 
+    /** The home dashboard's compact recap widget (the 2nd of the gimmick's
+     *  3 allowed homes, alongside the Focus scene and the collection
+     *  page) — the same plant, smaller, with its species name added since
+     *  this is glanced at far less often than the Focus scene. Left empty
+     *  (and hidden, via TFS.Themes.renderInto) with no subject chosen —
+     *  same "nothing to recap yet" reasoning as the Focus scene. */
+    function renderSummary(container) {
+        if (!container) return;
+        const subjectId = currentSubjectId();
+        if (!subjectId) return;
+        const species = speciesForSubject(subjectId);
+        const data = plantData(subjectId);
+        const stage = stageFor(data.rounds);
+        const wilt = wiltLevelFor(data.lastStudiedISO);
+
+        const wrap = document.createElement('div');
+        wrap.className = 'mint-summary';
+        const svgWrap = document.createElement('div');
+        svgWrap.className = 'mint-summary__svg-wrap';
+        svgWrap.appendChild(buildPlantSvg(species, stage, wilt));
+        wrap.appendChild(svgWrap);
+
+        const text = document.createElement('div');
+        text.className = 'mint-summary__text';
+        const name = document.createElement('p');
+        name.className = 'mint-summary__name';
+        name.textContent = I18n.pick(SPECIES_NAMES[species.id]);
+        text.appendChild(name);
+        const stageP = document.createElement('p');
+        stageP.className = 'mint-summary__stage';
+        stageP.textContent = I18n.t(stageLabelKey(stage));
+        text.appendChild(stageP);
+        wrap.appendChild(text);
+
+        container.appendChild(wrap);
+    }
+
     function renderCollection(container) {
         if (!container) return;
         container.innerHTML = '';
@@ -305,7 +342,7 @@
 
     TFS.Themes && TFS.Themes.registerGimmick('mint', {
         onSessionStart() {}, onSessionComplete, onTaskComplete() {}, onDayRollover() {}, onWeekRollover() {},
-        renderFocusScene, renderCollection
+        renderFocusScene, renderSummary, renderCollection
     });
 
 })(window);

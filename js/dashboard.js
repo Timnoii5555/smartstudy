@@ -24,6 +24,7 @@
     const readAheadPrompt = document.getElementById('readAheadPrompt');
     const streakBadge = document.getElementById('streakBadge');
     const readinessScoreCard = document.getElementById('readinessScoreCard');
+    const themeGimmickSummaryEl = document.getElementById('themeGimmickSummary');
     const notTodayBtn = document.getElementById('notTodayBtn');
 
     const RING_CIRCUMFERENCE = 2 * Math.PI * 88; // matches the SVG circle's r="88"
@@ -292,6 +293,7 @@
         if (TFS.Streak) TFS.Streak.reconcile();
         renderStreakBadge();
         if (TFS.Garden) TFS.Garden.render();
+        if (TFS.Themes) TFS.Themes.renderInto(themeGimmickSummaryEl, 'renderSummary');
         renderReadinessScore(percent);
 
         if (percent === 100 && total > 0) {
