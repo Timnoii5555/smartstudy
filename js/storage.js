@@ -110,10 +110,26 @@
             schemaVersion: SCHEMA_VERSION,
             settings: {
                 language: null, // null = "not chosen yet", app.js resolves it from the browser
-                theme: 'system', // 'light' | 'dark' | 'paper' | 'night' | 'system'
+                theme: 'system', // 'light' | 'dark' | 'system'
                 soundEnabled: true,
                 ambientType: 'brown', // 'brown' | 'rain'
                 ambientVolume: 0.5,
+                // Opt-in only, off by default (see js/presence.js) — joining
+                // the public "how many people are focusing right now" count
+                // is never automatic.
+                coStudyPublicEnabled: false,
+                // The flight visual's departure point (data/airports.js,
+                // js/geo.js) — Bangkok Suvarnabhumi by default, changeable
+                // any time from Settings.
+                departureAirportId: 'bkk',
+                // The flight map's tile style (js/focus.js's MAP_STYLES) —
+                // 'satellite' | 'standard' | 'monochrome'.
+                mapStyle: 'satellite',
+                // An explicitly-picked real airport (data/airports.js) from
+                // "Explore real destinations", overriding the curated
+                // FLIGHTS lookup until a curated flight chip is picked
+                // again — see js/focus.js's activeFlight().
+                customDestinationId: null,
                 // Off by default, one reminder a day at most (js/reminder.js)
                 // — matches this app's own notification rule. null = off;
                 // "HH:MM" = fire (at most) once, the first time the app is
@@ -165,7 +181,12 @@
                 runStartedAtMs: null,       // epoch ms the current run segment began, or null while paused — see js/focus.js
                 accumulatedMs: 0,           // ms of the current phase already elapsed from previous run segments
                 lastCreditAtMs: null,       // last time totals above were credited, so a reload never double-counts or drops time
-                lastActiveDateISO: null
+                lastActiveDateISO: null,
+                // {dateISO, originCode, destCode, destName, minutes, seat, scenarioId}[],
+                // capped at the most recent 20 entries (js/focus.js's logFlight())
+                // — the "Mine" flight log, same bounded-array spirit as
+                // flashcards.reviewLog above.
+                flightLog: []
             },
             ui: {
                 lastScreen: 'screen1'
@@ -201,6 +222,9 @@
             // and start clean rather than guessing at a shape that was never persisted by this app.
             state = defaultState();
         }
+
+        // Future migrations get appended here, e.g.:
+        // if (state.schemaVersion < 2) { ...transform...; state.schemaVersion = 2; }
 
         state.schemaVersion = SCHEMA_VERSION;
         return state;

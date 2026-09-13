@@ -90,20 +90,19 @@
 .schedule-block:hover { opacity: 0.85; }
 .schedule-block__title { font-size: 0.625rem; font-weight: 700; line-height: 1.2; }
 .schedule-block__time { font-size: 0.5625rem; color: var(--color-outline); margin-top: 0.15rem; }
-/* Each subject color keeps one fixed literal hue as its identity (the
-   border, an accent marker any theme can't reassign) but blends it into
-   the *current* theme's own surface/text tokens for the fill and label —
-   so these six automatically read correctly against any dark theme
-   (Dark, Night) or light one (default, Paper) with no per-theme override
-   rule needed, unlike the old html.dark-only overrides this replaced
-   (which never applied to Paper/Night at all). */
 .schedule-block--blue { background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface-lowest)); border-left-color: var(--color-primary); color: var(--color-primary); }
-.schedule-block--orange { background: color-mix(in srgb, #f97316 16%, var(--color-surface-lowest)); border-left-color: #f97316; color: color-mix(in srgb, #f97316 65%, var(--color-on-surface)); }
-.schedule-block--green { background: color-mix(in srgb, #22c55e 16%, var(--color-surface-lowest)); border-left-color: #22c55e; color: color-mix(in srgb, #22c55e 65%, var(--color-on-surface)); }
-.schedule-block--purple { background: color-mix(in srgb, #a855f7 16%, var(--color-surface-lowest)); border-left-color: #a855f7; color: color-mix(in srgb, #a855f7 65%, var(--color-on-surface)); }
-.schedule-block--pink { background: color-mix(in srgb, #ec4899 16%, var(--color-surface-lowest)); border-left-color: #ec4899; color: color-mix(in srgb, #ec4899 65%, var(--color-on-surface)); }
-.schedule-block--red { background: color-mix(in srgb, #ef4444 16%, var(--color-surface-lowest)); border-left-color: #ef4444; color: color-mix(in srgb, #ef4444 65%, var(--color-on-surface)); }
-.schedule-block--teal { background: color-mix(in srgb, #14b8a6 16%, var(--color-surface-lowest)); border-left-color: #14b8a6; color: color-mix(in srgb, #14b8a6 65%, var(--color-on-surface)); }
+.schedule-block--orange { background: #fff3e6; border-left-color: #f97316; color: #c2410c; }
+.schedule-block--green { background: #ecfdf3; border-left-color: #22c55e; color: #15803d; }
+.schedule-block--purple { background: #f5f0ff; border-left-color: #a855f7; color: #7e22ce; }
+.schedule-block--pink { background: #fef1f6; border-left-color: #ec4899; color: #be185d; }
+.schedule-block--red { background: #fef2f2; border-left-color: #ef4444; color: #b91c1c; }
+.schedule-block--teal { background: #effcfa; border-left-color: #14b8a6; color: #0f766e; }
+html.dark .schedule-block--orange { background: rgba(249,115,22,0.15); color: #fdba74; }
+html.dark .schedule-block--green { background: rgba(34,197,94,0.15); color: #86efac; }
+html.dark .schedule-block--purple { background: rgba(168,85,247,0.15); color: #d8b4fe; }
+html.dark .schedule-block--pink { background: rgba(236,72,153,0.15); color: #f9a8d4; }
+html.dark .schedule-block--red { background: rgba(239,68,68,0.15); color: #fca5a5; }
+html.dark .schedule-block--teal { background: rgba(20,184,166,0.15); color: #5eead4; }
 
 .search-panel { margin-bottom: 1.25rem; }
 .search-panel__input-wrap { position: relative; }
@@ -157,6 +156,169 @@
 
 /* ---------- Screen 6: focus timer ---------- */
 .focus-shell { min-height: calc(100vh - 12rem); display: flex; flex-direction: column; align-items: center; justify-content: center; max-width: 32rem; margin: 0 auto; }
+/* "Flight Focus"-style progress visual (see the HTML comment above this
+   block in index.html for why this replaced the plain progress ring):
+   the current Pomodoro phase's progress is a plane's position along a
+   real route on an actual satellite map (js/focus.js, via Leaflet). */
+.flight-viz { position: relative; width: 100%; max-width: 26rem; margin: 0 auto 1.5rem; }
+.flight-viz__map {
+    width: 100%; aspect-ratio: 2 / 1; min-height: 11rem; display: block; border-radius: 1.75rem;
+    box-shadow: var(--shadow-lg); overflow: hidden;
+    /* A gradient fallback behind the satellite tiles — shown any time they
+       haven't loaded yet (a fresh page load) or can't (offline, a blocked
+       CDN, Esri's tile service having a bad day), so the worst case is a
+       pleasant blue box instead of a blank/broken-looking one. */
+    background: linear-gradient(160deg, var(--color-primary-container), var(--color-primary));
+    /* Leaflet's own controls (attribution, and zoom buttons if they were
+       ever re-enabled) use z-index values around 1000 internally — with
+       nothing else, those aren't scoped to this box at all and can end up
+       compared directly against a completely unrelated part of the page,
+       like an open modal sitting at this app's own --z-modal (130). This
+       gives the whole map its own self-contained stacking context so
+       nothing inside it can ever bleed out and cover something like a
+       boarding-pass dialog open above it. */
+    isolation: isolate;
+}
+/* The HUD (phase/countdown/goal) sits in the bottom-left corner of the map
+   as a compact badge, deliberately *not* centered over it — a learner
+   asked for this directly after the centered version covered too much of
+   the actual route/plane. Top-center is the route-code pill and
+   bottom-right is Leaflet's own (required, see js/focus.js's header)
+   attribution, so bottom-left is the one corner that's actually free.
+   position:absolute keeps .flight-viz's own height driven purely by the
+   map's aspect-ratio, same as the plain progress ring this replaced. */
+.flight-viz__hud {
+    /* z-index kept small and local on purpose — this only ever needs to
+       sit above its sibling .flight-viz__map within .flight-viz, never
+       compared against this app's real layers (header/modal/toast, see
+       tokens.css's --z-header/--z-modal/--z-toast): a value like the 500
+       this used to be would sit *above* an open modal (--z-modal: 130)
+       dialog anywhere else on the page, exactly the bug this replaces. */
+    position: absolute; left: 0.75rem; bottom: 0.75rem; z-index: 2; text-align: left;
+    background: rgba(0, 0, 0, 0.45); border-radius: var(--radius-lg); padding: 0.5rem 0.75rem; color: #fff;
+    backdrop-filter: blur(2px);
+    /* Bounded well short of the map's own width (not just "doesn't
+       overflow") — a corner badge that stretched edge to edge would
+       defeat the point of moving the countdown out of the way at all. */
+    max-width: 60%; box-sizing: border-box;
+}
+.flight-viz__hud .focus-phase-badge { padding: 0.2rem 0.6rem; font-size: 0.5625rem; margin-bottom: 0.35rem; }
+/* .focus-phase-badge keeps its own self-contained pill colors (fine on any
+   backdrop); the plain-text pieces need an explicit override here since
+   they'd otherwise inherit dark, surface-toned colors meant for a light
+   card, illegible against this panel's dark background. The time display
+   is also much smaller than its usual 3.75rem here — that size was tuned
+   for the old fixed 18-20rem square ring, and a corner badge needs to
+   stay small enough to actually leave the map visible around it. */
+.flight-viz__hud .focus-time-display { color: #fff; font-size: 1.625rem; }
+.flight-viz__hud .focus-goal-label { color: rgba(255, 255, 255, 0.85); font-size: 0.625rem; justify-content: flex-start; margin-top: 0.2rem; }
+/* Leaflet renders its own tiles/panes/controls inside — round its outer
+   frame to match the card, and keep its (required, see js/focus.js's
+   header) attribution readable but unobtrusive against imagery of
+   unpredictable brightness. */
+.flight-viz__map .leaflet-container { border-radius: 1.75rem; font: inherit; background: var(--color-surface-high); }
+.flight-viz__map .leaflet-control-attribution { font-size: 0.5625rem; background: rgba(0, 0, 0, 0.35); color: #fff; }
+.flight-viz__map .leaflet-control-attribution a { color: #fff; }
+
+/* The plane marker glides to its new position each second rather than
+   jumping — a meaningful, data-driven motion (it always reflects real
+   elapsed time), not a decorative loop; prefers-reduced-motion
+   (styles/base.css) already collapses this to an instant snap for anyone
+   who's asked for that. */
+.flight-plane-marker { transition: transform 1s linear; display: flex; flex-direction: column; align-items: center; gap: 0.15rem; }
+.flight-plane-marker__glyph {
+    display: flex; align-items: center; justify-content: center; width: 1.75rem; height: 1.75rem; border-radius: 50%;
+    background: #fff; color: var(--color-primary-solid, #0058bc); box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5); font-size: 1.1rem;
+}
+.flight-plane-marker__windows { display: flex; gap: 0.15rem; background: rgba(0, 0, 0, 0.35); padding: 0.15rem 0.3rem; border-radius: var(--radius-full); }
+/* Unlit (empty seat) by default, warmly lit for every real learner
+   currently sharing this flight — see js/focus.js's renderFlightWindows().
+   A literal color, not a token: meant to read as "a lit window at dusk"
+   regardless of which of the 4 app themes is active. */
+.flight-window-dot { width: 0.3rem; height: 0.3rem; border-radius: 50%; background: rgba(255, 255, 255, 0.35); transition: background-color 0.6s ease; }
+.flight-window-dot.is-lit { background: #ffd54f; }
+
+.flight-viz__route {
+    position: absolute; top: 0.85rem; left: 50%; transform: translateX(-50%); z-index: 2;
+    display: flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.9rem;
+    background: rgba(0, 0, 0, 0.35); border-radius: var(--radius-full);
+    color: #fff; font-weight: 700; font-size: 0.75rem; letter-spacing: 0.03em;
+}
+
+/* Full-screen "on the plane" mode (js/focus.js's enterImmersive/exitImmersive)
+   — a pure view toggle layered over the same map/timer/controls, so
+   nothing about the timer engine underneath ever changes when it turns on
+   or off. Entered manually via the expand button, or automatically right
+   after boarding (see the boarding-pass tear animation), and exited any
+   time via the minimize button without pausing the session. */
+.flight-viz__expand, .flight-viz__minimize {
+    /* 2.75rem = 44px, this app's minimum touch target (see .icon-btn) —
+       these were 2.25rem (36px) until an accessibility pass caught it. */
+    position: absolute; top: 0.5rem; right: 0.5rem; z-index: 3;
+    width: 2.75rem; height: 2.75rem; border-radius: 50%; border: none;
+    background: rgba(0, 0, 0, 0.45); color: #fff; display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(2px);
+}
+.flight-viz__expand .material-symbols-outlined, .flight-viz__minimize .material-symbols-outlined { font-size: 1.15rem; }
+.flight-viz__minimize, .flight-viz__immersive-controls { display: none; }
+/* z-index sits just above --z-header (50 — the app header/bottom nav this
+   covers) but well under --z-modal (130): any modal opened from within
+   immersive mode (e.g. the daily-goal dialog from the HUD) still paints
+   correctly above it, same reasoning as the HUD/route z-index above. */
+.flight-viz--immersive {
+    position: fixed; inset: 0; z-index: 60; width: 100%; height: 100dvh; max-width: none; margin: 0;
+}
+.flight-viz--immersive .flight-viz__map { width: 100%; height: 100%; border-radius: 0; aspect-ratio: unset; min-height: 0; }
+.flight-viz--immersive .flight-viz__map .leaflet-container { border-radius: 0; }
+.flight-viz--immersive .flight-viz__hud { left: 1rem; bottom: 7rem; max-width: 75%; }
+.flight-viz--immersive .flight-viz__route { top: max(1rem, env(safe-area-inset-top)); }
+.flight-viz--immersive .flight-viz__expand { display: none; }
+.flight-viz--immersive .flight-viz__minimize { display: flex; top: max(0.75rem, env(safe-area-inset-top)); }
+.flight-viz--immersive .flight-viz__immersive-controls {
+    display: flex; gap: 0.75rem; position: absolute; left: 1rem; right: 1rem; z-index: 3;
+    bottom: max(1.25rem, env(safe-area-inset-bottom));
+}
+/* Prevents the rest of the (now fully covered but still in-flow) screen
+   from being scrolled into view behind the fixed immersive layer. */
+body.is-immersive-focus { overflow: hidden; }
+
+.flight-picker__label { font-size: 0.75rem; font-weight: 600; text-align: center; margin-bottom: 0.6rem; }
+.flight-picker {
+    /* width:100% (not just the flex/overflow rules below) matters here:
+       .focus-shell is a flex column with align-items:center, so a child
+       with no explicit width sizes to fit its own content instead of the
+       column's available width — with 11 flight cards that content is far
+       wider than any phone screen, so without this the *whole row*, not
+       just its overflow, pushed past the viewport and made the entire page
+       scroll sideways instead of just this one row. */
+    width: 100%; min-width: 0;
+    display: flex; gap: 0.65rem; overflow-x: auto; padding: 0.2rem 0.15rem 0.85rem;
+    margin-bottom: 0.5rem; scroll-snap-type: x proximity;
+}
+/* Styled like an actual fare-picker card (flight number, a little route
+   diagram, a selected checkmark) rather than a plain labeled chip — this
+   is the same "curated flight" concept as before, just given the
+   ticket-booking look the reference video's whole aesthetic is built on. */
+.flight-chip {
+    scroll-snap-align: start; flex-shrink: 0; position: relative; text-align: left;
+    display: flex; flex-direction: column; gap: 0.3rem;
+    min-width: 7.5rem; padding: 0.75rem 0.85rem; border-radius: var(--radius-xl);
+    border: 1.5px solid var(--color-border); background: var(--color-surface-lowest);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+.flight-chip.is-selected { border-color: var(--color-primary); background: var(--color-primary-fixed); box-shadow: 0 3px 10px color-mix(in srgb, var(--color-primary) 22%, transparent); }
+.flight-chip__flightno { font-size: 0.5625rem; font-weight: 700; letter-spacing: 0.06em; color: var(--color-outline); text-transform: uppercase; }
+.flight-chip__route { display: flex; align-items: center; gap: 0.3rem; }
+.flight-chip__route .material-symbols-outlined { font-size: 0.85rem; color: var(--color-primary); }
+.flight-chip__origin { font-size: 0.6875rem; font-weight: 600; color: var(--color-outline); }
+.flight-chip__code { font-family: var(--font-headline); font-weight: 800; font-size: 1rem; color: var(--color-primary); letter-spacing: 0.01em; }
+.flight-chip__name { font-size: 0.6875rem; color: var(--color-on-surface); white-space: nowrap; }
+.flight-chip__mins { font-size: 0.8125rem; font-weight: 700; }
+.flight-chip__check {
+    position: absolute; top: 0.5rem; right: 0.5rem; font-size: 1.1rem !important; color: var(--color-primary-solid);
+    opacity: 0; transform: scale(0.5); transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.flight-chip.is-selected .flight-chip__check { opacity: 1; transform: scale(1); }
 .focus-phase-badge { display: inline-flex; align-items: center; gap: 0.375rem; background: var(--color-primary-fixed); color: var(--color-primary); font-size: 0.6875rem; font-weight: 700; padding: 0.3rem 0.9rem; border-radius: var(--radius-full); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.75rem; }
 .focus-time-display { display: block; font-family: var(--font-headline); font-size: 3.75rem; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
 .focus-goal-label { font-size: 0.8125rem; font-weight: 500; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.15em; margin-top: 0.5rem; display: flex; align-items: center; justify-content: center; gap: 0.25rem; }
