@@ -646,6 +646,34 @@ input[type=range]::-moz-range-track { height: 0.5rem; background: var(--color-su
 }
 .night-summary__svg-wrap { width: 5rem; aspect-ratio: 5 / 3; border-radius: var(--radius-md); overflow: hidden; flex-shrink: 0; }
 .night-summary__label { font-size: 0.8125rem; font-weight: 600; color: var(--color-outline); }
+
+/* Paper — a notebook page, see js/gimmicks/paper.js */
+.paper-page {
+    position: relative; padding: 1rem 1.1rem; border-radius: var(--radius-lg);
+    background: var(--color-surface-low); overflow: hidden;
+}
+.paper-page--compact { padding: 0.75rem 0.85rem; }
+.paper-page--wear-1 { filter: sepia(0.12); }
+.paper-page--wear-2 { filter: sepia(0.22); transform: rotate(-0.4deg); }
+.paper-page--wear-3 { filter: sepia(0.32); transform: rotate(0.5deg); }
+.paper-page__stain { position: absolute; top: -0.5rem; right: -0.5rem; width: 3.5rem; height: 3.5rem; pointer-events: none; }
+.paper-page__doodle { position: absolute; bottom: 0.4rem; right: 0.4rem; width: 1.5rem; height: 1.5rem; opacity: 0.8; }
+.paper-page__date { font-size: 0.75rem; font-weight: 700; color: var(--color-outline); margin-bottom: 0.4rem; }
+.paper-page__line {
+    font-size: 0.875rem; margin: 0.3rem 0; text-decoration: line-through;
+    text-decoration-color: var(--color-primary); text-decoration-thickness: 2px; opacity: 0.75;
+}
+.paper-page__empty { font-size: 0.8125rem; color: var(--color-outline); }
+.paper-tally { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
+.paper-tally__group { width: 1.5rem; height: 1.25rem; stroke: var(--color-primary); stroke-width: 1.5; fill: none; }
+.paper-collection__section { margin-bottom: 1rem; }
+.paper-collection__section .paper-page { margin-bottom: 0.75rem; }
+.paper-collection__doodle-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.5rem; margin-top: 0.6rem; }
+.paper-collection__doodle {
+    display: flex; align-items: center; justify-content: center; aspect-ratio: 1;
+    border-radius: var(--radius-md); background: var(--color-surface-low); padding: 0.4rem;
+}
+.paper-collection__doodle svg { width: 100%; height: 100%; }
 .modal-actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
 .modal-panel__icon { width: 4rem; height: 4rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; }
 .modal-panel__icon--warn { background: color-mix(in srgb, var(--color-danger) 12%, transparent); color: var(--color-danger); }

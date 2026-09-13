@@ -226,6 +226,21 @@
                 // separate flag (so it can't go stale).
                 plantsBySubject: {}
             },
+            paperNotebook: {
+                // dateISO -> string[] (up to 6 completed task/topic titles
+                // that day) — js/gimmicks/paper.js's stylized notebook
+                // page, pruned to the most recent 30 days at write time.
+                // Not the real completion history (that's
+                // state.syllabusProgress, see js/history.js) — just enough
+                // to draw a believable page.
+                pages: {},
+                // Doodle ids (js/gimmicks/paper.js's DOODLES) earned so
+                // far by crossing a lifetime-focus-hours milestone — kept
+                // forever once earned, even if hours were somehow lower
+                // later (they never are, but the rule is the same "never
+                // revoke a collectible" principle as Mint/Night).
+                unlockedDoodles: []
+            },
             streak: {
                 current: 0,               // consecutive days with >=15 min of real focus time, ending today or yesterday
                 longest: 0,               // best streak ever, kept even after the current one breaks

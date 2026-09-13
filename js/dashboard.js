@@ -52,6 +52,14 @@
         // No explicit render() call here: this screen is subscribed to state
         // changes below and re-renders itself whenever it is the active screen.
         State.commit({ syllabusProgress: allProgress });
+
+        // Only a genuine tick (not un-ticking a mistake) counts as a "task
+        // completed" for Phase 8's theme gimmicks (Paper's notebook page).
+        if (!wasDone && TFS.Themes) {
+            const subject = TFS.Data && TFS.Data.getSubject ? TFS.Data.getSubject(subjectId) : null;
+            const topic = subject ? subject.topics.find((t) => t.id === topicId) : null;
+            TFS.Themes.notifyTaskComplete({ subjectId, topicId, title: topic ? I18n.pick(topic.label) : null, dateISO: U.formatDateISO(new Date()) });
+        }
     }
 
     /** The end of the "currently visible" window into the reading plan:

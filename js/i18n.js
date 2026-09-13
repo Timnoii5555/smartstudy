@@ -241,6 +241,13 @@
                 starCount: '{n} ดวง',
                 collectionEmpty: 'ยังไม่มีกลุ่มดาวในคืนที่ผ่านมา'
             },
+            paperNotebook: {
+                noTasksToday: 'วันนี้ยังไม่มีงานที่ทำเสร็จ',
+                taskFallback: 'งานที่ทำเสร็จแล้ว',
+                doodlesSection: 'ลายเส้นสะสม',
+                pagesSection: 'หน้าเก่า',
+                pagesEmpty: 'ยังไม่มีหน้าเก่าในสมุดเล่มนี้'
+            },
             modalGroups: {
                 title: 'กลุ่มเรียน',
                 codePlaceholder: 'รหัสเข้ากลุ่ม',
@@ -661,6 +668,13 @@
                 starsThisWeek: '{n} stars this week',
                 starCount: '{n} stars',
                 collectionEmpty: 'No past constellations yet.'
+            },
+            paperNotebook: {
+                noTasksToday: "Nothing finished today yet.",
+                taskFallback: 'A finished task',
+                doodlesSection: 'Doodle collection',
+                pagesSection: 'Old pages',
+                pagesEmpty: 'No old pages in this notebook yet.'
             },
             modalGroups: {
                 title: 'Study groups',
