@@ -159,6 +159,12 @@
 
     // ---------------------------------------------------------------- Gimmick hooks
 
+    // Set for a 45+ minute round and consumed by the very next scene
+    // render (which `js/focus.js` triggers immediately after this hook,
+    // right when the round actually finishes) — a one-shot flourish, not
+    // stored state, so revisiting the Focus screen later never replays it.
+    let pendingShootingStar = false;
+
     function onSessionComplete(session) {
         rolloverIfNeeded();
         const minutes = (session && session.minutes) || 0;
@@ -166,6 +172,7 @@
         const sky = State.get().nightSky;
         const star = { dateISO: (session && session.dateISO) || U.formatDateISO(new Date()), minutes };
         State.commit({ nightSky: { stars: [...sky.stars, star], currentWeekKey: sky.currentWeekKey || weekKeyFor(new Date()) } });
+        if (minutes >= 45) pendingShootingStar = true;
     }
 
     function renderFocusScene(container) {
@@ -186,6 +193,12 @@
         label.className = 'night-scene__label';
         label.textContent = I18n.t('nightSky.starsThisWeek', { n: sky.stars.length });
         wrap.appendChild(label);
+        if (pendingShootingStar) {
+            pendingShootingStar = false;
+            const shoot = document.createElement('div');
+            shoot.className = 'night-scene__shooting-star';
+            svgWrap.appendChild(shoot);
+        }
         container.appendChild(wrap);
     }
 
