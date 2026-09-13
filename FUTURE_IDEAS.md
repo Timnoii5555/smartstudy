@@ -132,20 +132,6 @@ being subtle enough not to need one? Worth building once these are
 pinned down, ideally starting from a mock of the exact dimming curve
 wanted rather than guessing at one from the brief text alone.
 
-## Theme gimmick scenes vs. the Flight Focus visual system
-
-Phase 8 added a `#themeGimmickScene` card to the Focus screen (screen6)
-*alongside* the pre-existing Flight Focus experience (the map, seat
-picker, boarding pass, real-airport distances — all built and iterated
-earlier in the same working session) rather than replacing it. That was
-a deliberate, but unconfirmed, reading of the brief: nothing in it said
-to remove Flight Focus, and swapping out a feature the learner had just
-finished shaping in detail felt like the riskier assumption. The two
-now sit stacked on the same screen. If a cleaner combined design is
-wanted instead — say, folding the flight visual into Pixel's own scene,
-or making the two mutually exclusive per-theme — that's a real redesign
-worth doing deliberately rather than as a side effect of the theme work.
-
 ## Reading-plan regeneration from Settings
 
 Editing the exam date or daily-goal hours from the Settings modal (as

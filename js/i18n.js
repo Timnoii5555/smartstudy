@@ -192,41 +192,9 @@
                 hint: 'เป็นผลงานของคุณคนเดียวเท่านั้น ไม่มีการเทียบกับใครทั้งนั้น',
                 shareBtn: 'แชร์', downloadBtn: 'ดาวน์โหลดรูปภาพ'
             },
-            modalBoardingPass: {
-                title: 'ตั๋วโดยสารของคุณ',
-                seatLabel: 'ที่นั่ง', durationLabel: 'ระยะเวลา', boardingLabel: 'ขึ้นเครื่อง', now: 'ตอนนี้', dateLabel: 'วันที่', distanceLabel: 'ระยะทาง',
-                tip: '📵 เคล็ดลับ: เปิดโหมดห้ามรบกวนหรือโหมดเครื่องบินก่อนขึ้นเครื่อง เพื่อโฟกัสได้เต็มที่',
-                checkInBtn: 'เช็คอินและเริ่มบิน',
-                swipeHint: 'รูดเพื่อฉีกตั๋วและขึ้นเครื่อง',
-                swipeAria: 'รูดเพื่อฉีกตั๋วและเริ่มโฟกัส'
-            },
-            modalSeatPicker: {
-                title: 'เลือกที่นั่งของคุณ',
-                hint: 'แตะที่นั่งที่ว่างเพื่อเลือก',
-                confirmBtn: 'ยืนยันที่นั่ง',
-                seatLabel: 'ที่นั่ง {seat}',
-                seatTakenLabel: 'ที่นั่ง {seat} ไม่ว่าง',
-                nose: 'หัวเครื่อง',
-                tail: 'ท้ายเครื่อง',
-                scenarioQuestion: 'อยากโฟกัสเรื่องอะไร?'
-            },
             modalReminder: {
                 notifTitle: '🤗 ได้เวลาโฟกัสแล้ว!',
-                notifBody: 'มาเริ่มติดปีกบินไปกับการอ่านหนังสือกันเถอะ'
-            },
-            modalAirportPicker: {
-                title: 'สนามบินต้นทาง',
-                useLocation: 'ใช้ตำแหน่งของฉัน',
-                useRandom: 'สุ่ม',
-                searchPlaceholder: 'ค้นหาสนามบิน / เมือง',
-                locationDenied: 'ไม่สามารถเข้าถึงตำแหน่งได้ ลองค้นหาหรือเลือกจากรายการแทนได้ครับ',
-                selectedToast: 'เปลี่ยนต้นทางเป็น {code} แล้ว'
-            },
-            modalRealDest: {
-                title: 'สำรวจปลายทางจริง',
-                openBtn: 'สำรวจปลายทางจริง',
-                hint: 'เรียงตามเวลาบินจริงจากสนามบินต้นทางปัจจุบันของคุณ',
-                unavailable: 'ฟีเจอร์นี้ยังไม่พร้อมใช้งานในตอนนี้'
+                notifBody: 'มาเริ่มโฟกัสกับการอ่านหนังสือกันเถอะ'
             },
             mintGarden: {
                 stageSeed: 'เมล็ดพันธุ์', stageSprout: 'ต้นอ่อน', stageStem: 'แตกลำต้น',
@@ -275,16 +243,6 @@
                 errCodeNotFound: 'ไม่พบกลุ่มที่ใช้รหัสนี้ ลองตรวจสอบรหัสอีกครั้งนะครับ',
                 leaveConfirmTitle: 'ออกจากกลุ่มนี้?',
                 leaveConfirmMsg: 'คุณจะไม่ถูกนับในจำนวนคนที่กำลังอ่านหนังสือของกลุ่มนี้อีกต่อไป'
-            },
-            modalPilotClub: {
-                title: 'ของฉัน',
-                clubName: 'FOCUSFLIGHT CLUB',
-                guestMember: 'นักบินรับเชิญ',
-                mapStyle: 'สไตล์แผนที่หลัก',
-                styleSatellite: 'ดาวเทียม', styleStandard: 'มาตรฐาน', styleMonochrome: 'โทนเดียว',
-                scenarios: 'สิ่งที่โฟกัสได้',
-                flightLog: 'ประวัติการบิน',
-                flightLogEmpty: 'ยังไม่มีเที่ยวบิน — โฟกัสให้จบสักรอบเพื่อบันทึกเที่ยวบินแรกของคุณ'
             },
             recap: {
                 streakLabel: 'วันติดต่อกัน',
@@ -395,23 +353,11 @@
                 mainGoal: 'เป้าหมายหลัก',
                 start: 'เริ่มจับเวลา', pause: 'หยุดพัก', resume: 'ทำต่อ', reset: 'รีเซ็ต',
                 soundToggleLabel: 'เสียงแจ้งเตือนเมื่อครบเวลา',
-                coStudyToggleLabel: 'แชร์ว่าคุณอยู่บนไฟลท์นี้ (ไม่มีชื่อ ไม่มีแชท)',
-                coStudyCountActive: '🟢 มีอีก {n} คนอยู่บนไฟลท์เดียวกับคุณตอนนี้',
-                coStudyCountAlone: 'ตอนนี้คุณเป็นคนเดียวบนไฟลท์นี้ — ชวนเพื่อนมาบินด้วยกันได้นะ',
-                coStudyUnavailable: 'ฟีเจอร์นี้ยังไม่พร้อมใช้งานในตอนนี้',
-                flightPickerLabel: 'เลือกไฟลท์ของคุณ',
-                flightMinutes: '{n} นาที',
-                ambientLabel: 'เสียงบรรยากาศ (Ambient)', ambientBrown: 'เสียงสีน้ำตาล', ambientRain: 'เสียงฝน',
-                ambientAddCustom: 'เพิ่มเสียงของฉัน', ambientUploadSuccess: 'เพิ่มเสียงเรียบร้อยแล้ว',
-                ambientUploadError: 'ไม่สามารถบันทึกไฟล์เสียงนี้ได้', ambientCustomError: 'เล่นไฟล์เสียงนี้ไม่ได้ ขอเปลี่ยนเป็นเสียงสีน้ำตาลแทน',
                 today: 'วันนี้', goal: 'เป้าหมาย',
                 timerAnnounce: '{phase} เหลือเวลา {time}',
                 phaseCompleteFocus: 'ครบเวลาโฟกัสแล้ว ถึงเวลาพัก!',
                 phaseCompleteBreak: 'พักครบแล้ว กลับมาโฟกัสกันต่อ!',
-                sessionSettingsLabel: 'การตั้งค่าเซสชัน',
-                expandMap: 'ดูแผนที่เต็มจอ',
-                minimizeMap: 'ย่อแผนที่',
-                distanceKm: '{n} กม.'
+                sessionSettingsLabel: 'การตั้งค่าเซสชัน'
             },
             settings: {
                 title: 'ตั้งค่า', language: 'ภาษา', theme: 'ธีม',
@@ -422,7 +368,6 @@
                 pomodoroSection: 'ตั้งเวลาโฟกัส (Pomodoro)',
                 focusMin: 'ช่วงโฟกัส (นาที)', shortBreakMin: 'พักสั้น (นาที)',
                 longBreakMin: 'พักยาว (นาที)', cycles: 'จำนวนรอบก่อนพักยาว',
-                departureSection: 'ต้นทางเที่ยวบิน',
                 flashcardsSection: 'แฟลชการ์ด', newCardsPerDay: 'คำศัพท์ใหม่สูงสุดต่อวัน',
                 soundSection: 'เสียง', soundEnabled: 'เปิดเสียงแจ้งเตือน',
                 reminderSection: 'เตือนความจำประจำวัน',
@@ -625,41 +570,9 @@
                 hint: "Just your own progress — nothing here compares you to anyone else.",
                 shareBtn: 'Share', downloadBtn: 'Download image'
             },
-            modalBoardingPass: {
-                title: 'Your boarding pass',
-                seatLabel: 'Seat', durationLabel: 'Duration', boardingLabel: 'Boarding', now: 'Now', dateLabel: 'Date', distanceLabel: 'Distance',
-                tip: '📵 Tip: turn on Do Not Disturb or Airplane Mode before boarding, for full focus.',
-                checkInBtn: 'Check in & start flying',
-                swipeHint: 'Swipe to tear & board',
-                swipeAria: 'Swipe to tear the ticket and start focusing'
-            },
-            modalSeatPicker: {
-                title: 'Choose your seat',
-                hint: 'Tap an available seat to pick it',
-                confirmBtn: 'Confirm seat',
-                seatLabel: 'Seat {seat}',
-                seatTakenLabel: 'Seat {seat}, unavailable',
-                nose: 'Nose',
-                tail: 'Tail',
-                scenarioQuestion: 'What do you want to focus on?'
-            },
             modalReminder: {
                 notifTitle: '🤗 Time to focus!',
-                notifBody: "Let's get those wings up and start reading."
-            },
-            modalAirportPicker: {
-                title: 'Departure airport',
-                useLocation: 'Use my location',
-                useRandom: 'Random',
-                searchPlaceholder: 'Search airport / city',
-                locationDenied: "Couldn't access your location — try searching or picking from the list instead.",
-                selectedToast: 'Departure set to {code}'
-            },
-            modalRealDest: {
-                title: 'Explore real destinations',
-                openBtn: 'Explore real destinations',
-                hint: 'Sorted by real flight time from your current departure airport.',
-                unavailable: "This feature isn't available right now"
+                notifBody: "Let's start focusing on reading."
             },
             mintGarden: {
                 stageSeed: 'Seed', stageSprout: 'Sprout', stageStem: 'Growing a stem',
@@ -708,16 +621,6 @@
                 errCodeNotFound: "No group found with that code — double check it and try again.",
                 leaveConfirmTitle: 'Leave this group?',
                 leaveConfirmMsg: "You'll stop counting toward this group's studying-now total."
-            },
-            modalPilotClub: {
-                title: 'Mine',
-                clubName: 'FOCUSFLIGHT CLUB',
-                guestMember: 'Guest Pilot',
-                mapStyle: 'Home map style',
-                styleSatellite: 'Satellite', styleStandard: 'Standard', styleMonochrome: 'Monochrome',
-                scenarios: 'Focus scenarios',
-                flightLog: 'Flight log',
-                flightLogEmpty: 'No flights yet — finish a focus session to log your first one.'
             },
             recap: {
                 streakLabel: 'day streak',
@@ -828,23 +731,11 @@
                 mainGoal: 'Main goal',
                 start: 'Start', pause: 'Pause', resume: 'Resume', reset: 'Reset',
                 soundToggleLabel: 'Play a sound when time is up',
-                coStudyToggleLabel: "Share that you're on this flight (no names, no chat)",
-                coStudyCountActive: '🟢 {n} other(s) on the same flight as you right now',
-                coStudyCountAlone: "You're the only one on this flight so far — invite a friend to join you",
-                coStudyUnavailable: "This feature isn't available right now",
-                flightPickerLabel: 'Choose your flight',
-                flightMinutes: '{n} min',
-                ambientLabel: 'Ambient sound', ambientBrown: 'Brown noise', ambientRain: 'Rain',
-                ambientAddCustom: 'Add my own sound', ambientUploadSuccess: 'Sound added successfully.',
-                ambientUploadError: 'Could not save that sound file.', ambientCustomError: "Couldn't play that sound file — switched back to brown noise.",
                 today: 'Today', goal: 'Goal',
                 timerAnnounce: '{phase}, {time} remaining',
                 phaseCompleteFocus: 'Focus session complete — time for a break!',
                 phaseCompleteBreak: 'Break is over — back to focus!',
-                sessionSettingsLabel: 'Session settings',
-                expandMap: 'View full-screen map',
-                minimizeMap: 'Minimize map',
-                distanceKm: '{n} km'
+                sessionSettingsLabel: 'Session settings'
             },
             settings: {
                 title: 'Settings', language: 'Language', theme: 'Theme',
@@ -855,7 +746,6 @@
                 pomodoroSection: 'Focus timer (Pomodoro)',
                 focusMin: 'Focus length (min)', shortBreakMin: 'Short break (min)',
                 longBreakMin: 'Long break (min)', cycles: 'Cycles before long break',
-                departureSection: 'Flight origin',
                 flashcardsSection: 'Flashcards', newCardsPerDay: 'New cards per day',
                 soundSection: 'Sound', soundEnabled: 'Enable notification sound',
                 reminderSection: 'Daily reminder',

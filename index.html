@@ -57,10 +57,6 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Kanit:wght@300;400;500;600&family=Prompt:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<!-- Leaflet: renders the real satellite map behind the focus-screen flight
-     visual (js/focus.js) — see that file's header for the tile source and
-     why it's built to degrade gracefully if this fails to load. -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" rel="stylesheet"/>
 <link href="styles/tokens.css" rel="stylesheet"/>
 <link href="styles/base.css" rel="stylesheet"/>
 <link href="styles/components.css" rel="stylesheet"/>
@@ -697,9 +693,6 @@
                 <button type="button" id="openStudyGroupsBtn" class="icon-btn" data-i18n-attr='{"aria-label":"modalGroups.title"}' aria-label="Study groups">
                     <span class="material-symbols-outlined" aria-hidden="true">groups</span>
                 </button>
-                <button type="button" id="openPilotClubBtn" class="icon-btn" data-i18n-attr='{"aria-label":"modalPilotClub.title"}' aria-label="Mine">
-                    <span class="material-symbols-outlined" aria-hidden="true">badge</span>
-                </button>
                 <button type="button" class="icon-btn js-open-settings" data-i18n-attr='{"aria-label":"aria.openSettings"}' aria-label="Settings">
                     <span class="material-symbols-outlined" aria-hidden="true">settings</span>
                 </button>
@@ -708,75 +701,26 @@
     </header>
 
     <main class="screen__main focus-shell">
-        <div class="text-center" style="margin-bottom:2.5rem">
+        <div class="text-center" style="margin-bottom:1.5rem">
             <h1 data-screen-heading style="font-size:1.875rem;font-weight:600" data-i18n="s6.title">Focus mode</h1>
             <p class="text-outline" style="font-weight:300" data-i18n="s6.subtitle">Cut distractions and get to work</p>
         </div>
 
-        <!-- "Flight Focus"-style visualization: the current Pomodoro phase's
-             progress is a plane flying a fixed route, instead of a bare
-             progress ring. The daily-goal ring's old job (today vs. goal)
-             is still covered by the plain numbers further down this screen
-             (#focusTodayHours / #focusGoalHours) — this replaces its role
-             as the *current phase's* progress indicator, which previously
-             had no visual at all beyond the countdown digits themselves. -->
-        <div class="flight-viz" id="flightViz">
-            <!-- A real satellite map (Leaflet + Esri World Imagery — no API
-                 key required, see js/focus.js's header) instead of a drawn
-                 illustration: the route from Bangkok to the current
-                 flight's real destination, a plane marker that moves along
-                 it as the phase progresses, and lit cabin-window dots for
-                 real fellow passengers on the same flight. All panning/
-                 zooming is disabled — it's a display, not an interactive
-                 map — and every bit of this is wrapped so a slow or
-                 missing connection can never affect the countdown itself,
-                 which is rendered separately either way. -->
-            <div id="flightMapContainer" class="flight-viz__map" aria-hidden="true"></div>
-            <div class="flight-viz__route" aria-hidden="true">
-                <span id="flightOriginCode" class="flight-viz__code">BKK</span>
-                <span class="material-symbols-outlined" aria-hidden="true" style="font-size:0.9rem">flight</span>
-                <span id="flightDestCode" class="flight-viz__code">CNX</span>
-            </div>
-            <div class="flight-viz__hud" style="cursor:pointer" id="btnOpenSetTimerModal" title="Set your daily goal">
-                <div class="focus-phase-badge"><span id="focusPhaseLabel" data-i18n="s6.phaseFocus">Focus</span> · <span id="focusCycleLabel"></span></div>
-                <span id="focusTimerDisplay" class="focus-time-display" aria-live="polite">0:00:00</span>
-                <span class="focus-goal-label">
-                    <span id="focusModeLabel"><span data-i18n="s6.mainGoal">Main goal</span> <span id="displayFocusGoal" style="margin-left:0.25rem;font-weight:700">04:30</span></span>
-                </span>
-            </div>
+        <!-- Phase 8's theme gimmick scene (js/gimmicks/*.js, dispatched via
+             TFS.Themes.currentGimmick().renderFocusScene() — js/focus.js's
+             refreshThemeGimmickScene()) — this screen's primary visual,
+             replacing the earlier "Flight Focus" map/boarding-pass system
+             entirely (a deliberate decision to simplify down to one visual
+             system on this screen instead of two running side by side). -->
+        <div id="themeGimmickScene" class="theme-gimmick-scene" hidden></div>
 
-            <!-- Full-screen "on the plane" mode (see js/focus.js's
-                 enterImmersive/exitImmersive) — purely a view toggle over
-                 the same map/timer, entered manually here or automatically
-                 right after boarding, exited any time via the minimize
-                 button without ever pausing the session underneath. -->
-            <button type="button" id="flightVizExpandBtn" class="flight-viz__expand" data-i18n-attr='{"aria-label":"s6.expandMap"}' aria-label="View full-screen map">
-                <span class="material-symbols-outlined" aria-hidden="true">open_in_full</span>
-            </button>
-            <button type="button" id="flightVizMinimizeBtn" class="flight-viz__minimize" data-i18n-attr='{"aria-label":"s6.minimizeMap"}' aria-label="Minimize map">
-                <span class="material-symbols-outlined" aria-hidden="true">close_fullscreen</span>
-            </button>
-            <div class="flight-viz__immersive-controls">
-                <button type="button" id="focusImmersiveResetBtn" class="focus-reset-btn" data-i18n-attr='{"aria-label":"s6.reset"}' aria-label="Reset">
-                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.5rem">refresh</span>
-                </button>
-                <button type="button" id="focusImmersiveStartBtn" class="btn btn--primary flex-1">
-                    <span id="focusImmersiveStartBtnIcon" class="material-symbols-outlined" aria-hidden="true" style="font-size:1.5rem;font-variation-settings:'FILL' 1">play_arrow</span>
-                    <span id="focusImmersiveStartBtnText" data-i18n="s6.start">Start</span>
-                </button>
-            </div>
+        <div class="text-center" style="margin-bottom:1.5rem;cursor:pointer" id="btnOpenSetTimerModal" title="Set your daily goal">
+            <div class="focus-phase-badge"><span id="focusPhaseLabel" data-i18n="s6.phaseFocus">Focus</span> · <span id="focusCycleLabel"></span></div>
+            <span id="focusTimerDisplay" class="focus-time-display" aria-live="polite">0:00:00</span>
+            <span class="focus-goal-label">
+                <span id="focusModeLabel"><span data-i18n="s6.mainGoal">Main goal</span> <span id="displayFocusGoal" style="margin-left:0.25rem;font-weight:700">04:30</span></span>
+            </span>
         </div>
-
-        <!-- Only shown before a focus phase starts (see js/focus.js's
-             renderFlightPicker) — "book" one of a few curated durations
-             instead of only adjusting a number in Settings. Picking a chip
-             sets settings.pomodoro.focusMin directly. -->
-        <p class="flight-picker__label text-outline" id="flightPickerLabel" hidden data-i18n="s6.flightPickerLabel">Choose your flight</p>
-        <div class="flight-picker custom-scroll" id="flightPickerRow" role="radiogroup" aria-labelledby="flightPickerLabel" hidden></div>
-        <button type="button" id="openRealDestBtn" class="btn btn--ghost" style="margin:-0.5rem auto 0.5rem;display:flex" hidden>
-            <span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">travel_explore</span>
-            <span data-i18n="modalRealDest.openBtn">Explore real destinations</span>
-        </button>
 
         <div class="focus-controls">
             <div class="focus-controls__row">
@@ -789,12 +733,6 @@
                 </button>
             </div>
 
-            <!-- The public co-study room toggle and the ambient sound panel
-                 that used to live here were both removed — real usage
-                 feedback was that neither pulled its weight against the
-                 clutter of always showing them. Presence itself (the lit
-                 cabin windows and taken seats elsewhere on this screen)
-                 stays, just automatic now instead of behind a toggle. -->
             <button type="button" id="notifToggleBtn" class="toggle-row">
                 <span class="settings-row__left">
                     <span class="settings-row__icon"><span class="material-symbols-outlined" aria-hidden="true" id="notifToggleIcon">notifications_active</span></span>
@@ -803,19 +741,6 @@
                 <span id="notifToggleSwitch" class="switch"><span class="switch__knob"></span></span>
             </button>
         </div>
-
-        <!-- Phase 8's theme gimmick scene (js/gimmicks/*.js, dispatched via
-             TFS.Themes.currentGimmick().renderFocusScene() — js/focus.js's
-             refreshThemeGimmickScene()). Deliberately additive, not a
-             replacement for the flight visual above: that feature was
-             built and iterated on directly with the user earlier this same
-             project, and the phase brief's own rules call for keeping
-             existing structure intact wherever the best approach would
-             otherwise require tearing it down — see this phase's session
-             report for the full reasoning and the alternative it trades
-             off against. Only Mint renders anything real so far; the
-             other 3 themes' no-op stub leaves this empty and hidden. -->
-        <div id="themeGimmickScene" class="theme-gimmick-scene" hidden></div>
 
         <div class="focus-stats">
             <div class="focus-stat-card">
@@ -1122,128 +1047,6 @@
     </div>
 </div>
 
-<!-- Step 1 of the "check-in" ritual, shown right before a *fresh* focus
-     phase starts (see js/focus.js's handleStartBtnClick) — a full-screen
-     seat grid like the reference video's, so picking a seat feels like
-     actually boarding a flight instead of just confirming a dialog. The
-     chosen seat feeds into the boarding pass shown next (step 2). -->
-<div id="seatPickerModal" class="modal-overlay hidden">
-    <div class="modal-panel modal-panel--full" data-modal-panel>
-        <div class="seat-picker">
-            <div class="seat-picker__header">
-                <h2 class="seat-picker__title"><span class="material-symbols-outlined" aria-hidden="true">airline_seat_recline_normal</span> <span data-i18n="modalSeatPicker.title">Choose your seat</span></h2>
-                <button type="button" id="closeSeatPickerBtn" class="boarding-pass__close" data-i18n-attr='{"aria-label":"aria.closeDialog"}' aria-label="Close"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">close</span></button>
-            </div>
-            <p class="seat-picker__route" aria-hidden="true"><span id="seatPickerOriginCode">BKK</span> <span class="material-symbols-outlined" aria-hidden="true" style="font-size:0.8rem">flight</span> <span id="seatPickerDestCode">CNX</span></p>
-
-            <div class="seat-picker__cabin custom-scroll">
-                <!-- An actual fuselage silhouette (dome nose + cockpit windows,
-                     tapered tail) instead of plain text "Nose"/"Tail" labels —
-                     see js/focus.js's header for why the first version played
-                     it safe with text; this shape is drawn straight from a
-                     reference screenshot instead of guessed blind. -->
-                <div class="seat-picker__fuselage">
-                    <div class="seat-picker__cockpit" aria-hidden="true">
-                        <span class="seat-picker__cockpit-pane seat-picker__cockpit-pane--l"></span>
-                        <span class="seat-picker__cockpit-pane seat-picker__cockpit-pane--r"></span>
-                    </div>
-                    <div class="seat-picker__cols" aria-hidden="true">
-                        <span></span><span>A</span><span>C</span><span class="seat-picker__aisle"></span><span>D</span><span>F</span>
-                    </div>
-                    <div class="seat-picker__grid" id="seatPickerGrid" role="radiogroup" aria-label="Seat"></div>
-                    <div class="seat-picker__tailcone" aria-hidden="true"></div>
-                </div>
-            </div>
-
-            <p class="seat-picker__hint text-outline" id="seatPickerHint" data-i18n="modalSeatPicker.hint">Tap an available seat to pick it</p>
-
-            <!-- Shown once a seat is actually picked (see js/focus.js's
-                 selectSeat()) — a lightweight, no-pressure extra touch:
-                 defaults to "Focus" either way, so skipping it never blocks
-                 confirming. -->
-            <div class="seat-picker__scenario-prompt" id="seatPickerScenarioPrompt" hidden>
-                <p class="seat-picker__scenario-seat" id="seatPickerScenarioSeatLabel">Seat: 02D</p>
-                <p class="seat-picker__scenario-question" data-i18n="modalSeatPicker.scenarioQuestion">What do you want to focus on?</p>
-                <div class="seat-picker__scenarios" id="seatPickerScenarios" role="radiogroup" aria-label="Focus scenario"></div>
-            </div>
-
-            <button type="button" id="confirmSeatBtn" class="btn btn--primary btn--block" disabled>
-                <span class="material-symbols-outlined" aria-hidden="true">check</span>
-                <span data-i18n="modalSeatPicker.confirmBtn">Confirm seat</span>
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- Step 2: shown right after a seat is confirmed above — a "check-in"
-     ritual styled like a real boarding pass, the same touch shown in the
-     reference video. Everything on it is decorative flavor (boarding pass
-     barcode) except the destination/duration/seat, which reflect what was
-     actually picked. -->
-<div id="boardingPassModal" class="modal-overlay hidden">
-    <div class="modal-panel modal-panel--sm modal-panel--boarding" data-modal-panel>
-        <div class="boarding-pass" id="boardingPassCard">
-            <div class="boarding-pass__top">
-                <div class="boarding-pass__header">
-                    <span class="boarding-pass__title"><span class="material-symbols-outlined" aria-hidden="true">confirmation_number</span> <span data-i18n="modalBoardingPass.title">Your boarding pass</span></span>
-                    <button type="button" id="closeBoardingPassBtn" class="boarding-pass__close" data-i18n-attr='{"aria-label":"aria.closeDialog"}' aria-label="Close"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">close</span></button>
-                </div>
-                <div class="boarding-pass__route">
-                    <span class="boarding-pass__code" id="boardingPassOriginCode">BKK</span>
-                    <span class="material-symbols-outlined boarding-pass__plane" aria-hidden="true">flight</span>
-                    <span class="boarding-pass__code" id="boardingPassDestCode">CNX</span>
-                </div>
-                <p class="boarding-pass__city" id="boardingPassDestName">Chiang Mai</p>
-                <p class="boarding-pass__scenario" id="boardingPassScenario" aria-hidden="true"><span class="material-symbols-outlined" aria-hidden="true" id="boardingPassScenarioIcon" style="font-size:0.8rem">hub</span> <span id="boardingPassScenarioLabel">Focus</span></p>
-                <div class="boarding-pass__divider" aria-hidden="true"></div>
-                <div class="boarding-pass__grid">
-                    <div class="boarding-pass__field">
-                        <span class="boarding-pass__label" data-i18n="modalBoardingPass.seatLabel">Seat</span>
-                        <span class="boarding-pass__value" id="boardingPassSeat">14A</span>
-                    </div>
-                    <div class="boarding-pass__field">
-                        <span class="boarding-pass__label" data-i18n="modalBoardingPass.durationLabel">Duration</span>
-                        <span class="boarding-pass__value" id="boardingPassDuration">25 min</span>
-                    </div>
-                    <div class="boarding-pass__field">
-                        <span class="boarding-pass__label" data-i18n="modalBoardingPass.boardingLabel">Boarding</span>
-                        <span class="boarding-pass__value" data-i18n="modalBoardingPass.now">Now</span>
-                    </div>
-                    <div class="boarding-pass__field">
-                        <span class="boarding-pass__label" data-i18n="modalBoardingPass.dateLabel">Date</span>
-                        <span class="boarding-pass__value" id="boardingPassDate">2569/06/24</span>
-                    </div>
-                    <div class="boarding-pass__field">
-                        <span class="boarding-pass__label" data-i18n="modalBoardingPass.distanceLabel">Distance</span>
-                        <span class="boarding-pass__value" id="boardingPassDistance">423 km</span>
-                    </div>
-                </div>
-                <div class="boarding-pass__barcode" id="boardingPassBarcode" aria-hidden="true"></div>
-            </div>
-
-            <div class="boarding-pass__perforation" aria-hidden="true"><span class="material-symbols-outlined boarding-pass__perforation-icon">content_cut</span></div>
-
-            <div class="boarding-pass__stub" id="boardingPassStub">
-                <p class="boarding-pass__tip" data-i18n="modalBoardingPass.tip">📵 Tip: turn on Do Not Disturb or Airplane Mode before boarding, for full focus.</p>
-
-                <div class="boarding-pass__tear" id="boardingPassTear">
-                    <span class="boarding-pass__tear-hint" id="boardingPassTearHint" data-i18n="modalBoardingPass.swipeHint">Swipe to tear &amp; board</span>
-                    <div class="boarding-pass__tear-thumb" id="boardingPassTearThumb" role="slider" tabindex="0"
-                         aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
-                         data-i18n-attr='{"aria-label":"modalBoardingPass.swipeAria"}' aria-label="Swipe to tear the ticket and start focusing">
-                        <span class="material-symbols-outlined" aria-hidden="true">content_cut</span>
-                    </div>
-                </div>
-
-                <button type="button" id="confirmBoardingBtn" class="boarding-pass__fallback-btn">
-                    <span class="material-symbols-outlined" aria-hidden="true">flight_takeoff</span>
-                    <span data-i18n="modalBoardingPass.checkInBtn">Check in &amp; start flying</span>
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div id="congratsModal" class="modal-overlay hidden">
     <div class="modal-panel modal-panel--sm text-center" data-modal-panel>
         <div class="modal-panel__icon modal-panel__icon--success"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:2.5rem;font-variation-settings:'FILL' 1">workspace_premium</span></div>
@@ -1397,19 +1200,6 @@
             </div>
         </div>
 
-        <!-- The flight visual's departure point (js/geo.js + data/airports.js)
-             — a real Thai airport instead of always Bangkok. Purely cosmetic
-             (which real city the route/boarding-pass distance start from);
-             changing it any time is fine, unlike the reference video's
-             "locked once chosen" version, since nothing here depends on it
-             staying fixed. -->
-        <div class="settings-section">
-            <span class="settings-section__title" data-i18n="settings.departureSection">Flight origin</span>
-            <button type="button" id="settingsAirportBtn" class="date-trigger" style="padding:0.85rem 1rem">
-                <span class="date-trigger__row"><span id="settingsAirportDisplay" class="date-trigger__value" style="font-size:1rem">-</span><span class="material-symbols-outlined text-primary" aria-hidden="true">flight_takeoff</span></span>
-            </button>
-        </div>
-
         <div class="settings-section">
             <span class="settings-section__title" data-i18n="settings.flashcardsSection">Flashcards</span>
             <div class="field">
@@ -1474,90 +1264,13 @@
     </div>
 </div>
 
-<div id="airportPickerModal" class="modal-overlay hidden">
-    <div class="modal-panel modal-panel--sheet" data-modal-panel>
-        <div class="modal-header">
-            <h2 class="modal-title"><span class="material-symbols-outlined" aria-hidden="true">flight_takeoff</span> <span data-i18n="modalAirportPicker.title">Departure airport</span></h2>
-            <button type="button" id="closeAirportPickerBtn" class="modal-close" data-i18n-attr='{"aria-label":"aria.closeDialog"}' aria-label="Close"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">close</span></button>
-        </div>
-        <div class="modal-actions" style="margin-top:0;margin-bottom:1rem">
-            <button type="button" id="airportUseLocationBtn" class="btn btn--outline flex-1">
-                <span class="material-symbols-outlined" aria-hidden="true">my_location</span> <span data-i18n="modalAirportPicker.useLocation">Use my location</span>
-            </button>
-            <button type="button" id="airportUseRandomBtn" class="btn btn--outline flex-1">
-                <span class="material-symbols-outlined" aria-hidden="true">casino</span> <span data-i18n="modalAirportPicker.useRandom">Random</span>
-            </button>
-        </div>
-        <input type="text" id="airportSearchInput" class="input" style="margin-bottom:0.75rem" data-i18n-attr='{"placeholder":"modalAirportPicker.searchPlaceholder"}' placeholder="Search airport / city">
-        <div id="airportListContainer" class="flex flex-col gap-2 custom-scroll" style="max-height:18rem;overflow-y:auto"></div>
-    </div>
-</div>
-
-<!-- Picking a real airport here (js/focus.js) sets the session length to
-     however long that route actually takes (real distance ÷ an assumed
-     cruise speed + ground-ops overhead) instead of one of the curated
-     round Pomodoro lengths — an alternative, not a replacement: the
-     curated flight-picker chips stay the default because round numbers
-     matter more for an actual study session than realism does, but this
-     is here for whoever wants the realism anyway. -->
-<div id="realDestModal" class="modal-overlay hidden">
-    <div class="modal-panel modal-panel--sheet custom-scroll" data-modal-panel style="max-height:85vh">
-        <div class="modal-header">
-            <h2 class="modal-title"><span class="material-symbols-outlined" aria-hidden="true">travel_explore</span> <span data-i18n="modalRealDest.title">Explore real destinations</span></h2>
-            <button type="button" id="closeRealDestBtn" class="modal-close" data-i18n-attr='{"aria-label":"aria.closeDialog"}' aria-label="Close"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">close</span></button>
-        </div>
-        <p class="text-outline" style="font-size:0.8125rem;margin-bottom:1rem" data-i18n="modalRealDest.hint">Sorted by real flight time from your current departure airport.</p>
-        <div id="realDestList" class="flex flex-col gap-2 custom-scroll" style="max-height:24rem;overflow-y:auto"></div>
-    </div>
-</div>
-
-<!-- "Mine": a flight-themed profile hub (js/pilotClub.js) — a membership
-     card for delight, a couple of preference shortcuts that don't fit
-     inline on screen6, and the flight log (js/focus.js's logFlight()).
-     Full Settings stays the real control panel; the gear icon here just
-     jumps to it, same as the reference video's own "Mine ⚙️" pairing. -->
-<div id="pilotClubModal" class="modal-overlay hidden">
-    <div class="modal-panel modal-panel--sheet custom-scroll" data-modal-panel style="max-height:88vh">
-        <div class="modal-header">
-            <h2 class="modal-title"><span class="material-symbols-outlined" aria-hidden="true">badge</span> <span data-i18n="modalPilotClub.title">Mine</span></h2>
-            <div style="display:flex;align-items:center;gap:0.5rem">
-                <button type="button" id="openSettingsFromClubBtn" class="icon-btn" data-i18n-attr='{"aria-label":"aria.openSettings"}' aria-label="Settings"><span class="material-symbols-outlined" aria-hidden="true">settings</span></button>
-                <button type="button" id="closePilotClubBtn" class="modal-close" data-i18n-attr='{"aria-label":"aria.closeDialog"}' aria-label="Close"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">close</span></button>
-            </div>
-        </div>
-
-        <div class="pilot-card">
-            <div class="pilot-card__seal" aria-hidden="true"><span class="material-symbols-outlined">flight</span></div>
-            <p class="pilot-card__club" data-i18n="modalPilotClub.clubName">FOCUSFLIGHT CLUB</p>
-            <p class="pilot-card__member" id="pilotCardMemberName">-</p>
-        </div>
-
-        <div class="settings-section">
-            <span class="settings-section__title" data-i18n="modalPilotClub.mapStyle">Home map style</span>
-            <div class="pilot-card__style-row" id="clubMapStyleRow" role="radiogroup" aria-label="Map style"></div>
-        </div>
-
-        <div class="settings-section">
-            <span class="settings-section__title" data-i18n="modalPilotClub.scenarios">Scenarios</span>
-            <div class="pilot-card__scenarios" id="pilotCardScenarios" aria-hidden="true"></div>
-        </div>
-
-        <div class="settings-section">
-            <span class="settings-section__title" data-i18n="modalPilotClub.flightLog">Flight log</span>
-            <div id="flightLogContainer" class="flex flex-col gap-2"></div>
-            <p id="flightLogEmpty" class="text-outline" style="font-size:0.8125rem;text-align:center;padding:1rem 0" data-i18n="modalPilotClub.flightLogEmpty">No flights yet — finish a focus session to log your first one.</p>
-        </div>
-    </div>
-</div>
-
 <!-- Study groups (js/groups.js + js/groupsUI.js) — deliberately scoped down
      from the reference: no camera ("Cam Study"), no ranking, and for now
-     no member list/nicknames either, so every member stays exactly as
-     anonymous as the per-flight presence count already is (see
-     js/groups.js's own header for why that's what keeps this feature out
-     of "needs a report/block flow" territory). A named-members version is
-     real future work, tracked in FUTURE_IDEAS.md, that has to build that
-     flow alongside it rather than skip it. -->
+     no member list/nicknames either, so every member stays fully anonymous
+     (see js/groups.js's own header for why that's what keeps this feature
+     out of "needs a report/block flow" territory). A named-members version
+     is real future work, tracked in FUTURE_IDEAS.md, that has to build
+     that flow alongside it rather than skip it. -->
 <div id="studyGroupsModal" class="modal-overlay hidden">
     <div class="modal-panel modal-panel--sheet custom-scroll" data-modal-panel style="max-height:88vh">
         <div class="modal-header">
@@ -1637,9 +1350,7 @@
 <script src="js/utils.js"></script>
 <script src="js/storage.js"></script>
 <script src="data/subjects.js"></script>
-<script src="data/airports.js"></script>
 <script src="data/constellationNames.js"></script>
-<script src="js/geo.js"></script>
 <script src="js/planner.js"></script>
 <script src="js/srs.js"></script>
 <script src="js/state.js"></script>
@@ -1662,7 +1373,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="js/firebaseConfig.js"></script>
 <script src="js/auth.js"></script>
-<script src="js/presence.js"></script>
 <script src="js/groups.js"></script>
 <script src="js/modal.js"></script>
 <script src="js/router.js"></script>
@@ -1677,9 +1387,7 @@
 <script src="js/recap.js"></script>
 <script src="js/schedule.js"></script>
 <script src="js/flashcards.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="js/focus.js"></script>
-<script src="js/pilotClub.js"></script>
 <script src="js/groupsUI.js"></script>
 <script src="js/settings.js"></script>
 <script src="js/history.js"></script>

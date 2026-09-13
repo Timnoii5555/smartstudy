@@ -29,8 +29,6 @@
     const cyclesInput = document.getElementById('settingsCycles');
     const newCardsPerDayInput = document.getElementById('settingsNewCardsPerDay');
     const soundToggle = document.getElementById('settingsSoundToggle');
-    const settingsAirportBtn = document.getElementById('settingsAirportBtn');
-    const settingsAirportDisplay = document.getElementById('settingsAirportDisplay');
     const settingsReminderToggle = document.getElementById('settingsReminderToggle');
     const settingsReminderTimeField = document.getElementById('settingsReminderTimeField');
     const settingsReminderTime = document.getElementById('settingsReminderTime');
@@ -58,9 +56,6 @@
 
         soundToggle.querySelector('.switch').classList.toggle('is-on', s.settings.soundEnabled);
         soundToggle.setAttribute('aria-pressed', String(s.settings.soundEnabled));
-
-        const airport = (TFS.Geo && TFS.Geo.airportById(s.settings.departureAirportId)) || (TFS.AIRPORTS && TFS.AIRPORTS[0]);
-        if (settingsAirportDisplay && airport) settingsAirportDisplay.textContent = `${I18n.pick(airport.name)} (${airport.code})`;
 
         const reminderOn = !!s.settings.dailyReminderTime;
         if (settingsReminderToggle) {
@@ -259,77 +254,6 @@
         global.location.href = mailto;
         TFS.Modal.close(reportModal);
     });
-
-    // ---------------------------------------------------------------- Departure airport (data/airports.js, js/geo.js)
-    // Purely cosmetic (which real city the flight visual/boarding pass's
-    // distance start from) — changing it any time is fine, unlike the
-    // reference video's "locked once chosen" version, since nothing here
-    // depends on it staying fixed.
-
-    const airportPickerModal = document.getElementById('airportPickerModal');
-    const airportListContainer = document.getElementById('airportListContainer');
-    const airportSearchInput = document.getElementById('airportSearchInput');
-
-    function selectAirport(airport) {
-        if (!airport) return;
-        State.commit({ settings: { departureAirportId: airport.id } });
-        render();
-        TFS.Modal.close(airportPickerModal);
-        TFS.Toast.success(I18n.t('modalAirportPicker.selectedToast', { code: airport.code }));
-    }
-
-    function renderAirportList() {
-        if (!airportListContainer) return;
-        const query = (airportSearchInput.value || '').trim().toLowerCase();
-        const currentId = State.get().settings.departureAirportId;
-        airportListContainer.innerHTML = '';
-        (TFS.AIRPORTS || [])
-            .filter((a) => !query || a.code.toLowerCase().includes(query) || I18n.pick(a.name).toLowerCase().includes(query))
-            .forEach((a) => {
-                const isCurrent = a.id === currentId;
-                airportListContainer.appendChild(U.el('button', {
-                    className: 'search-result-item w-full',
-                    attrs: { type: 'button', style: `border:2px solid ${isCurrent ? 'var(--color-primary)' : 'transparent'};background:${isCurrent ? 'var(--color-primary-fixed)' : 'var(--color-surface-lowest)'}` },
-                    on: { click: () => selectAirport(a) }
-                }, [
-                    U.el('span', { className: 'flex items-center gap-3' }, [
-                        U.el('span', { className: 'material-symbols-outlined text-primary', attrs: { 'aria-hidden': 'true' }, text: 'flight_takeoff' }),
-                        U.el('span', {}, [
-                            U.el('h3', { attrs: { style: 'font-weight:700;font-size:0.875rem' }, text: I18n.pick(a.name) }),
-                            U.el('p', { className: 'text-outline', attrs: { style: 'font-size:0.6875rem' }, text: a.code })
-                        ])
-                    ]),
-                    isCurrent ? U.el('span', { className: 'material-symbols-outlined text-primary', attrs: { 'aria-hidden': 'true' }, text: 'check_circle' }) : document.createTextNode('')
-                ]));
-            });
-    }
-
-    if (settingsAirportBtn) {
-        settingsAirportBtn.addEventListener('click', () => {
-            airportSearchInput.value = '';
-            renderAirportList();
-            TFS.Modal.open(airportPickerModal);
-        });
-    }
-    if (airportSearchInput) airportSearchInput.addEventListener('input', renderAirportList);
-    const closeAirportPickerBtn = document.getElementById('closeAirportPickerBtn');
-    if (closeAirportPickerBtn) closeAirportPickerBtn.addEventListener('click', () => TFS.Modal.close(airportPickerModal));
-
-    const airportUseRandomBtn = document.getElementById('airportUseRandomBtn');
-    if (airportUseRandomBtn) {
-        airportUseRandomBtn.addEventListener('click', () => selectAirport(TFS.Geo && TFS.Geo.randomAirport()));
-    }
-    const airportUseLocationBtn = document.getElementById('airportUseLocationBtn');
-    if (airportUseLocationBtn) {
-        airportUseLocationBtn.addEventListener('click', () => {
-            if (!TFS.Geo) return;
-            airportUseLocationBtn.disabled = true;
-            TFS.Geo.nearestAirportFromDevice()
-                .then((airport) => selectAirport(airport))
-                .catch(() => TFS.Toast.warn(I18n.t('modalAirportPicker.locationDenied')))
-                .finally(() => { airportUseLocationBtn.disabled = false; });
-        });
-    }
 
     // ---------------------------------------------------------------- Theme collection page (Phase 8, js/themes.js)
 

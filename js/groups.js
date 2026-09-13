@@ -9,20 +9,14 @@
  * not a design choice to weigh against convenience), no ranking/leaderboard
  * (this app's own non-negotiable rule), and — for this first version — no
  * member list, nicknames, or per-member stats either: everyone in a group
- * is exactly as anonymous as everyone already is in the per-flight
- * presence count (js/presence.js), which is what keeps this feature out of
- * "needs a report/block flow" territory (see this app's own rule: any room
- * UI needs one *unless* it exposes zero identifying info). A richer
- * version with named members is real, separate future work — see
- * FUTURE_IDEAS.md — that does need to build a report/block flow alongside
- * it, not skip it.
+ * is fully anonymous, which is what keeps this feature out of "needs a
+ * report/block flow" territory (see this app's own rule: any room UI
+ * needs one *unless* it exposes zero identifying info). A richer version
+ * with named members is real, separate future work — see FUTURE_IDEAS.md
+ * — that does need to build a report/block flow alongside it, not skip it.
  *
- * Same heartbeat/staleness design as js/presence.js (a 90s-old heartbeat
- * ages out of the "studying now" count automatically, no cleanup job
- * needed) — kept as this file's own small copy rather than generalizing
- * that module, since a learner can be in a study group *and* mid-flight at
- * the same time, needing two independent heartbeats presence.js's
- * single-current-room design doesn't assume.
+ * A 90s-old heartbeat ages out of the "studying now" count automatically,
+ * so there's no cleanup job to run on a static site with nowhere to run one.
  *
  * Requires a Firestore security rule for the new `study_groups` collection:
  *   match /study_groups/{groupId} {
@@ -36,7 +30,7 @@
  *     }
  *   }
  * Every call here fails soft (logs a warning, returns null) if Firebase
- * isn't configured or that rule isn't deployed yet, same as js/presence.js.
+ * isn't configured or that rule isn't deployed yet.
  */
 (function (global) {
     'use strict';
@@ -140,8 +134,7 @@
     /** Up to 20 public groups, in whatever order Firestore returns them —
      *  deliberately not sorted server-side (an equality filter plus a sort
      *  on a different field needs a composite index to set up in the
-     *  Firebase console; a bare equality filter never does, the same
-     *  reasoning js/presence.js's header explains for its own query).
+     *  Firebase console; a bare equality filter never does).
      *  Returns null (not []) if the fetch itself couldn't be attempted or
      *  failed, so the caller can tell "none public right now" apart from
      *  "couldn't check". */
@@ -193,9 +186,7 @@
     }
 
     /** Starts counting this device toward `groupId`'s "studying now" total
-     *  — meant to run only while a focus session is actually running, same
-     *  as js/presence.js's per-flight heartbeat, and independent of it (a
-     *  learner can be doing both at once). */
+     *  — meant to run only while a focus session is actually running. */
     function startHeartbeat(groupId) {
         if (!groupId) return;
         if (heartbeatGroupId === groupId && heartbeatTimerId !== null) return;
