@@ -25,10 +25,41 @@
     const streakBadge = document.getElementById('streakBadge');
     const readinessScoreCard = document.getElementById('readinessScoreCard');
     const notTodayBtn = document.getElementById('notTodayBtn');
+    const confettiBurst = document.getElementById('confettiBurst');
 
     const RING_CIRCUMFERENCE = 2 * Math.PI * 88; // matches the SVG circle's r="88"
 
     let hasShownCongratsThisSession = false;
+
+    const CONFETTI_COLORS = ['#f97316', '#22c55e', '#a855f7', '#ec4899', '#14b8a6', '#facc15'];
+
+    /** One-shot confetti burst for the "finished every lesson today" modal
+     *  — plain colored divs, no library, cleaned out and rebuilt fresh on
+     *  every celebration rather than left to pile up across repeat 100%
+     *  days. Purely decorative (aria-hidden container, no pointer-events),
+     *  so a JS error here is caught and swallowed rather than risking the
+     *  actual congratulations content underneath it. */
+    function burstConfetti() {
+        if (!confettiBurst) return;
+        try {
+            confettiBurst.innerHTML = '';
+            const pieceCount = 28;
+            for (let i = 0; i < pieceCount; i++) {
+                const piece = document.createElement('span');
+                piece.className = 'confetti-piece';
+                const left = Math.round(Math.random() * 100);
+                const delay = (Math.random() * 0.25).toFixed(2);
+                const duration = (0.9 + Math.random() * 0.6).toFixed(2);
+                const color = CONFETTI_COLORS[i % CONFETTI_COLORS.length];
+                piece.style.left = left + '%';
+                piece.style.background = color;
+                piece.style.animationDelay = delay + 's';
+                piece.style.animationDuration = duration + 's';
+                if (i % 2 === 0) piece.style.borderRadius = '50%';
+                confettiBurst.appendChild(piece);
+            }
+        } catch (e) { console.error('[dashboard] Confetti burst failed to render.', e); }
+    }
 
     function getCurrentSubject() {
         const subjectId = State.get().plan.subject;
@@ -39,6 +70,13 @@
         return State.get().syllabusProgress[subjectId] || {};
     }
 
+    // The topic id whose checkbox should play its one-shot "just toggled"
+    // pop animation on the very next renderChecklist() call — cleared
+    // immediately after, so ticking one task never replays the animation
+    // on every other item the next time something unrelated re-renders
+    // this screen (see renderChecklist() below).
+    let justToggledTopicId = null;
+
     function toggleTopic(subjectId, topicId) {
         const allProgress = { ...State.get().syllabusProgress };
         const topicMap = { ...(allProgress[subjectId] || {}) };
@@ -48,6 +86,7 @@
         // show a "what did I finish and when" view across every subject.
         else topicMap[topicId] = { completedAt: new Date().toISOString() };
         allProgress[subjectId] = topicMap;
+        justToggledTopicId = topicId;
         // No explicit render() call here: this screen is subscribed to state
         // changes below and re-renders itself whenever it is the active screen.
         State.commit({ syllabusProgress: allProgress });
@@ -145,8 +184,9 @@
         totalLessonsBadge.textContent = String(todaysTopics.length);
         todaysTopics.forEach(topic => {
             const done = !!progress[topic.id];
+            const justToggled = topic.id === justToggledTopicId;
             const item = U.el('button', {
-                className: 'task-item' + (done ? ' is-done' : ''),
+                className: 'task-item' + (done ? ' is-done' : '') + (justToggled ? ' is-just-toggled' : ''),
                 attrs: { type: 'button', 'aria-pressed': done ? 'true' : 'false' },
                 on: { click: () => toggleTopic(subject.id, topic.id) }
             }, [
@@ -159,6 +199,7 @@
             ]);
             checklistContainer.appendChild(item);
         });
+        justToggledTopicId = null;
         renderReadAheadPrompt(subject, todaysTopics, progress);
     }
 
@@ -297,7 +338,7 @@
         if (percent === 100 && total > 0) {
             if (subject) markSubjectCompleted(subject.id);
             if (!hasShownCongratsThisSession) {
-                TFS.Modal.open('congratsModal');
+                TFS.Modal.open('congratsModal', { onOpen: burstConfetti });
                 hasShownCongratsThisSession = true;
             }
         } else {

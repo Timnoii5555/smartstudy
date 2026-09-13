@@ -26,7 +26,7 @@
 // Bump this on any change to this file (or to the strategy above) so every
 // previously-installed service worker discards its old cache on its next
 // activate — see the comment on activate() below.
-const CACHE_VERSION = 'tfs-v17';
+const CACHE_VERSION = 'tfs-v18';
 
 const PRECACHE_URLS = [
     './',
