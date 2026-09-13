@@ -248,6 +248,11 @@
                 pagesSection: 'หน้าเก่า',
                 pagesEmpty: 'ยังไม่มีหน้าเก่าในสมุดเล่มนี้'
             },
+            pixelMeadow: {
+                characterSection: 'เลือกตัวละคร',
+                petSection: 'เลือกสัตว์เลี้ยง',
+                scenerySection: 'ของประดับที่ปลดล็อกแล้ว'
+            },
             modalGroups: {
                 title: 'กลุ่มเรียน',
                 codePlaceholder: 'รหัสเข้ากลุ่ม',
@@ -675,6 +680,11 @@
                 doodlesSection: 'Doodle collection',
                 pagesSection: 'Old pages',
                 pagesEmpty: 'No old pages in this notebook yet.'
+            },
+            pixelMeadow: {
+                characterSection: 'Choose a character',
+                petSection: 'Choose a pet',
+                scenerySection: 'Unlocked scenery'
             },
             modalGroups: {
                 title: 'Study groups',

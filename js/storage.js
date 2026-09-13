@@ -226,6 +226,17 @@
                 // separate flag (so it can't go stale).
                 plantsBySubject: {}
             },
+            pixelMeadow: {
+                // js/gimmicks/pixel.js. characterId defaults to the first
+                // of 6 (never blank — a scene always has someone standing
+                // in it); petId is null by default since a pet is opt-in.
+                characterId: 'char1',
+                petId: null,
+                // Scenery ids (js/gimmicks/pixel.js's SCENERY) earned by
+                // crossing a lifetime-focus-hours milestone — kept forever
+                // once earned, same rule as paperNotebook.unlockedDoodles.
+                unlockedScenery: []
+            },
             paperNotebook: {
                 // dateISO -> string[] (up to 6 completed task/topic titles
                 // that day) — js/gimmicks/paper.js's stylized notebook
