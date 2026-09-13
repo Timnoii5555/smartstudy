@@ -579,6 +579,26 @@ input[type=range]::-moz-range-track { height: 0.5rem; background: var(--color-su
 .flight-log-entry__route .material-symbols-outlined { font-size: 0.9rem; color: var(--color-primary); }
 .flight-log-entry__meta { font-size: 0.6875rem; color: var(--color-outline); margin-top: 0.15rem; }
 .flight-log-entry__mins { font-weight: 700; font-size: 0.8125rem; color: var(--color-primary); white-space: nowrap; }
+
+/* ---------- Theme gimmick scenes (Phase 8, see js/themes.js) ---------- */
+
+.theme-gimmick-scene { width: 100%; margin-bottom: 1.5rem; }
+.theme-gimmick-scene:empty { display: none; }
+
+/* Mint — a potted plant, see js/gimmicks/mint.js */
+.mint-scene {
+    display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+    padding: 1.25rem 1rem; border-radius: var(--radius-2xl); background: var(--color-surface-low);
+}
+.mint-scene__svg-wrap { width: 7rem; height: 7rem; }
+.mint-scene__label { font-size: 0.75rem; font-weight: 600; color: var(--color-outline); }
+.mint-scene__empty { font-size: 0.8125rem; color: var(--color-outline); text-align: center; padding: 1rem 0; }
+.mint-collection__section { margin-bottom: 0.5rem; }
+.mint-collection__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr)); gap: 0.75rem; margin-top: 0.6rem; }
+.mint-collection__card { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; padding: 0.75rem 0.5rem; border-radius: var(--radius-lg); background: var(--color-surface-low); text-align: center; }
+.mint-collection__card .mint-scene__svg-wrap { width: 4.5rem; height: 4.5rem; }
+.mint-collection__name { font-size: 0.75rem; font-weight: 700; }
+.mint-collection__meta { font-size: 0.625rem; color: var(--color-outline); }
 .modal-actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
 .modal-panel__icon { width: 4rem; height: 4rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; }
 .modal-panel__icon--warn { background: color-mix(in srgb, var(--color-danger) 12%, transparent); color: var(--color-danger); }

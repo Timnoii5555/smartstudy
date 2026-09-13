@@ -229,6 +229,28 @@
     const focusResetBtn = document.getElementById('focusResetBtn');
     const focusTodayHours = document.getElementById('focusTodayHours');
     const focusGoalHours = document.getElementById('focusGoalHours');
+    const themeGimmickSceneEl = document.getElementById('themeGimmickScene');
+
+    /** Redraws whichever theme's gimmick scene is currently active (Phase
+     *  8, js/themes.js) into its container — called on entering this
+     *  screen and right after a session starts/completes (the only times
+     *  a scene's own data actually changes), never on every render() tick,
+     *  since rebuilding an SVG every second for no reason is wasteful. A
+     *  theme with nothing to show (still a no-op stub, or Mint with no
+     *  subject chosen yet) just leaves the container empty and hidden. */
+    function refreshThemeGimmickScene() {
+        if (!themeGimmickSceneEl || !TFS.Themes || !isActive()) return;
+        // Cleared here, not left to each gimmick, so switching to a theme
+        // whose gimmick is still the no-op stub (nothing built for it yet)
+        // can never leave a *previous* theme's scene stuck on screen —
+        // the stub does nothing at all, on purpose, so it can never clean
+        // up after a different gimmick either.
+        themeGimmickSceneEl.innerHTML = '';
+        try {
+            TFS.Themes.currentGimmick().renderFocusScene(themeGimmickSceneEl);
+            themeGimmickSceneEl.hidden = themeGimmickSceneEl.innerHTML.trim() === '';
+        } catch (e) { console.error('[focus] Theme gimmick scene failed to render.', e); themeGimmickSceneEl.hidden = true; }
+    }
     const displayFocusGoal = document.getElementById('displayFocusGoal');
 
     // Full-screen "on the plane" mode mirrors the same start/reset controls
@@ -749,6 +771,7 @@
         if (mode === 'focus') {
             logFlight(pomodoroSettings().focusMin);
             if (TFS.Themes) TFS.Themes.notifySessionComplete({ minutes: pomodoroSettings().focusMin, subject: State.get().plan.subject, dateISO: todayISO() });
+            refreshThemeGimmickScene();
             cyclesCompletedToday++;
             const cycles = pomodoroSettings().cyclesBeforeLongBreak;
             mode = (cyclesCompletedToday % cycles === 0) ? 'longBreak' : 'shortBreak';
@@ -782,6 +805,7 @@
         ensureRenderInterval();
         joinFlightHeartbeatIfEligible();
         if (mode === 'focus' && TFS.Themes) TFS.Themes.notifySessionStart({ minutes: pomodoroSettings().focusMin, subject: State.get().plan.subject, dateISO: todayISO() });
+        refreshThemeGimmickScene();
         persistRuntime();
         render();
     }
@@ -1272,6 +1296,7 @@
             loadRuntimeFromState();
             render();
             initFlightPassengerUpdates();
+            refreshThemeGimmickScene();
             // Leaflet sizes itself against its container at creation time;
             // re-checking on every re-entry to this screen (a standard
             // Leaflet pattern for a map inside a show/hide container) fixes
@@ -1295,6 +1320,6 @@
     // A small read-only surface for js/pilotClub.js ("Mine") — the
     // scenario list and map style keys, so that file doesn't need its own
     // copy of either to stay in sync with.
-    TFS.Focus = { SCENARIOS, MAP_STYLE_KEYS: Object.keys(MAP_STYLES) };
+    TFS.Focus = { SCENARIOS, MAP_STYLE_KEYS: Object.keys(MAP_STYLES), refreshThemeGimmickScene };
 
 })(window);

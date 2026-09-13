@@ -45,6 +45,7 @@
         themeBtnPaper.classList.toggle('is-active', theme === 'paper');
         themeBtnNight.classList.toggle('is-active', theme === 'night');
         themeBtnMint.classList.toggle('is-active', theme === 'mint');
+        if (openThemeCollectionBtnLabel && TFS.Themes) openThemeCollectionBtnLabel.textContent = I18n.pick(TFS.Themes.currentDefinition().collectionName);
 
         dailyGoalInput.value = (s.plan.dailyGoalSeconds / 3600).toFixed(1).replace(/\.0$/, '');
         examDateDisplay.textContent = s.plan.examDateISO ? I18n.formatDate(U.parseISODate(s.plan.examDateISO)) : I18n.t('s2.examDatePlaceholder');
@@ -329,6 +330,36 @@
                 .finally(() => { airportUseLocationBtn.disabled = false; });
         });
     }
+
+    // ---------------------------------------------------------------- Theme collection page (Phase 8, js/themes.js)
+
+    const themeCollectionModal = document.getElementById('themeCollectionModal');
+    const themeCollectionTitle = document.getElementById('themeCollectionTitle');
+    const themeCollectionBody = document.getElementById('themeCollectionBody');
+    const openThemeCollectionBtn = document.getElementById('openThemeCollectionBtn');
+    const openThemeCollectionBtnLabel = document.getElementById('openThemeCollectionBtnLabel');
+    const closeThemeCollectionBtn = document.getElementById('closeThemeCollectionBtn');
+
+    // The label itself (named for the active theme, e.g. "View My Garden"
+    // for Mint) is kept current by render() above, called both on every
+    // theme switch and every time Settings is opened — no separate
+    // language-change listener needed for just this one label.
+    if (openThemeCollectionBtn) {
+        openThemeCollectionBtn.addEventListener('click', () => {
+            if (!TFS.Themes) return;
+            const def = TFS.Themes.currentDefinition();
+            if (themeCollectionTitle) themeCollectionTitle.querySelector('span:last-child').textContent = I18n.pick(def.collectionName);
+            // Cleared here (not left to each gimmick) so a theme whose
+            // collection isn't built yet can never leave a *different*
+            // theme's leftover content on screen — same reasoning as
+            // js/focus.js's refreshThemeGimmickScene().
+            themeCollectionBody.innerHTML = '';
+            try { TFS.Themes.currentGimmick().renderCollection(themeCollectionBody); }
+            catch (e) { console.error('[settings] Theme collection failed to render.', e); }
+            TFS.Modal.open(themeCollectionModal);
+        });
+    }
+    if (closeThemeCollectionBtn) closeThemeCollectionBtn.addEventListener('click', () => TFS.Modal.close(themeCollectionModal));
 
     I18n.onChange(() => { if (TFS.Modal.isOpen(settingsModal)) render(); });
 

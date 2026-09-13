@@ -797,6 +797,19 @@
             </button>
         </div>
 
+        <!-- Phase 8's theme gimmick scene (js/gimmicks/*.js, dispatched via
+             TFS.Themes.currentGimmick().renderFocusScene() — js/focus.js's
+             refreshThemeGimmickScene()). Deliberately additive, not a
+             replacement for the flight visual above: that feature was
+             built and iterated on directly with the user earlier this same
+             project, and the phase brief's own rules call for keeping
+             existing structure intact wherever the best approach would
+             otherwise require tearing it down — see this phase's session
+             report for the full reasoning and the alternative it trades
+             off against. Only Mint renders anything real so far; the
+             other 3 themes' no-op stub leaves this empty and hidden. -->
+        <div id="themeGimmickScene" class="theme-gimmick-scene" hidden></div>
+
         <div class="focus-stats">
             <div class="focus-stat-card">
                 <p class="text-outline" style="font-size:0.625rem;font-weight:600;margin-bottom:0.25rem" data-i18n="s6.today">Today</p>
@@ -1347,6 +1360,12 @@
                 <button type="button" id="themeBtnNight" data-theme="night"><span class="material-symbols-outlined" aria-hidden="true">bedtime</span><span data-i18n="settings.themeNight">Night</span></button>
                 <button type="button" id="themeBtnMint" data-theme="mint"><span class="material-symbols-outlined" aria-hidden="true">potted_plant</span><span data-i18n="settings.themeMint">Mint</span></button>
             </div>
+            <!-- Always opens the CURRENTLY active theme's own collection
+                 page (js/themes.js's currentGimmick().renderCollection) —
+                 all 4 keep collecting in the background either way. -->
+            <button type="button" id="openThemeCollectionBtn" class="btn btn--ghost btn--block" style="justify-content:flex-start;margin-top:0.75rem">
+                <span class="material-symbols-outlined" aria-hidden="true">yard</span><span id="openThemeCollectionBtnLabel" data-i18n="settings.viewCollection">View this theme's collection</span>
+            </button>
         </div>
 
         <div class="settings-section">
@@ -1592,6 +1611,21 @@
     </div>
 </div>
 
+<!-- Always shows the CURRENTLY active theme's own collection page —
+     js/gimmicks/*.js's renderCollection(), dispatched via
+     TFS.Themes.currentGimmick(). Only Mint has a real one so far; the
+     other 3 render their own no-op stub's (empty) output until each
+     phase lands. -->
+<div id="themeCollectionModal" class="modal-overlay hidden">
+    <div class="modal-panel modal-panel--sheet custom-scroll" data-modal-panel style="max-height:88vh">
+        <div class="modal-header">
+            <h2 class="modal-title" id="themeCollectionTitle"><span class="material-symbols-outlined" aria-hidden="true">yard</span> <span>My Garden</span></h2>
+            <button type="button" id="closeThemeCollectionBtn" class="modal-close" data-i18n-attr='{"aria-label":"aria.closeDialog"}' aria-label="Close"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">close</span></button>
+        </div>
+        <div id="themeCollectionBody" class="flex flex-col gap-4"></div>
+    </div>
+</div>
+
 <script src="js/errorBoundary.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/storage.js"></script>
@@ -1604,6 +1638,7 @@
 <script src="js/i18n.js"></script>
 <script src="js/theme.js"></script>
 <script src="js/themes.js"></script>
+<script src="js/gimmicks/mint.js"></script>
 <script src="js/toast.js"></script>
 <script src="js/reminder.js"></script>
 <script src="js/streak.js"></script>

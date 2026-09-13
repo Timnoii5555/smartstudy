@@ -200,6 +200,19 @@
                 currentGroupId: null,
                 currentGroupName: null
             },
+            // Phase 8 theme gimmicks — one namespace per theme, all 4 always
+            // collecting in the background regardless of which is active
+            // (js/themes.js's broadcast()), so switching themes never loses
+            // progress in the others. Only mintGarden exists so far.
+            mintGarden: {
+                // subjectId -> { rounds: number, lastStudiedISO: string }
+                // — js/gimmicks/mint.js. `rounds` is completed-or-kept-
+                // partial focus phases for that subject; a subject not
+                // studied in >7/14 days reads as wilted/leaf-dropped at
+                // render time from `lastStudiedISO`, never stored as a
+                // separate flag (so it can't go stale).
+                plantsBySubject: {}
+            },
             streak: {
                 current: 0,               // consecutive days with >=15 min of real focus time, ending today or yesterday
                 longest: 0,               // best streak ever, kept even after the current one breaks

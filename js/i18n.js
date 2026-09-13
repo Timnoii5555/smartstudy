@@ -228,6 +228,14 @@
                 hint: 'เรียงตามเวลาบินจริงจากสนามบินต้นทางปัจจุบันของคุณ',
                 unavailable: 'ฟีเจอร์นี้ยังไม่พร้อมใช้งานในตอนนี้'
             },
+            mintGarden: {
+                stageSeed: 'เมล็ดพันธุ์', stageSprout: 'ต้นอ่อน', stageStem: 'แตกลำต้น',
+                stageBranching: 'แตกกิ่งก้าน', stageFull: 'ใบเต็มต้น', stageBloom: 'ออกดอกแล้ว',
+                noSubject: 'ยังไม่ได้เลือกวิชา — ปลูกต้นแรกได้เมื่อเลือกวิชาแล้ว',
+                collectionEmpty: 'ยังไม่มีต้นไม้ในส่วนนี้',
+                growingSection: 'กำลังปลูก',
+                shelfSection: 'ชั้นวาง (เรียนจบแล้ว)'
+            },
             modalGroups: {
                 title: 'กลุ่มเรียน',
                 codePlaceholder: 'รหัสเข้ากลุ่ม',
@@ -392,6 +400,7 @@
                 title: 'ตั้งค่า', language: 'ภาษา', theme: 'ธีม',
                 themeLight: 'สว่าง', themeDark: 'มืด', themePaper: 'กระดาษ', themeNight: 'กลางคืน', themeSystem: 'ตามระบบ',
                 themePixel: 'ทุ่งหญ้า', themeMint: 'ต้นไม้',
+                viewCollection: 'ดูคลังสะสมของธีมนี้',
                 dailyGoal: 'เป้าหมายชั่วโมงอ่านต่อวัน', examDate: 'วันสอบ',
                 pomodoroSection: 'ตั้งเวลาโฟกัส (Pomodoro)',
                 focusMin: 'ช่วงโฟกัส (นาที)', shortBreakMin: 'พักสั้น (นาที)',
@@ -635,6 +644,14 @@
                 hint: 'Sorted by real flight time from your current departure airport.',
                 unavailable: "This feature isn't available right now"
             },
+            mintGarden: {
+                stageSeed: 'Seed', stageSprout: 'Sprout', stageStem: 'Growing a stem',
+                stageBranching: 'Branching out', stageFull: 'Full leaves', stageBloom: 'In bloom',
+                noSubject: 'No subject chosen yet — the first plant grows once you pick one.',
+                collectionEmpty: 'Nothing here yet.',
+                growingSection: 'Currently growing',
+                shelfSection: 'Shelf (finished subjects)'
+            },
             modalGroups: {
                 title: 'Study groups',
                 codePlaceholder: 'Join code',
@@ -799,6 +816,7 @@
                 title: 'Settings', language: 'Language', theme: 'Theme',
                 themeLight: 'Light', themeDark: 'Dark', themePaper: 'Paper', themeNight: 'Night', themeSystem: 'Follow system',
                 themePixel: 'Pixel', themeMint: 'Mint',
+                viewCollection: "View this theme's collection",
                 dailyGoal: 'Daily study goal (hours)', examDate: 'Exam date',
                 pomodoroSection: 'Focus timer (Pomodoro)',
                 focusMin: 'Focus length (min)', shortBreakMin: 'Short break (min)',

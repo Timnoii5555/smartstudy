@@ -40,6 +40,10 @@
         document.documentElement.setAttribute('data-theme-setting', eff);
         // Keep the native UI (scrollbars, form controls) in sync with the theme too.
         document.documentElement.style.colorScheme = (eff === 'pixel' || eff === 'night') ? 'dark' : 'light';
+        // A theme switch changes which gimmick scene should be showing on
+        // screen 6 right now — js/focus.js exposes the redraw for exactly
+        // this (a no-op if that screen isn't even the active one).
+        if (TFS.Focus && TFS.Focus.refreshThemeGimmickScene) TFS.Focus.refreshThemeGimmickScene();
     }
 
     function setTheme(setting) {
