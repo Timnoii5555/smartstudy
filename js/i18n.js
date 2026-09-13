@@ -236,6 +236,11 @@
                 growingSection: 'กำลังปลูก',
                 shelfSection: 'ชั้นวาง (เรียนจบแล้ว)'
             },
+            nightSky: {
+                starsThisWeek: 'ดาวสัปดาห์นี้ {n} ดวง',
+                starCount: '{n} ดวง',
+                collectionEmpty: 'ยังไม่มีกลุ่มดาวในคืนที่ผ่านมา'
+            },
             modalGroups: {
                 title: 'กลุ่มเรียน',
                 codePlaceholder: 'รหัสเข้ากลุ่ม',
@@ -651,6 +656,11 @@
                 collectionEmpty: 'Nothing here yet.',
                 growingSection: 'Currently growing',
                 shelfSection: 'Shelf (finished subjects)'
+            },
+            nightSky: {
+                starsThisWeek: '{n} stars this week',
+                starCount: '{n} stars',
+                collectionEmpty: 'No past constellations yet.'
             },
             modalGroups: {
                 title: 'Study groups',

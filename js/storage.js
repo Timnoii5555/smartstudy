@@ -203,7 +203,20 @@
             // Phase 8 theme gimmicks — one namespace per theme, all 4 always
             // collecting in the background regardless of which is active
             // (js/themes.js's broadcast()), so switching themes never loses
-            // progress in the others. Only mintGarden exists so far.
+            // progress in the others.
+            nightSky: {
+                // {dateISO, minutes}[] — this WEEK's stars only, cleared
+                // into weeklyLog once a new week's first star is about to
+                // be added (js/gimmicks/night.js's rolloverIfNeeded()).
+                stars: [],
+                // Past weeks' finished constellations — the "Past Skies"
+                // collection: {weekKey, name:{th,en}, startISO, endISO,
+                // starCount, totalMinutes}[]. A week that ended with under
+                // 3 stars never appears here (its stars are just dropped —
+                // "no message, nothing to see" per the brief).
+                weeklyLog: [],
+                currentWeekKey: null
+            },
             mintGarden: {
                 // subjectId -> { rounds: number, lastStudiedISO: string }
                 // — js/gimmicks/mint.js. `rounds` is completed-or-kept-
