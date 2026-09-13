@@ -16,11 +16,10 @@
     const settingsModal = document.getElementById('settingsModal');
     const langBtnTh = document.getElementById('langBtnTh');
     const langBtnEn = document.getElementById('langBtnEn');
-    const themeBtnLight = document.getElementById('themeBtnLight');
-    const themeBtnDark = document.getElementById('themeBtnDark');
+    const themeBtnPixel = document.getElementById('themeBtnPixel');
     const themeBtnPaper = document.getElementById('themeBtnPaper');
     const themeBtnNight = document.getElementById('themeBtnNight');
-    const themeBtnSystem = document.getElementById('themeBtnSystem');
+    const themeBtnMint = document.getElementById('themeBtnMint');
     const dailyGoalInput = document.getElementById('settingsDailyGoalHours');
     const examDateBtn = document.getElementById('settingsExamDateBtn');
     const examDateDisplay = document.getElementById('settingsExamDateDisplay');
@@ -42,11 +41,10 @@
         langBtnEn.classList.toggle('is-active', I18n.getLang() === 'en');
 
         const theme = s.settings.theme;
-        themeBtnLight.classList.toggle('is-active', theme === 'light');
-        themeBtnDark.classList.toggle('is-active', theme === 'dark');
+        themeBtnPixel.classList.toggle('is-active', theme === 'pixel');
         themeBtnPaper.classList.toggle('is-active', theme === 'paper');
         themeBtnNight.classList.toggle('is-active', theme === 'night');
-        themeBtnSystem.classList.toggle('is-active', theme === 'system');
+        themeBtnMint.classList.toggle('is-active', theme === 'mint');
 
         dailyGoalInput.value = (s.plan.dailyGoalSeconds / 3600).toFixed(1).replace(/\.0$/, '');
         examDateDisplay.textContent = s.plan.examDateISO ? I18n.formatDate(U.parseISODate(s.plan.examDateISO)) : I18n.t('s2.examDatePlaceholder');
@@ -83,11 +81,10 @@
     langBtnTh.addEventListener('click', () => { I18n.setLanguage('th'); render(); });
     langBtnEn.addEventListener('click', () => { I18n.setLanguage('en'); render(); });
 
-    themeBtnLight.addEventListener('click', () => { TFS.Theme.setTheme('light'); render(); });
-    themeBtnDark.addEventListener('click', () => { TFS.Theme.setTheme('dark'); render(); });
+    themeBtnPixel.addEventListener('click', () => { TFS.Theme.setTheme('pixel'); render(); });
     themeBtnPaper.addEventListener('click', () => { TFS.Theme.setTheme('paper'); render(); });
     themeBtnNight.addEventListener('click', () => { TFS.Theme.setTheme('night'); render(); });
-    themeBtnSystem.addEventListener('click', () => { TFS.Theme.setTheme('system'); render(); });
+    themeBtnMint.addEventListener('click', () => { TFS.Theme.setTheme('mint'); render(); });
 
     dailyGoalInput.addEventListener('change', () => {
         let hrs = parseFloat(dailyGoalInput.value);

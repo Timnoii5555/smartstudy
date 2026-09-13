@@ -748,6 +748,7 @@
         playNotificationSound();
         if (mode === 'focus') {
             logFlight(pomodoroSettings().focusMin);
+            if (TFS.Themes) TFS.Themes.notifySessionComplete({ minutes: pomodoroSettings().focusMin, subject: State.get().plan.subject, dateISO: todayISO() });
             cyclesCompletedToday++;
             const cycles = pomodoroSettings().cyclesBeforeLongBreak;
             mode = (cyclesCompletedToday % cycles === 0) ? 'longBreak' : 'shortBreak';
@@ -780,6 +781,7 @@
         requestWakeLock();
         ensureRenderInterval();
         joinFlightHeartbeatIfEligible();
+        if (mode === 'focus' && TFS.Themes) TFS.Themes.notifySessionStart({ minutes: pomodoroSettings().focusMin, subject: State.get().plan.subject, dateISO: todayISO() });
         persistRuntime();
         render();
     }

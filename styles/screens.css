@@ -90,19 +90,22 @@
 .schedule-block:hover { opacity: 0.85; }
 .schedule-block__title { font-size: 0.625rem; font-weight: 700; line-height: 1.2; }
 .schedule-block__time { font-size: 0.5625rem; color: var(--color-outline); margin-top: 0.15rem; }
+/* Each subject color keeps one fixed literal hue as its identity (the
+   border, an accent marker any theme can't reassign) but blends it into
+   the *current* theme's own surface/text tokens for the fill and label —
+   so these six automatically read correctly against a dark theme (Pixel,
+   Night) or a light one (Paper, Mint) with no per-theme override rule
+   needed, unlike the old html.dark-only overrides this replaced (which
+   silently never applied to Paper/Night either, nor to Pixel once "dark"
+   was renamed to it — exactly the kind of hardcoded-color gap Phase 8's
+   own acceptance check exists to catch). */
 .schedule-block--blue { background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface-lowest)); border-left-color: var(--color-primary); color: var(--color-primary); }
-.schedule-block--orange { background: #fff3e6; border-left-color: #f97316; color: #c2410c; }
-.schedule-block--green { background: #ecfdf3; border-left-color: #22c55e; color: #15803d; }
-.schedule-block--purple { background: #f5f0ff; border-left-color: #a855f7; color: #7e22ce; }
-.schedule-block--pink { background: #fef1f6; border-left-color: #ec4899; color: #be185d; }
-.schedule-block--red { background: #fef2f2; border-left-color: #ef4444; color: #b91c1c; }
-.schedule-block--teal { background: #effcfa; border-left-color: #14b8a6; color: #0f766e; }
-html.dark .schedule-block--orange { background: rgba(249,115,22,0.15); color: #fdba74; }
-html.dark .schedule-block--green { background: rgba(34,197,94,0.15); color: #86efac; }
-html.dark .schedule-block--purple { background: rgba(168,85,247,0.15); color: #d8b4fe; }
-html.dark .schedule-block--pink { background: rgba(236,72,153,0.15); color: #f9a8d4; }
-html.dark .schedule-block--red { background: rgba(239,68,68,0.15); color: #fca5a5; }
-html.dark .schedule-block--teal { background: rgba(20,184,166,0.15); color: #5eead4; }
+.schedule-block--orange { background: color-mix(in srgb, #f97316 16%, var(--color-surface-lowest)); border-left-color: #f97316; color: color-mix(in srgb, #f97316 65%, var(--color-on-surface)); }
+.schedule-block--green { background: color-mix(in srgb, #22c55e 16%, var(--color-surface-lowest)); border-left-color: #22c55e; color: color-mix(in srgb, #22c55e 65%, var(--color-on-surface)); }
+.schedule-block--purple { background: color-mix(in srgb, #a855f7 16%, var(--color-surface-lowest)); border-left-color: #a855f7; color: color-mix(in srgb, #a855f7 65%, var(--color-on-surface)); }
+.schedule-block--pink { background: color-mix(in srgb, #ec4899 16%, var(--color-surface-lowest)); border-left-color: #ec4899; color: color-mix(in srgb, #ec4899 65%, var(--color-on-surface)); }
+.schedule-block--red { background: color-mix(in srgb, #ef4444 16%, var(--color-surface-lowest)); border-left-color: #ef4444; color: color-mix(in srgb, #ef4444 65%, var(--color-on-surface)); }
+.schedule-block--teal { background: color-mix(in srgb, #14b8a6 16%, var(--color-surface-lowest)); border-left-color: #14b8a6; color: color-mix(in srgb, #14b8a6 65%, var(--color-on-surface)); }
 
 .search-panel { margin-bottom: 1.25rem; }
 .search-panel__input-wrap { position: relative; }
@@ -320,7 +323,9 @@ body.is-immersive-focus { overflow: hidden; }
 }
 .flight-chip.is-selected .flight-chip__check { opacity: 1; transform: scale(1); }
 .focus-phase-badge { display: inline-flex; align-items: center; gap: 0.375rem; background: var(--color-primary-fixed); color: var(--color-primary); font-size: 0.6875rem; font-weight: 700; padding: 0.3rem 0.9rem; border-radius: var(--radius-full); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.75rem; }
-.focus-time-display { display: block; font-family: var(--font-headline); font-size: 3.75rem; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+/* --font-timer defaults to the headline face and is only actually
+   overridden by Pixel (a monospace stack) — see styles/tokens.css. */
+.focus-time-display { display: block; font-family: var(--font-timer); font-size: 3.75rem; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
 .focus-goal-label { font-size: 0.8125rem; font-weight: 500; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.15em; margin-top: 0.5rem; display: flex; align-items: center; justify-content: center; gap: 0.25rem; }
 .focus-controls { width: 100%; display: flex; flex-direction: column; gap: 1rem; }
 .focus-controls__row { display: flex; gap: 0.75rem; width: 100%; }
@@ -335,7 +340,7 @@ body.is-immersive-focus { overflow: hidden; }
 .settings-lang-toggle { display: flex; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--color-border); }
 .settings-lang-toggle button { flex: 1; padding: 0.6rem; background: var(--color-surface-lowest); border: none; font-weight: 600; }
 .settings-lang-toggle button.is-active { background: var(--color-primary-solid); color: #fff; }
-.settings-theme-toggle { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+.settings-theme-toggle { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
 .settings-theme-toggle button { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; padding: 0.75rem 0.5rem; border-radius: var(--radius-lg); border: 1px solid var(--color-border); background: var(--color-surface-lowest); font-size: 0.6875rem; font-weight: 600; }
 .settings-theme-toggle button.is-active { border-color: var(--color-primary); color: var(--color-primary); background: var(--color-primary-fixed); }
 .settings-file-input { display: none; }

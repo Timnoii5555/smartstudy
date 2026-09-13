@@ -1,66 +1,149 @@
 /**
  * tokens.css
- * Design tokens as CSS custom properties. Light values live on :root; dark
- * values are redeclared under html.dark (Part 3.2 — Tailwind's "class"
- * strategy re-created by hand since Part 4 replaces the Tailwind CDN build
- * with hand-written CSS — see README notes in the final report for why).
- * Every other stylesheet consumes these tokens instead of literal colors,
- * so theming and future rebranding both stay a one-file change.
+ * Design tokens as CSS custom properties — Phase 8's 4-theme system. Every
+ * other stylesheet consumes these tokens instead of literal colors, so
+ * re-theming is a one-file change; every visual "gimmick" (js/themes.js)
+ * reads them too, never its own hardcoded hex values.
+ *
+ * The 4 themes are Pixel (default, :root — no class needed), Paper, Night
+ * and Mint (each an html.<name> class, exactly like the dark/paper/night
+ * scheme this replaced). This project's own existing token set is richer
+ * than the phase brief's minimal 10-token model (--bg/--bg-elevated/
+ * --bg-sunken/--text-primary/--text-secondary/--text-muted/--accent/
+ * --accent-subtle/--border/--success/--radius) because dozens of already-
+ * shipped components across this whole app key off the existing, more
+ * granular names (surface/surface-low/surface-lowest/surface-high/
+ * surface-highest for a 5-step elevation ramp; six separate --radius-*
+ * tokens for different rounding roles) — renaming every one of those call
+ * sites was judged not worth the risk for what this phase actually needs
+ * (see the migration report), so the brief's simpler model is *mapped onto*
+ * this richer one instead of replacing it:
+ *   --bg          -> --color-bg / --color-surface
+ *   --bg-sunken   -> --color-surface-low   (recessed panels)
+ *   --bg-elevated -> --color-surface-lowest (the one raised-card tier the
+ *                    brief specifies; --surface-high/-highest extrapolate
+ *                    one and two steps further in the same direction, for
+ *                    hover/pressed states the brief doesn't name)
+ *   --text-primary/-secondary/-muted -> --color-on-surface / -variant / --color-outline
+ *   --accent / --accent-subtle -> --color-primary (also -secondary/-tertiary,
+ *                    collapsed to one hue per theme — the brief's model has
+ *                    no separate secondary/tertiary concept) / --color-*-fixed
+ *   --border      -> --color-border
+ *   --success     -> --color-success
+ *   --radius      -> see each theme's radius block below
+ * --color-danger/--color-warning aren't in the brief's model at all; each
+ * theme below picks a hue consistent with its given palette.
  */
 
 :root {
+    color-scheme: dark;
+
+    /* ============================== Pixel (default) ==============================
+       The brief's exact palette; radius forced to 0 everywhere, "not even
+       one rounded button" — literal, on purpose, including the normally-
+       fully-round --radius-full (icon buttons, switches, avatars), which
+       is why they render square only in this theme. */
+    --color-primary: #D98E5F;
+    --color-primary-container: #E4A578;
+    --color-secondary: #9CB8A9;
+    --color-tertiary: #D98E5F;
+    --color-danger: #C96A5A;
+    --color-success: #8FBF7A;
+    --color-warning: #D9B15F;
+
+    --color-primary-solid: #986342;
+    --color-primary-solid-container: #7A4F35;
+    --color-tertiary-solid: #986342;
+    --color-danger-solid: #9C4E40;
+
+    --color-primary-fixed: #3E5A4B;
+    --color-secondary-fixed: #3E5A4B;
+    --color-tertiary-fixed: #3E5A4B;
+    --color-on-primary-fixed: #F2E6C8;
+    --color-on-tertiary-fixed: #F2E6C8;
+
+    --color-bg: #1B2A38;
+    --color-surface: #1B2A38;
+    --color-surface-low: #14202B;
+    --color-surface-lowest: #243A4C;
+    --color-surface-high: #3A4E5E;
+    --color-surface-highest: #546573;
+
+    --color-on-surface: #F2E6C8;
+    --color-on-surface-variant: #9CB8A9;
+    --color-outline: #6E8A7C;
+    --color-outline-variant: #2C4456;
+    --color-border: #3E5A6B;
+
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
+    --shadow-md: 0 16px 32px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.5);
+    --shadow-ring: 0 0 0 3px rgba(217, 142, 95, 0.45);
+
+    --radius-sm: 0px;
+    --radius-md: 0px;
+    --radius-lg: 0px;
+    --radius-xl: 0px;
+    --radius-2xl: 0px;
+    --radius-full: 0px;
+
+    /* Type */
+    --font-headline: 'Plus Jakarta Sans', 'Noto Sans Thai', system-ui, sans-serif;
+    --font-body: 'Kanit', 'Noto Sans Thai', system-ui, sans-serif;
+    /* Only Pixel uses a monospace timer (a retro/pixel-art reading of "the
+       countdown"); every other theme falls back to the headline face. */
+    --font-timer: 'Courier New', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+
+    --z-header: 50;
+    --z-modal: 130;
+    --z-toast: 400;
+}
+
+/* ============================== Paper ==============================
+   Warm cream/sepia, low contrast, no recurring animation at all (see
+   js/themes.js's paper gimmick) — the calmest of the four on purpose. */
+html.paper {
     color-scheme: light;
 
-    /* Brand */
-    --color-primary: #0058bc;
-    --color-primary-container: #0070eb;
-    --color-secondary: #405e96;
-    --color-tertiary: #9e3d00;
-    --color-danger: #d92d20;
-    --color-success: #17803d;
-    --color-warning: #b45309;
+    --color-primary: #B5623C;
+    --color-primary-container: #C97A52;
+    --color-secondary: #8A7355;
+    --color-tertiary: #B5623C;
+    --color-danger: #A8442F;
+    --color-success: #6E8B4A;
+    --color-warning: #8A6A1E;
 
-    /* "Solid fill" variants: used specifically where a token colors a full-
-       opacity background with white/light text or icons on top (buttons,
-       banners, active pills, the exam-date calendar cell). In light mode
-       these equal the base color; in dark mode the base colors above are
-       deliberately light (so they read well as *text* on a dark surface),
-       which is too light for white text to sit on top of at WCAG AA — so
-       dark mode redeclares darker, more saturated "solid" values below. */
-    --color-primary-solid: var(--color-primary);
-    --color-primary-solid-container: var(--color-primary-container);
-    --color-tertiary-solid: var(--color-tertiary);
-    --color-danger-solid: var(--color-danger);
+    --color-primary-solid: #AC5D39;
+    --color-primary-solid-container: #8A4A2C;
+    --color-tertiary-solid: #AC5D39;
+    --color-danger-solid: #8A3624;
 
-    /* Tinted fixed containers (icon badges, callouts) */
-    --color-primary-fixed: #d8e2ff;
-    --color-secondary-fixed: #adc6ff;
-    --color-tertiary-fixed: #ffdbcc;
-    --color-on-primary-fixed: #001a41;
-    --color-on-tertiary-fixed: #3a1400;
+    --color-primary-fixed: #E8D5BE;
+    --color-secondary-fixed: #E8D5BE;
+    --color-tertiary-fixed: #E8D5BE;
+    --color-on-primary-fixed: #3B2F22;
+    --color-on-tertiary-fixed: #3B2F22;
 
-    /* Surfaces */
-    --color-bg: #f9f9fc;
-    --color-surface: #f9f9fc;
-    --color-surface-low: #f3f3f6;
-    --color-surface-lowest: #ffffff;
-    --color-surface-high: #eceef2;
-    --color-surface-highest: #e2e2e5;
+    --color-bg: #F4EADA;
+    --color-surface: #F4EADA;
+    --color-surface-low: #EADFCB;
+    --color-surface-lowest: #FBF5E9;
+    --color-surface-high: #D3C9B7;
+    --color-surface-highest: #BBB2A2;
 
-    /* Text & borders */
-    --color-on-surface: #1a1c1e;
-    --color-on-surface-variant: #44474a;
-    --color-outline: #717786;
-    --color-outline-variant: #c4c7ce;
-    --color-border: #e5e7eb;
+    --color-on-surface: #3B2F22;
+    --color-on-surface-variant: #8A7355;
+    --color-outline: #A89577;
+    --color-outline-variant: #DCCDB4;
+    --color-border: #DCCDB4;
 
-    /* Elevation */
-    --shadow-sm: 0 2px 8px rgba(16, 24, 40, 0.04);
-    --shadow-md: 0 16px 32px rgba(0, 88, 188, 0.06);
-    --shadow-lg: 0 20px 40px rgba(0, 88, 188, 0.10);
-    --shadow-ring: 0 0 0 3px rgba(0, 88, 188, 0.35);
+    --shadow-sm: 0 2px 8px rgba(59, 47, 34, 0.08);
+    --shadow-md: 0 16px 32px rgba(59, 47, 34, 0.10);
+    --shadow-lg: 0 20px 40px rgba(59, 47, 34, 0.14);
+    --shadow-ring: 0 0 0 3px rgba(181, 98, 60, 0.35);
 
-    /* Shape */
+    /* radius base = 8px, same as Pixel's pre-Phase-8 default — the rest of
+       the scale keeps its existing proportions relative to that base. */
     --radius-sm: 0.5rem;
     --radius-md: 0.75rem;
     --radius-lg: 1rem;
@@ -68,146 +151,114 @@
     --radius-2xl: 2rem;
     --radius-full: 999px;
 
-    /* Type */
-    --font-headline: 'Plus Jakarta Sans', 'Noto Sans Thai', system-ui, sans-serif;
-    --font-body: 'Kanit', 'Noto Sans Thai', system-ui, sans-serif;
-
-    --z-header: 50;
-    --z-modal: 130;
-    --z-toast: 400;
+    --font-timer: var(--font-headline);
 }
 
-html.dark {
-    color-scheme: dark;
-
-    --color-primary: #7fb2ff;
-    --color-primary-container: #4c8fef;
-    --color-secondary: #a9c2f0;
-    --color-tertiary: #ffb27a;
-    --color-danger: #ff6b6b;
-    --color-success: #4ade80;
-    --color-warning: #fbbf24;
-
-    /* Darker than the base colors above on purpose — see the comment on
-       these tokens under :root. White text/icons on these pass WCAG AA
-       (contrast ratio ≈ 4.8–7.7:1); on the light --color-primary/-danger
-       above it would only be ≈ 2.2–2.8:1. */
-    --color-primary-solid: #2760c0;
-    --color-primary-solid-container: #1f4fa8;
-    --color-tertiary-solid: #a8480d;
-    --color-danger-solid: #c62f2f;
-
-    --color-primary-fixed: rgba(127, 178, 255, 0.18);
-    --color-secondary-fixed: rgba(169, 194, 240, 0.18);
-    --color-tertiary-fixed: rgba(255, 178, 122, 0.18);
-    --color-on-primary-fixed: #dce8ff;
-    --color-on-tertiary-fixed: #ffe1c7;
-
-    --color-bg: #101317;
-    --color-surface: #101317;
-    --color-surface-low: #171b21;
-    --color-surface-lowest: #1c2129;
-    --color-surface-high: #232833;
-    --color-surface-highest: #2c323e;
-
-    --color-on-surface: #eef1f6;
-    --color-on-surface-variant: #c3c9d3;
-    --color-outline: #9aa1ad;
-    --color-outline-variant: #3a4150;
-    --color-border: #2a303b;
-
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.28);
-    --shadow-md: 0 16px 32px rgba(0, 0, 0, 0.35);
-    --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.45);
-    --shadow-ring: 0 0 0 3px rgba(127, 178, 255, 0.45);
-}
-
-/* "Paper" — a warm, cream/sepia light theme, deliberately lower-contrast
-   than the default light theme for comfortable long reading sessions
-   (still comfortably above the 4.5:1 body-text / 3:1 large-text minimums —
-   see the html.dark block above for the same reasoning applied to darks). */
-html.paper {
-    color-scheme: light;
-
-    --color-primary: #7a4a1e;
-    --color-primary-container: #9c6428;
-    --color-secondary: #6b5636;
-    --color-tertiary: #8a5a2a;
-    --color-danger: #a8442f;
-    --color-success: #4d7a3a;
-    --color-warning: #8a6a1e;
-
-    --color-primary-solid: #5c3814;
-    --color-primary-solid-container: #4a2d10;
-    --color-tertiary-solid: #6b4420;
-    --color-danger-solid: #8a3624;
-
-    --color-primary-fixed: #e8d4b0;
-    --color-secondary-fixed: #ddd0b4;
-    --color-tertiary-fixed: #e8d4b0;
-    --color-on-primary-fixed: #3f2a10;
-    --color-on-tertiary-fixed: #3f2a10;
-
-    --color-bg: #f2e8d5;
-    --color-surface: #f2e8d5;
-    --color-surface-low: #e9dcc0;
-    --color-surface-lowest: #faf3e3;
-    --color-surface-high: #e2d3af;
-    --color-surface-highest: #d6c49a;
-
-    --color-on-surface: #3f3222;
-    --color-on-surface-variant: #5f4f39;
-    --color-outline: #8c7955;
-    --color-outline-variant: #cbb98f;
-    --color-border: #d4c19a;
-
-    --shadow-sm: 0 2px 8px rgba(63, 50, 34, 0.08);
-    --shadow-md: 0 16px 32px rgba(63, 50, 34, 0.10);
-    --shadow-lg: 0 20px 40px rgba(63, 50, 34, 0.14);
-    --shadow-ring: 0 0 0 3px rgba(122, 74, 30, 0.35);
-}
-
-/* "Night" — very dark and deliberately desaturated, with a warm amber
-   accent instead of blue so the dominant on-screen hue carries the least
-   blue light of any theme here (a literal "minimal blue light" reading of
-   the design brief, not just "darker than Dark"). */
+/* ============================== Night ==============================
+   Near-black, desaturated, warm sage accent — carries the least blue light
+   of any theme here, meant for late-night use. */
 html.night {
     color-scheme: dark;
 
-    --color-primary: #d99a5b;
-    --color-primary-container: #b97d3f;
-    --color-secondary: #c9a876;
-    --color-tertiary: #e0b48a;
-    --color-danger: #e0776b;
-    --color-success: #9fc98a;
-    --color-warning: #e0b45b;
+    --color-primary: #8A9A7B;
+    --color-primary-container: #9FAE91;
+    --color-secondary: #6B7078;
+    --color-tertiary: #8A9A7B;
+    --color-danger: #B8695A;
+    --color-success: #7A9A6B;
+    --color-warning: #C9A868;
 
-    --color-primary-solid: #8a5a25;
-    --color-primary-solid-container: #714a1c;
-    --color-tertiary-solid: #8a5a25;
-    --color-danger-solid: #8a3a2e;
+    --color-primary-solid: #68745C;
+    --color-primary-solid-container: #545E4A;
+    --color-tertiary-solid: #68745C;
+    --color-danger-solid: #8A4E42;
 
-    --color-primary-fixed: rgba(217, 154, 91, 0.16);
-    --color-secondary-fixed: rgba(201, 168, 118, 0.16);
-    --color-tertiary-fixed: rgba(224, 180, 138, 0.16);
-    --color-on-primary-fixed: #f0dcc0;
-    --color-on-tertiary-fixed: #f0dcc0;
+    --color-primary-fixed: #232A22;
+    --color-secondary-fixed: #232A22;
+    --color-tertiary-fixed: #232A22;
+    --color-on-primary-fixed: #E4E6E9;
+    --color-on-tertiary-fixed: #E4E6E9;
 
-    --color-bg: #0a0a0a;
-    --color-surface: #0a0a0a;
-    --color-surface-low: #121212;
-    --color-surface-lowest: #161616;
-    --color-surface-high: #1e1c1a;
-    --color-surface-highest: #2a2724;
+    --color-bg: #101215;
+    --color-surface: #101215;
+    --color-surface-low: #0A0C0E;
+    --color-surface-lowest: #1A1D21;
+    --color-surface-high: #313437;
+    --color-surface-highest: #4C4F52;
 
-    --color-on-surface: #d8d3c9;
-    --color-on-surface-variant: #b0aa9e;
-    --color-outline: #8a8378;
-    --color-outline-variant: #3a352e;
-    --color-border: #2a2620;
+    --color-on-surface: #E4E6E9;
+    --color-on-surface-variant: #6B7078;
+    --color-outline: #4A4E54;
+    --color-outline-variant: #24272B;
+    --color-border: #24272B;
 
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
-    --shadow-md: 0 16px 32px rgba(0, 0, 0, 0.5);
-    --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.6);
-    --shadow-ring: 0 0 0 3px rgba(217, 154, 91, 0.45);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.45);
+    --shadow-md: 0 16px 32px rgba(0, 0, 0, 0.55);
+    --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.65);
+    --shadow-ring: 0 0 0 3px rgba(138, 154, 123, 0.45);
+
+    /* radius base = 10px, scaled proportionally from the same 8px:12px:...
+       ratio the other themes use. */
+    --radius-sm: 0.625rem;
+    --radius-md: 0.9375rem;
+    --radius-lg: 1.25rem;
+    --radius-xl: 1.875rem;
+    --radius-2xl: 2.5rem;
+    --radius-full: 999px;
+
+    --font-timer: var(--font-headline);
+}
+
+/* ============================== Mint ==============================
+   Warm-white/grey, clean, bright — the plant/garden theme, meant for
+   daytime use. */
+html.mint {
+    color-scheme: light;
+
+    --color-primary: #2E9E7B;
+    --color-primary-container: #3DB08C;
+    --color-secondary: #7A8079;
+    --color-tertiary: #2E9E7B;
+    --color-danger: #C1523F;
+    --color-success: #2E9E7B;
+    --color-warning: #C99A3D;
+
+    --color-primary-solid: #257E62;
+    --color-primary-solid-container: #1D6650;
+    --color-tertiary-solid: #257E62;
+    --color-danger-solid: #954031;
+
+    --color-primary-fixed: #DFF2EA;
+    --color-secondary-fixed: #DFF2EA;
+    --color-tertiary-fixed: #DFF2EA;
+    --color-on-primary-fixed: #1C1F1C;
+    --color-on-tertiary-fixed: #1C1F1C;
+
+    --color-bg: #FBFBF9;
+    --color-surface: #FBFBF9;
+    --color-surface-low: #F2F3F0;
+    --color-surface-lowest: #FFFFFF;
+    --color-surface-high: #DADBD8;
+    --color-surface-highest: #C2C2C0;
+
+    --color-on-surface: #1C1F1C;
+    --color-on-surface-variant: #7A8079;
+    --color-outline: #A3A8A1;
+    --color-outline-variant: #E3E5E0;
+    --color-border: #E3E5E0;
+
+    --shadow-sm: 0 2px 8px rgba(28, 31, 28, 0.06);
+    --shadow-md: 0 16px 32px rgba(28, 31, 28, 0.08);
+    --shadow-lg: 0 20px 40px rgba(28, 31, 28, 0.12);
+    --shadow-ring: 0 0 0 3px rgba(46, 158, 123, 0.35);
+
+    /* radius base = 10px, same scaling as Night. */
+    --radius-sm: 0.625rem;
+    --radius-md: 0.9375rem;
+    --radius-lg: 1.25rem;
+    --radius-xl: 1.875rem;
+    --radius-2xl: 2.5rem;
+    --radius-full: 999px;
+
+    --font-timer: var(--font-headline);
 }

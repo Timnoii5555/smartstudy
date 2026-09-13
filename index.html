@@ -34,12 +34,20 @@
         var stateKey = activeProfileId ? ('tfs:v1:state:' + activeProfileId) : 'tfs:v1:state';
         var raw = localStorage.getItem(stateKey);
         var data = raw ? JSON.parse(raw) : null;
-        var themeSetting = (data && data.settings && data.settings.theme) || 'system';
+        // Phase 8's 4-theme system (Pixel/Paper/Night/Mint — see
+        // js/theme.js's header) replaced the old light/dark/paper/night/
+        // system scheme; migrate an old saved value the same way
+        // js/storage.js's migrate() does, since this runs before that ever
+        // gets a chance to.
+        var themeSetting = (data && data.settings && data.settings.theme) || 'pixel';
         var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        var effective = (themeSetting === 'dark' || themeSetting === 'paper' || themeSetting === 'night') ? themeSetting
-            : (themeSetting === 'light' ? 'light' : (prefersDark ? 'dark' : 'light'));
-        if (effective !== 'light') document.documentElement.classList.add(effective);
-        document.documentElement.style.colorScheme = (effective === 'night') ? 'dark' : (effective === 'paper' ? 'light' : effective);
+        if (themeSetting === 'light') themeSetting = 'mint';
+        else if (themeSetting === 'dark') themeSetting = 'pixel';
+        else if (themeSetting === 'system') themeSetting = prefersDark ? 'pixel' : 'mint';
+        var validThemes = ['pixel', 'paper', 'night', 'mint'];
+        var effective = validThemes.indexOf(themeSetting) > -1 ? themeSetting : 'pixel';
+        if (effective !== 'pixel') document.documentElement.classList.add(effective);
+        document.documentElement.style.colorScheme = (effective === 'pixel' || effective === 'night') ? 'dark' : 'light';
 
         var lang = (data && data.settings && data.settings.language) || (navigator.language || 'th').toLowerCase().indexOf('en') === 0 ? 'en' : 'th';
         document.documentElement.setAttribute('lang', lang);
@@ -1329,12 +1337,15 @@
 
         <div class="settings-section">
             <span class="settings-section__title" data-i18n="settings.theme">Theme</span>
+            <!-- Phase 8's 4-theme system (js/themes.js, js/theme.js) — Pixel
+                 is the default, all 4 available from first launch, no
+                 unlock system and no OS-following "system" option anymore
+                 (see js/theme.js's header for the old-value migration). -->
             <div class="settings-theme-toggle">
-                <button type="button" id="themeBtnLight" data-theme="light"><span class="material-symbols-outlined" aria-hidden="true">light_mode</span><span data-i18n="settings.themeLight">Light</span></button>
-                <button type="button" id="themeBtnDark" data-theme="dark"><span class="material-symbols-outlined" aria-hidden="true">dark_mode</span><span data-i18n="settings.themeDark">Dark</span></button>
+                <button type="button" id="themeBtnPixel" data-theme="pixel"><span class="material-symbols-outlined" aria-hidden="true">grass</span><span data-i18n="settings.themePixel">Pixel</span></button>
                 <button type="button" id="themeBtnPaper" data-theme="paper"><span class="material-symbols-outlined" aria-hidden="true">auto_stories</span><span data-i18n="settings.themePaper">Paper</span></button>
                 <button type="button" id="themeBtnNight" data-theme="night"><span class="material-symbols-outlined" aria-hidden="true">bedtime</span><span data-i18n="settings.themeNight">Night</span></button>
-                <button type="button" id="themeBtnSystem" data-theme="system"><span class="material-symbols-outlined" aria-hidden="true">contrast</span><span data-i18n="settings.themeSystem">System</span></button>
+                <button type="button" id="themeBtnMint" data-theme="mint"><span class="material-symbols-outlined" aria-hidden="true">potted_plant</span><span data-i18n="settings.themeMint">Mint</span></button>
             </div>
         </div>
 
@@ -1592,6 +1603,7 @@
 <script src="js/state.js"></script>
 <script src="js/i18n.js"></script>
 <script src="js/theme.js"></script>
+<script src="js/themes.js"></script>
 <script src="js/toast.js"></script>
 <script src="js/reminder.js"></script>
 <script src="js/streak.js"></script>

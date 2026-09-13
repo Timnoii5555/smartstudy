@@ -13,7 +13,7 @@
     const U = TFS.Utils;
 
     const STORAGE_KEY = 'tfs:v1:state';
-    const SCHEMA_VERSION = 1;
+    const SCHEMA_VERSION = 2;
 
     // ---- Local profiles ("login") ------------------------------------------
     // There is no server here, so "login" means "which named local profile on
@@ -110,7 +110,7 @@
             schemaVersion: SCHEMA_VERSION,
             settings: {
                 language: null, // null = "not chosen yet", app.js resolves it from the browser
-                theme: 'system', // 'light' | 'dark' | 'system'
+                theme: 'pixel', // 'pixel' | 'paper' | 'night' | 'mint' — see js/theme.js
                 soundEnabled: true,
                 ambientType: 'brown', // 'brown' | 'rain'
                 ambientVolume: 0.5,
@@ -223,8 +223,21 @@
             state = defaultState();
         }
 
-        // Future migrations get appended here, e.g.:
-        // if (state.schemaVersion < 2) { ...transform...; state.schemaVersion = 2; }
+        // Phase 8's 4-theme system (Pixel/Paper/Night/Mint) replaced the
+        // old light/dark/paper/night/system scheme — the same one-time
+        // remap index.html's inline first-paint script already applies to
+        // avoid a flash, kept in sync with it deliberately.
+        if (version < 2 && state.settings && typeof state.settings.theme === 'string') {
+            const oldTheme = state.settings.theme;
+            if (oldTheme === 'light') state.settings.theme = 'mint';
+            else if (oldTheme === 'dark') state.settings.theme = 'pixel';
+            else if (oldTheme === 'system') {
+                const prefersDark = typeof global.matchMedia === 'function' && global.matchMedia('(prefers-color-scheme: dark)').matches;
+                state.settings.theme = prefersDark ? 'pixel' : 'mint';
+            } else if (!['pixel', 'paper', 'night', 'mint'].includes(oldTheme)) {
+                state.settings.theme = 'pixel';
+            }
+        }
 
         state.schemaVersion = SCHEMA_VERSION;
         return state;
