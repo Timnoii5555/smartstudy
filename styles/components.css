@@ -76,6 +76,9 @@
 .btn:active { transform: scale(0.96); }
 .btn--flex { flex: 1 1 0%; border-radius: var(--radius-lg); }
 .btn--primary { background: linear-gradient(to bottom right, var(--color-primary-solid), var(--color-primary-solid-container)); color: #fff; box-shadow: var(--shadow-lg); }
+@media (hover: hover) {
+    .btn--primary:hover { transform: translateY(-2px); box-shadow: 0 22px 34px color-mix(in srgb, var(--color-primary-solid) 30%, transparent); }
+}
 .btn--ghost { background: var(--color-surface-high); color: var(--color-on-surface-variant); }
 .btn--ghost:hover { background: var(--color-surface-highest); }
 .btn--danger { background: var(--color-danger-solid); color: #fff; }
@@ -123,10 +126,17 @@
     display: flex; flex-direction: column; width: 100%; padding: 1.5rem;
     background: var(--color-surface-lowest); border-radius: var(--radius-xl);
     box-shadow: var(--shadow-sm); border: 2px solid transparent; cursor: pointer;
-    transition: border-color 0.2s ease, background-color 0.2s ease;
+    transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
     text-align: left; font: inherit; color: inherit;
 }
 .subject-card:hover { background: var(--color-surface-low); }
+/* Hover-only lift, gated on an actual pointing device — on a touchscreen
+   :hover just sticks around after the tap that already navigated away,
+   which would leave a random card looking permanently "raised". */
+@media (hover: hover) {
+    .subject-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+}
+.subject-card:active { transform: scale(0.98); }
 .subject-card.is-selected { border-color: var(--color-primary); box-shadow: var(--shadow-md); }
 .subject-card__row { display: flex; align-items: center; justify-content: space-between; width: 100%; }
 .subject-card__main { display: flex; align-items: center; gap: 1.25rem; }

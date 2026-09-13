@@ -13,7 +13,19 @@ html, body { height: 100%; }
 body {
     margin: 0;
     min-height: 100vh;
-    background-color: var(--color-bg);
+    /* Two large, very soft tinted blobs instead of one flat color — real
+       content always sits on its own solid card (--color-surface-lowest),
+       so this never touches text contrast; it just keeps the space
+       *around* the cards from reading as one dead flat plane. Built from
+       the theme's own --color-primary/-tertiary via color-mix() so it
+       re-tints correctly for every theme with zero per-theme overrides.
+       No background-attachment:fixed on purpose — that's a well-known
+       scroll-jank trap on iOS Safari, which a lot of this app's real
+       usage is. */
+    background:
+        radial-gradient(70rem 40rem at 12% -8%, color-mix(in srgb, var(--color-primary) 9%, transparent), transparent 60%),
+        radial-gradient(60rem 45rem at 108% 8%, color-mix(in srgb, var(--color-tertiary) 7%, transparent), transparent 60%),
+        var(--color-bg);
     color: var(--color-on-surface);
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;

@@ -34,6 +34,19 @@
 .slider-labels { display: flex; justify-content: space-between; margin-top: 1rem; font-size: 0.625rem; font-weight: 700; text-transform: uppercase; color: var(--color-outline); }
 
 /* ---------- Screen 3: dashboard ---------- */
+/* A small staggered rise for the dashboard's top-level cards, same
+   keyframe as the landing page — since .screen's display:none/block
+   toggle (styles/base... see .screen.is-active) removes this whole
+   subtree from rendering between visits, this genuinely replays every
+   time the learner comes back to this screen, not just on first load. */
+#gardenCard, #readinessScoreCard, .dashboard-grid > .card {
+    animation: landing-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+#gardenCard { animation-delay: 0.05s; }
+#readinessScoreCard { animation-delay: 0.12s; }
+.dashboard-grid > .card:nth-child(1) { animation-delay: 0.19s; }
+.dashboard-grid > .card:nth-child(2) { animation-delay: 0.26s; }
+
 .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
 @media (min-width: 768px) {
     .dashboard-grid { grid-template-columns: repeat(12, 1fr); }
@@ -363,11 +376,21 @@ body.is-immersive-focus { overflow: hidden; }
     width: 2.25rem; height: 2.25rem; border-radius: var(--radius-md); flex-shrink: 0;
     background: linear-gradient(135deg, var(--color-primary), var(--color-tertiary));
     color: #fff; display: flex; align-items: center; justify-content: center;
+    animation: brand-glow 3s ease-in-out infinite;
+}
+@keyframes brand-glow {
+    0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 35%, transparent); }
+    50% { box-shadow: 0 0 0.6rem 0.15rem color-mix(in srgb, var(--color-primary) 25%, transparent); }
 }
 
 .landing-hero {
     max-width: 44rem; margin: 0 auto 4.5rem; text-align: center;
     display: flex; flex-direction: column; align-items: center; gap: 1.25rem;
+    animation: landing-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes landing-rise {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 .landing-eyebrow {
     display: inline-flex; align-items: center; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.02em;
@@ -393,7 +416,12 @@ body.is-immersive-focus { overflow: hidden; }
     background: var(--color-surface-lowest); box-shadow: var(--shadow-sm); border: 1px solid var(--color-border);
     display: flex; flex-direction: column; gap: 0.6rem;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
+    animation: landing-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
+.landing-step:nth-child(1) { animation-delay: 0.05s; }
+.landing-step:nth-child(2) { animation-delay: 0.15s; }
+.landing-step:nth-child(3) { animation-delay: 0.25s; }
+.landing-step:nth-child(4) { animation-delay: 0.35s; }
 .landing-step:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
 .landing-step__num {
     position: absolute; top: -0.8rem; left: 1.5rem; width: 1.85rem; height: 1.85rem; border-radius: 50%;
