@@ -33,6 +33,13 @@
  *   --radius      -> see each theme's radius block below
  * --color-danger/--color-warning aren't in the brief's model at all; each
  * theme below picks a hue consistent with its given palette.
+ *
+ * --backdrop-blur-lg/-sm, --border-width and --font-timer-size exist
+ * purely so Pixel can look like an actual pixel-art/retro-game theme
+ * (hard offset --shadow-* values, no blur, a visible border, a real 8-bit
+ * timer face) without a single call-site change elsewhere — every
+ * consumer already reads these through var(), so Pixel just picks
+ * different values for them than the other 3 themes do.
  */
 
 :root {
@@ -75,10 +82,21 @@
     --color-outline-variant: #2C4456;
     --color-border: #3E5A6B;
 
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
-    --shadow-md: 0 16px 32px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.5);
+    /* Hard-edged, zero-blur, offset shadows — the "cut-out sprite" look a
+       flat drop shadow reads as, instead of the soft glow the other 3
+       themes use (same var() names, so every component that already
+       consumes --shadow-* picks this up with no call-site changes). */
+    --shadow-sm: 2px 2px 0 rgba(0, 0, 0, 0.5);
+    --shadow-md: 4px 4px 0 rgba(0, 0, 0, 0.5);
+    --shadow-lg: 6px 6px 0 rgba(0, 0, 0, 0.55);
     --shadow-ring: 0 0 0 3px rgba(217, 142, 95, 0.45);
+
+    /* No blur anywhere in this theme either — glassmorphism reads as
+       "modern flat UI", the opposite of the pixel-art/retro-game look
+       this theme is going for. Reset back to a real blur in the other
+       3 themes' blocks below. */
+    --backdrop-blur-lg: 0px;
+    --backdrop-blur-sm: 0px;
 
     --radius-sm: 0px;
     --radius-md: 0px;
@@ -87,12 +105,28 @@
     --radius-2xl: 0px;
     --radius-full: 0px;
 
+    /* A pixel-art surface needs a visible edge (no radius to imply one via
+       shading) — every other theme keeps this at the previous 1px. */
+    --border-width: 2px;
+
     /* Type */
     --font-headline: 'Plus Jakarta Sans', 'Noto Sans Thai', system-ui, sans-serif;
     --font-body: 'Kanit', 'Noto Sans Thai', system-ui, sans-serif;
-    /* Only Pixel uses a monospace timer (a retro/pixel-art reading of "the
-       countdown"); every other theme falls back to the headline face. */
-    --font-timer: 'Courier New', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+    /* A real 8-bit pixel typeface for the timer — safe *only* here because
+       the countdown is pure digits/colons, never Thai text: Press Start 2P
+       has no Thai glyph coverage at all, so using it anywhere Thai copy
+       could appear (headings, body) would silently fall back to a
+       generic system font for every Thai reader and break consistency —
+       exactly why --font-headline/--font-body stay the shared faces above
+       for all 4 themes. Every other theme falls back to the headline face
+       for its timer, same as before. */
+    --font-timer: 'Press Start 2P', 'Courier New', ui-monospace, monospace;
+    /* Deliberately much smaller than the other themes' 3.75rem — Press
+       Start 2P's blocky glyphs run far wider per character than a normal
+       monospace face, and the countdown is 7 characters ("0:24:59"); this
+       keeps it comfortably inside the narrowest phone width instead of
+       wrapping or overflowing. */
+    --font-timer-size: 2rem;
 
     --z-header: 50;
     --z-modal: 130;
@@ -142,6 +176,10 @@ html.paper {
     --shadow-lg: 0 20px 40px rgba(59, 47, 34, 0.14);
     --shadow-ring: 0 0 0 3px rgba(181, 98, 60, 0.35);
 
+    --backdrop-blur-lg: 20px;
+    --backdrop-blur-sm: 4px;
+    --border-width: 1px;
+
     /* radius base = 8px, same as Pixel's pre-Phase-8 default — the rest of
        the scale keeps its existing proportions relative to that base. */
     --radius-sm: 0.5rem;
@@ -152,6 +190,7 @@ html.paper {
     --radius-full: 999px;
 
     --font-timer: var(--font-headline);
+    --font-timer-size: 3.75rem;
 }
 
 /* ============================== Night ==============================
@@ -197,6 +236,10 @@ html.night {
     --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.65);
     --shadow-ring: 0 0 0 3px rgba(138, 154, 123, 0.45);
 
+    --backdrop-blur-lg: 20px;
+    --backdrop-blur-sm: 4px;
+    --border-width: 1px;
+
     /* radius base = 10px, scaled proportionally from the same 8px:12px:...
        ratio the other themes use. */
     --radius-sm: 0.625rem;
@@ -207,6 +250,7 @@ html.night {
     --radius-full: 999px;
 
     --font-timer: var(--font-headline);
+    --font-timer-size: 3.75rem;
 }
 
 /* ============================== Mint ==============================
@@ -252,6 +296,10 @@ html.mint {
     --shadow-lg: 0 20px 40px rgba(28, 31, 28, 0.12);
     --shadow-ring: 0 0 0 3px rgba(46, 158, 123, 0.35);
 
+    --backdrop-blur-lg: 20px;
+    --backdrop-blur-sm: 4px;
+    --border-width: 1px;
+
     /* radius base = 10px, same scaling as Night. */
     --radius-sm: 0.625rem;
     --radius-md: 0.9375rem;
@@ -261,4 +309,5 @@ html.mint {
     --radius-full: 999px;
 
     --font-timer: var(--font-headline);
+    --font-timer-size: 3.75rem;
 }

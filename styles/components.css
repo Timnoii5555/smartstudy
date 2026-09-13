@@ -11,7 +11,7 @@
 .app-header {
     position: fixed; top: 0; left: 0; width: 100%; z-index: var(--z-header);
     background: color-mix(in srgb, var(--color-bg) 70%, transparent);
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(var(--backdrop-blur-lg));
     box-shadow: var(--shadow-md);
     height: 4rem;
     display: flex; align-items: center;
@@ -45,7 +45,7 @@
 .app-footer {
     position: fixed; bottom: 0; left: 0; width: 100%; z-index: var(--z-header);
     background: color-mix(in srgb, var(--color-surface-lowest) 85%, transparent);
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(var(--backdrop-blur-lg));
     padding: 1.5rem 1.5rem 2.5rem; display: flex; flex-direction: column; align-items: center;
 }
 
@@ -55,7 +55,7 @@
     display: flex; justify-content: space-around; align-items: center;
     padding: 1rem 1rem 2rem; border-top-left-radius: var(--radius-2xl); border-top-right-radius: var(--radius-2xl);
     box-shadow: 0 -10px 20px rgba(0,0,0,0.04);
-    border-top: 1px solid var(--color-border);
+    border-top: var(--border-width) solid var(--color-border);
 }
 .nav-btn {
     display: flex; flex-direction: column; align-items: center; gap: 0.15rem;
@@ -91,7 +91,7 @@
    surface color. `--color-outline` alone dropped well under the 4.5:1
    minimum in the dark/night themes, since it's tuned for light text on a
    dark surface, the opposite of this button. */
-.btn--pill-white { background: #fff; color: #3a3d42; border: 1px solid var(--color-border); }
+.btn--pill-white { background: #fff; color: #3a3d42; border: var(--border-width) solid var(--color-border); }
 
 /* ---------- Cards / surfaces ---------- */
 
@@ -101,7 +101,7 @@
     box-shadow: var(--shadow-md);
 }
 .card--soft { background: var(--color-surface-low); box-shadow: none; }
-.card--border { border: 1px solid var(--color-border); }
+.card--border { border: var(--border-width) solid var(--color-border); }
 
 .callout {
     display: flex; gap: 1rem; padding: 1rem; border-radius: var(--radius-lg);
@@ -143,7 +143,7 @@
 .subject-card.is-selected .subject-card__check { background: var(--color-primary-solid); border-color: var(--color-primary-solid); }
 .subject-card__check .material-symbols-outlined { color: #fff; font-size: 1.1rem; transform: scale(0); transition: transform 0.15s ease; font-variation-settings: 'wght' 700; }
 .subject-card.is-selected .subject-card__check .material-symbols-outlined { transform: scale(1); }
-.subject-card__accordion { width: 100%; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--color-border); }
+.subject-card__accordion { width: 100%; margin-top: 1rem; padding-top: 1rem; border-top: var(--border-width) solid var(--color-border); }
 .subject-card__accordion p { font-size: 0.875rem; font-weight: 700; color: var(--color-primary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.25rem; }
 .subject-card__accordion ul { font-size: 0.75rem; color: var(--color-outline); list-style: disc; margin-left: 1.5rem; display: flex; flex-direction: column; gap: 0.25rem; }
 .subject-card.is-completed, .subject-card:disabled { opacity: 0.75; cursor: not-allowed; }
@@ -156,7 +156,7 @@
 
 .subject-category-tabs { display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.25rem; margin-bottom: 1.5rem; }
 .subject-category-tab {
-    flex-shrink: 0; padding: 0.5rem 1.125rem; border-radius: var(--radius-full); border: 1px solid var(--color-border);
+    flex-shrink: 0; padding: 0.5rem 1.125rem; border-radius: var(--radius-full); border: var(--border-width) solid var(--color-border);
     background: var(--color-surface-lowest); font-size: 0.8125rem; font-weight: 600; color: var(--color-outline); cursor: pointer;
 }
 .subject-category-tab.is-active { background: var(--color-primary-solid); border-color: var(--color-primary-solid); color: #fff; }
@@ -223,7 +223,7 @@
 .field { display: flex; flex-direction: column; gap: 0.5rem; }
 .field__label { font-size: 0.75rem; font-weight: 600; color: var(--color-outline); text-transform: uppercase; letter-spacing: 0.04em; }
 .input, .select, .textarea {
-    width: 100%; border: 1px solid var(--color-border); border-radius: var(--radius-lg);
+    width: 100%; border: var(--border-width) solid var(--color-border); border-radius: var(--radius-lg);
     padding: 0.75rem; font-size: 0.875rem; background: var(--color-surface-lowest); color: var(--color-on-surface);
 }
 .input:focus, .select:focus, .textarea:focus { border-color: var(--color-primary); }
@@ -238,7 +238,7 @@
 .date-trigger__value { font-size: 1.25rem; font-weight: 500; }
 
 .time-trigger {
-    width: 100%; border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 0.75rem;
+    width: 100%; border: var(--border-width) solid var(--color-border); border-radius: var(--radius-lg); padding: 0.75rem;
     font-weight: 700; display: flex; justify-content: space-between; align-items: center; font-size: 0.875rem;
     background: var(--color-surface-lowest);
 }
@@ -288,7 +288,7 @@ input[type=range]::-moz-range-track { height: 0.5rem; background: var(--color-su
     border: none; width: 100%; text-align: left; font: inherit; color: inherit;
 }
 .task-item:hover { background: var(--color-surface-low); }
-.task-item--bordered { background: var(--color-surface-low); border: 1px solid var(--color-border); }
+.task-item--bordered { background: var(--color-surface-low); border: var(--border-width) solid var(--color-border); }
 .checkbox-box {
     width: 1.5rem; height: 1.5rem; border-radius: var(--radius-sm); border: 2px solid var(--color-outline);
     display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--color-surface-lowest); transition: all 0.15s ease;
@@ -307,7 +307,7 @@ input[type=range]::-moz-range-track { height: 0.5rem; background: var(--color-su
 .read-ahead-card p { flex: 1; font-size: 0.8125rem; color: var(--color-on-primary-fixed); line-height: 1.4; }
 
 /* ---------- Badge ---------- */
-.badge { display: inline-flex; align-items: baseline; gap: 0.25rem; background: var(--color-surface-low); padding: 0.5rem 1rem; border-radius: var(--radius-lg); border: 1px solid var(--color-border); }
+.badge { display: inline-flex; align-items: baseline; gap: 0.25rem; background: var(--color-surface-low); padding: 0.5rem 1rem; border-radius: var(--radius-lg); border: var(--border-width) solid var(--color-border); }
 
 .streak-badge {
     display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.75rem; font-weight: 700;
@@ -344,7 +344,7 @@ input[type=range]::-moz-range-track { height: 0.5rem; background: var(--color-su
 /* ---------- Modal ---------- */
 
 .modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(4px);
+    position: fixed; inset: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(var(--backdrop-blur-sm));
     z-index: var(--z-modal); display: flex; align-items: center; justify-content: center; padding: 1rem;
     opacity: 0; transition: opacity 0.18s ease;
 }
@@ -476,7 +476,7 @@ input[type=range]::-moz-range-track { height: 0.5rem; background: var(--color-su
 .pixel-scene__svg-wrap, .pixel-picker-cell svg, .paper-collection__doodle svg {
     shape-rendering: crispEdges;
 }
-.pixel-scene { border-radius: var(--radius-lg); overflow: hidden; }
+.pixel-scene { border-radius: var(--radius-lg); overflow: hidden; border: var(--border-width) solid var(--color-border); }
 .pixel-scene__svg-wrap { width: 100%; aspect-ratio: 2 / 1; display: block; }
 .pixel-scene__svg-wrap--compact { aspect-ratio: 5 / 2; }
 .pixel-picker-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(2.75rem, 1fr)); gap: 0.5rem; margin-top: 0.6rem; }
@@ -521,7 +521,7 @@ input[type=range]::-moz-range-track { height: 0.5rem; background: var(--color-su
 
 .wheel-picker-frame {
     position: relative; height: 12rem; display: flex; justify-content: center; align-items: center; overflow: hidden;
-    background: var(--color-surface-low); border-radius: var(--radius-lg); border: 1px solid var(--color-border); user-select: none;
+    background: var(--color-surface-low); border-radius: var(--radius-lg); border: var(--border-width) solid var(--color-border); user-select: none;
 }
 .picker-highlight {
     position: absolute; top: 50%; transform: translateY(-50%); width: 100%; height: 2.5rem;
