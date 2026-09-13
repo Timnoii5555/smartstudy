@@ -88,21 +88,34 @@
     }
 
     // ---------------------------------------------------------------- Lifecycle dispatch
-    // Every call is wrapped — a gimmick throwing must never break the real
-    // feature it's decorating (a finished focus session, a completed
-    // task), the same defensive stance js/focus.js's own render path
-    // already takes for its own risks (Leaflet, iOS Safari SVG quirks).
+    //
+    // The data-collecting hooks (everything except the two render*() calls
+    // below) go to *every* theme's gimmick, not just the active one — "even
+    // if the learner only ever uses one theme, the others still collect in
+    // the background" is one of this phase's controlling rules, so a
+    // finished session/task has to reach all 4 regardless of which theme
+    // happens to be on screen when it happens. Only renderFocusScene() and
+    // renderCollection() are current-theme-only, since only one theme's
+    // visuals are ever actually showing.
+    //
+    // Every call is wrapped per-theme — one gimmick throwing must never
+    // break the real feature it's decorating, nor stop the other 3 themes
+    // from still recording the same event, the same defensive stance
+    // js/focus.js's own render path already takes for its own risks
+    // (Leaflet, iOS Safari SVG quirks).
 
-    function safeCall(hookName, ...args) {
-        try { currentGimmick()[hookName](...args); }
-        catch (e) { console.error(`[themes] "${currentId()}" gimmick's ${hookName} threw`, e); }
+    function broadcast(hookName, ...args) {
+        ORDER.forEach((themeId) => {
+            try { gimmicks[themeId][hookName](...args); }
+            catch (e) { console.error(`[themes] "${themeId}" gimmick's ${hookName} threw`, e); }
+        });
     }
 
-    function notifySessionStart(session) { safeCall('onSessionStart', session); }
-    function notifySessionComplete(session) { safeCall('onSessionComplete', session); }
-    function notifyTaskComplete(task) { safeCall('onTaskComplete', task); }
-    function notifyDayRollover() { safeCall('onDayRollover'); }
-    function notifyWeekRollover() { safeCall('onWeekRollover'); }
+    function notifySessionStart(session) { broadcast('onSessionStart', session); }
+    function notifySessionComplete(session) { broadcast('onSessionComplete', session); }
+    function notifyTaskComplete(task) { broadcast('onTaskComplete', task); }
+    function notifyDayRollover() { broadcast('onDayRollover'); }
+    function notifyWeekRollover() { broadcast('onWeekRollover'); }
 
     TFS.Themes = {
         ORDER, DEFAULT, DEFINITIONS,
