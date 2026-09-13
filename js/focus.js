@@ -2,17 +2,16 @@
  * focus.js
  * Screen 6: a real Pomodoro engine (focus / short break / long break, cycling
  * automatically, durations configurable in Settings). The current phase's
- * countdown is shown as plain large digits; the day's active theme (Phase 8,
- * js/themes.js) supplies whatever illustrated scene sits above it via
- * refreshThemeGimmickScene() — this file only owns the timer itself.
+ * countdown is shown as plain large digits.
  *
  * This screen used to also host a "Flight Focus"-style visual system (a
  * real satellite map, a boarding-pass check-in ritual, a seat picker, a
- * per-flight shared-presence headcount, a flight log) built and iterated on
- * earlier in this app's life. It was removed in favor of letting the theme
- * gimmick scene be the screen's one visual system instead of two running
- * side by side — see the git history around that removal for the full
- * reasoning, and FUTURE_IDEAS.md for what, if anything, might replace it.
+ * per-flight shared-presence headcount, a flight log) and, later, a set of
+ * per-theme animated "gimmick" scenes — both were built and iterated on
+ * earlier in this app's life and both were removed, leaving this screen a
+ * plain, focused timer with no extra visual layer at all. See the git
+ * history around those removals for the full reasoning, and
+ * FUTURE_IDEAS.md for what, if anything, might replace them.
  *
  * Timer correctness: the countdown is timestamp-based, not a `setInterval`
  * counter. `runStartedAtMs` (when the current run segment began) and
@@ -232,19 +231,6 @@
     const focusTodayHours = document.getElementById('focusTodayHours');
     const focusGoalHours = document.getElementById('focusGoalHours');
     const displayFocusGoal = document.getElementById('displayFocusGoal');
-    const themeGimmickSceneEl = document.getElementById('themeGimmickScene');
-
-    /** Redraws whichever theme's gimmick scene is currently active (Phase
-     *  8, js/themes.js) into its container — called on entering this
-     *  screen and right after a session starts/completes (the only times
-     *  a scene's own data actually changes), never on every render() tick,
-     *  since rebuilding an SVG every second for no reason is wasteful. A
-     *  theme with nothing to show just leaves the container empty and
-     *  hidden. */
-    function refreshThemeGimmickScene() {
-        if (!themeGimmickSceneEl || !TFS.Themes || !isActive()) return;
-        TFS.Themes.renderInto(themeGimmickSceneEl, 'renderFocusScene');
-    }
 
     const PHASE_KEY = { focus: 's6.phaseFocus', shortBreak: 's6.phaseShortBreak', longBreak: 's6.phaseLongBreak' };
 
@@ -295,8 +281,6 @@
     function completePhase() {
         playNotificationSound();
         if (mode === 'focus') {
-            if (TFS.Themes) TFS.Themes.notifySessionComplete({ minutes: pomodoroSettings().focusMin, subject: State.get().plan.subject, dateISO: todayISO() });
-            refreshThemeGimmickScene();
             cyclesCompletedToday++;
             const cycles = pomodoroSettings().cyclesBeforeLongBreak;
             mode = (cyclesCompletedToday % cycles === 0) ? 'longBreak' : 'shortBreak';
@@ -321,8 +305,6 @@
         lastCreditMs = runStartedAtMs;
         requestWakeLock();
         ensureRenderInterval();
-        if (mode === 'focus' && TFS.Themes) TFS.Themes.notifySessionStart({ minutes: pomodoroSettings().focusMin, subject: State.get().plan.subject, dateISO: todayISO() });
-        refreshThemeGimmickScene();
         persistRuntime();
         render();
     }
@@ -435,7 +417,6 @@
             TFS.Nav.show(); TFS.Nav.setActive('focus');
             loadRuntimeFromState();
             render();
-            refreshThemeGimmickScene();
         },
         onLeave: () => {
             // Leaving the focus screen for another in-app screen pauses the
@@ -444,7 +425,5 @@
             pause();
         }
     });
-
-    TFS.Focus = { refreshThemeGimmickScene };
 
 })(window);

@@ -24,7 +24,6 @@
     const readAheadPrompt = document.getElementById('readAheadPrompt');
     const streakBadge = document.getElementById('streakBadge');
     const readinessScoreCard = document.getElementById('readinessScoreCard');
-    const themeGimmickSummaryEl = document.getElementById('themeGimmickSummary');
     const notTodayBtn = document.getElementById('notTodayBtn');
 
     const RING_CIRCUMFERENCE = 2 * Math.PI * 88; // matches the SVG circle's r="88"
@@ -52,14 +51,6 @@
         // No explicit render() call here: this screen is subscribed to state
         // changes below and re-renders itself whenever it is the active screen.
         State.commit({ syllabusProgress: allProgress });
-
-        // Only a genuine tick (not un-ticking a mistake) counts as a "task
-        // completed" for Phase 8's theme gimmicks (Paper's notebook page).
-        if (!wasDone && TFS.Themes) {
-            const subject = TFS.Data && TFS.Data.getSubject ? TFS.Data.getSubject(subjectId) : null;
-            const topic = subject ? subject.topics.find((t) => t.id === topicId) : null;
-            TFS.Themes.notifyTaskComplete({ subjectId, topicId, title: topic ? I18n.pick(topic.label) : null, dateISO: U.formatDateISO(new Date()) });
-        }
     }
 
     /** The end of the "currently visible" window into the reading plan:
@@ -301,7 +292,6 @@
         if (TFS.Streak) TFS.Streak.reconcile();
         renderStreakBadge();
         if (TFS.Garden) TFS.Garden.render();
-        if (TFS.Themes) TFS.Themes.renderInto(themeGimmickSummaryEl, 'renderSummary');
         renderReadinessScore(percent);
 
         if (percent === 100 && total > 0) {

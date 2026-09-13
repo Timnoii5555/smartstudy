@@ -34,20 +34,12 @@
         var stateKey = activeProfileId ? ('tfs:v1:state:' + activeProfileId) : 'tfs:v1:state';
         var raw = localStorage.getItem(stateKey);
         var data = raw ? JSON.parse(raw) : null;
-        // Phase 8's 4-theme system (Pixel/Paper/Night/Mint — see
-        // js/theme.js's header) replaced the old light/dark/paper/night/
-        // system scheme; migrate an old saved value the same way
-        // js/storage.js's migrate() does, since this runs before that ever
-        // gets a chance to.
-        var themeSetting = (data && data.settings && data.settings.theme) || 'pixel';
+        var themeSetting = (data && data.settings && data.settings.theme) || 'system';
         var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (themeSetting === 'light') themeSetting = 'mint';
-        else if (themeSetting === 'dark') themeSetting = 'pixel';
-        else if (themeSetting === 'system') themeSetting = prefersDark ? 'pixel' : 'mint';
-        var validThemes = ['pixel', 'paper', 'night', 'mint'];
-        var effective = validThemes.indexOf(themeSetting) > -1 ? themeSetting : 'pixel';
-        if (effective !== 'pixel') document.documentElement.classList.add(effective);
-        document.documentElement.style.colorScheme = (effective === 'pixel' || effective === 'night') ? 'dark' : 'light';
+        var effective = (themeSetting === 'dark' || themeSetting === 'paper' || themeSetting === 'night') ? themeSetting
+            : (themeSetting === 'light' ? 'light' : (prefersDark ? 'dark' : 'light'));
+        if (effective !== 'light') document.documentElement.classList.add(effective);
+        document.documentElement.style.colorScheme = (effective === 'night') ? 'dark' : (effective === 'paper' ? 'light' : effective);
 
         var lang = (data && data.settings && data.settings.language) || (navigator.language || 'th').toLowerCase().indexOf('en') === 0 ? 'en' : 'th';
         document.documentElement.setAttribute('lang', lang);
@@ -55,7 +47,7 @@
 })();
 </script>
 
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Kanit:wght@300;400;500;600&family=Prompt:wght@400;500;600&family=Press+Start+2P&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Kanit:wght@300;400;500;600&family=Prompt:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <link href="styles/tokens.css" rel="stylesheet"/>
 <link href="styles/base.css" rel="stylesheet"/>
@@ -408,13 +400,6 @@
             </div>
         </div>
 
-        <!-- Phase 8's theme gimmick recap widget (js/themes.js's
-             renderSummary hook) — the 2nd of the gimmick's only 3 allowed
-             homes, alongside the Focus screen's scene and this theme's
-             collection page. Empty/hidden for a theme with nothing built
-             yet, exactly like #themeGimmickScene on screen6. -->
-        <div id="themeGimmickSummary" class="theme-gimmick-scene" hidden></div>
-
         <div id="readinessScoreCard" class="card readiness-score-card" style="margin-bottom:1.5rem"></div>
 
         <div class="dashboard-grid">
@@ -705,14 +690,6 @@
             <h1 data-screen-heading style="font-size:1.875rem;font-weight:600" data-i18n="s6.title">Focus mode</h1>
             <p class="text-outline" style="font-weight:300" data-i18n="s6.subtitle">Cut distractions and get to work</p>
         </div>
-
-        <!-- Phase 8's theme gimmick scene (js/gimmicks/*.js, dispatched via
-             TFS.Themes.currentGimmick().renderFocusScene() — js/focus.js's
-             refreshThemeGimmickScene()) — this screen's primary visual,
-             replacing the earlier "Flight Focus" map/boarding-pass system
-             entirely (a deliberate decision to simplify down to one visual
-             system on this screen instead of two running side by side). -->
-        <div id="themeGimmickScene" class="theme-gimmick-scene" hidden></div>
 
         <div class="text-center" style="margin-bottom:1.5rem;cursor:pointer" id="btnOpenSetTimerModal" title="Set your daily goal">
             <div class="focus-phase-badge"><span id="focusPhaseLabel" data-i18n="s6.phaseFocus">Focus</span> · <span id="focusCycleLabel"></span></div>
@@ -1160,22 +1137,13 @@
 
         <div class="settings-section">
             <span class="settings-section__title" data-i18n="settings.theme">Theme</span>
-            <!-- Phase 8's 4-theme system (js/themes.js, js/theme.js) — Pixel
-                 is the default, all 4 available from first launch, no
-                 unlock system and no OS-following "system" option anymore
-                 (see js/theme.js's header for the old-value migration). -->
             <div class="settings-theme-toggle">
-                <button type="button" id="themeBtnPixel" data-theme="pixel"><span class="material-symbols-outlined" aria-hidden="true">grass</span><span data-i18n="settings.themePixel">Pixel</span></button>
+                <button type="button" id="themeBtnLight" data-theme="light"><span class="material-symbols-outlined" aria-hidden="true">light_mode</span><span data-i18n="settings.themeLight">Light</span></button>
+                <button type="button" id="themeBtnDark" data-theme="dark"><span class="material-symbols-outlined" aria-hidden="true">dark_mode</span><span data-i18n="settings.themeDark">Dark</span></button>
                 <button type="button" id="themeBtnPaper" data-theme="paper"><span class="material-symbols-outlined" aria-hidden="true">auto_stories</span><span data-i18n="settings.themePaper">Paper</span></button>
                 <button type="button" id="themeBtnNight" data-theme="night"><span class="material-symbols-outlined" aria-hidden="true">bedtime</span><span data-i18n="settings.themeNight">Night</span></button>
-                <button type="button" id="themeBtnMint" data-theme="mint"><span class="material-symbols-outlined" aria-hidden="true">potted_plant</span><span data-i18n="settings.themeMint">Mint</span></button>
+                <button type="button" id="themeBtnSystem" data-theme="system"><span class="material-symbols-outlined" aria-hidden="true">contrast</span><span data-i18n="settings.themeSystem">System</span></button>
             </div>
-            <!-- Always opens the CURRENTLY active theme's own collection
-                 page (js/themes.js's currentGimmick().renderCollection) —
-                 all 4 keep collecting in the background either way. -->
-            <button type="button" id="openThemeCollectionBtn" class="btn btn--ghost btn--block" style="justify-content:flex-start;margin-top:0.75rem">
-                <span class="material-symbols-outlined" aria-hidden="true">yard</span><span id="openThemeCollectionBtnLabel" data-i18n="settings.viewCollection">View this theme's collection</span>
-            </button>
         </div>
 
         <div class="settings-section">
@@ -1331,36 +1299,15 @@
     </div>
 </div>
 
-<!-- Always shows the CURRENTLY active theme's own collection page —
-     js/gimmicks/*.js's renderCollection(), dispatched via
-     TFS.Themes.currentGimmick(). Only Mint has a real one so far; the
-     other 3 render their own no-op stub's (empty) output until each
-     phase lands. -->
-<div id="themeCollectionModal" class="modal-overlay hidden">
-    <div class="modal-panel modal-panel--sheet custom-scroll" data-modal-panel style="max-height:88vh">
-        <div class="modal-header">
-            <h2 class="modal-title" id="themeCollectionTitle"><span class="material-symbols-outlined" aria-hidden="true">yard</span> <span>My Garden</span></h2>
-            <button type="button" id="closeThemeCollectionBtn" class="modal-close" data-i18n-attr='{"aria-label":"aria.closeDialog"}' aria-label="Close"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">close</span></button>
-        </div>
-        <div id="themeCollectionBody" class="flex flex-col gap-4"></div>
-    </div>
-</div>
-
 <script src="js/errorBoundary.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/storage.js"></script>
 <script src="data/subjects.js"></script>
-<script src="data/constellationNames.js"></script>
 <script src="js/planner.js"></script>
 <script src="js/srs.js"></script>
 <script src="js/state.js"></script>
 <script src="js/i18n.js"></script>
 <script src="js/theme.js"></script>
-<script src="js/themes.js"></script>
-<script src="js/gimmicks/mint.js"></script>
-<script src="js/gimmicks/night.js"></script>
-<script src="js/gimmicks/paper.js"></script>
-<script src="js/gimmicks/pixel.js"></script>
 <script src="js/toast.js"></script>
 <script src="js/reminder.js"></script>
 <script src="js/streak.js"></script>

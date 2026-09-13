@@ -42,7 +42,7 @@
 .progress-stats__value { font-family: var(--font-headline); font-size: 1.5rem; font-weight: 700; }
 
 .goal-banner { background: linear-gradient(to bottom right, var(--color-primary-solid), var(--color-primary-solid-container)); border-radius: var(--radius-2xl); padding: 1.5rem; color: #fff; box-shadow: var(--shadow-lg); }
-.goal-banner__inner { background: rgba(255,255,255,0.12); border-radius: var(--radius-lg); padding: 1rem; backdrop-filter: blur(var(--backdrop-blur-sm)); }
+.goal-banner__inner { background: rgba(255,255,255,0.12); border-radius: var(--radius-lg); padding: 1rem; backdrop-filter: blur(6px); }
 .mini-progress { width: 100%; background: rgba(255,255,255,0.2); border-radius: var(--radius-full); height: 0.375rem; margin-top: 0.5rem; }
 .mini-progress__fill { background: #fff; height: 100%; border-radius: var(--radius-full); transition: width 0.5s ease; }
 
@@ -56,7 +56,7 @@
     .schedule-sidebar { grid-column: span 3; }
     .schedule-main { grid-column: span 9; }
 }
-.mini-calendar-card { padding: 1.25rem; border: var(--border-width) solid var(--color-border); }
+.mini-calendar-card { padding: 1.25rem; border: 1px solid var(--color-border); }
 .mini-calendar-card__head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
 .exam-indicator {
     margin-top: 1rem; font-size: 0.6875rem; font-weight: 500; color: var(--color-tertiary);
@@ -68,8 +68,8 @@
 .week-nav { display: flex; align-items: center; gap: 0.5rem; }
 .week-nav__label { font-size: 0.8125rem; font-weight: 600; min-width: 11rem; text-align: center; }
 
-.schedule-card { border: var(--border-width) solid var(--color-border); display: flex; flex-direction: column; height: 35rem; }
-.schedule-day-headers { display: grid; grid-template-columns: 3rem repeat(7, minmax(5.5rem, 1fr)); background: var(--color-surface-low); padding: 1rem 0.5rem; border-bottom: var(--border-width) solid var(--color-border); flex: none; min-width: 42rem; }
+.schedule-card { border: 1px solid var(--color-border); display: flex; flex-direction: column; height: 35rem; }
+.schedule-day-headers { display: grid; grid-template-columns: 3rem repeat(7, minmax(5.5rem, 1fr)); background: var(--color-surface-low); padding: 1rem 0.5rem; border-bottom: 1px solid var(--color-border); flex: none; min-width: 42rem; }
 .schedule-day-headers__time { font-size: 0.625rem; font-weight: 700; color: var(--color-outline); text-transform: uppercase; align-self: center; }
 .schedule-day-headers__day { text-align: center; }
 .schedule-day-headers__day p:first-child { font-size: 0.625rem; font-weight: 700; color: var(--color-outline); }
@@ -79,9 +79,9 @@
 .schedule-scroll { position: relative; flex-grow: 1; overflow: auto; }
 .schedule-scroll-inner { position: relative; height: 72rem; min-width: 42rem; }
 .schedule-hour-lines { position: absolute; inset: 0; display: grid; grid-template-rows: repeat(24, minmax(0,1fr)); pointer-events: none; z-index: 0; }
-.schedule-hour-lines div { border-bottom: var(--border-width) solid var(--color-border); }
+.schedule-hour-lines div { border-bottom: 1px solid var(--color-border); }
 .schedule-columns-wrap { position: absolute; inset: 0; display: grid; grid-template-columns: 3rem repeat(7, minmax(5.5rem, 1fr)); z-index: 1; }
-.schedule-hour-labels { display: grid; grid-template-rows: repeat(24, minmax(0,1fr)); text-align: center; padding-top: 0.5rem; font-size: 0.625rem; color: var(--color-outline); background: color-mix(in srgb, var(--color-surface-lowest) 70%, transparent); border-right: var(--border-width) solid var(--color-border); position: sticky; left: 0; z-index: 2; }
+.schedule-hour-labels { display: grid; grid-template-rows: repeat(24, minmax(0,1fr)); text-align: center; padding-top: 0.5rem; font-size: 0.625rem; color: var(--color-outline); background: color-mix(in srgb, var(--color-surface-lowest) 70%, transparent); border-right: 1px solid var(--color-border); position: sticky; left: 0; z-index: 2; }
 .schedule-grid-area { position: relative; grid-column: 2 / -1; background-image: repeating-linear-gradient(to right, transparent, transparent calc(100%/7 - 1px), var(--color-border) calc(100%/7 - 1px), var(--color-border) calc(100%/7)); }
 .schedule-block {
     position: absolute; border-left-width: 4px; border-left-style: solid; padding: 0.4rem; border-radius: 0 var(--radius-md) var(--radius-md) 0;
@@ -93,12 +93,10 @@
 /* Each subject color keeps one fixed literal hue as its identity (the
    border, an accent marker any theme can't reassign) but blends it into
    the *current* theme's own surface/text tokens for the fill and label —
-   so these six automatically read correctly against a dark theme (Pixel,
-   Night) or a light one (Paper, Mint) with no per-theme override rule
-   needed, unlike the old html.dark-only overrides this replaced (which
-   silently never applied to Paper/Night either, nor to Pixel once "dark"
-   was renamed to it — exactly the kind of hardcoded-color gap Phase 8's
-   own acceptance check exists to catch). */
+   so these six automatically read correctly against any dark theme
+   (Dark, Night) or light one (default, Paper) with no per-theme override
+   rule needed, unlike the old html.dark-only overrides this replaced
+   (which never applied to Paper/Night at all). */
 .schedule-block--blue { background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface-lowest)); border-left-color: var(--color-primary); color: var(--color-primary); }
 .schedule-block--orange { background: color-mix(in srgb, #f97316 16%, var(--color-surface-lowest)); border-left-color: #f97316; color: color-mix(in srgb, #f97316 65%, var(--color-on-surface)); }
 .schedule-block--green { background: color-mix(in srgb, #22c55e 16%, var(--color-surface-lowest)); border-left-color: #22c55e; color: color-mix(in srgb, #22c55e 65%, var(--color-on-surface)); }
@@ -120,14 +118,14 @@
 /* ---------- Screen 5: flashcards ---------- */
 .deck-progress-track { width: 100%; max-width: 20rem; height: 0.375rem; background: var(--color-surface-highest); border-radius: var(--radius-full); overflow: hidden; margin: 0 auto 3rem; }
 .deck-progress-track__fill { height: 100%; background: var(--color-primary); border-radius: var(--radius-full); transition: width 0.3s ease; width: 0%; }
-.flashcard-shell { width: 100%; background: var(--color-surface-lowest); border-radius: var(--radius-2xl); padding: 1.5rem; border: var(--border-width) solid var(--color-border); box-shadow: var(--shadow-lg); display: flex; flex-direction: column; align-items: center; }
+.flashcard-shell { width: 100%; background: var(--color-surface-lowest); border-radius: var(--radius-2xl); padding: 1.5rem; border: 1px solid var(--color-border); box-shadow: var(--shadow-lg); display: flex; flex-direction: column; align-items: center; }
 @media (min-width: 768px) { .flashcard-shell { padding: 2rem; } }
 .flashcard-empty { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 3rem; background: var(--color-surface-low); border-radius: var(--radius-2xl); border: 1px dashed var(--color-border); width: 100%; }
 .flip-card { width: 100%; max-width: 28rem; perspective: 1000px; aspect-ratio: 4 / 5; cursor: pointer; }
 @media (min-width: 768px) { .flip-card { aspect-ratio: 3 / 2; } }
 .flip-card__inner { position: relative; width: 100%; height: 100%; transition: transform 0.7s; transform-style: preserve-3d; }
 .flip-card__inner.is-flipped { transform: rotateY(180deg); }
-.flip-card__face { position: absolute; inset: 0; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; background: var(--color-surface-lowest); border-radius: var(--radius-2xl); text-align: center; border: var(--border-width) solid var(--color-border); }
+.flip-card__face { position: absolute; inset: 0; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; background: var(--color-surface-lowest); border-radius: var(--radius-2xl); text-align: center; border: 1px solid var(--color-border); }
 .flip-card__face--back { transform: rotateY(180deg); }
 .flip-card__eyebrow { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 1rem; }
 .flip-card__term { font-size: 2.25rem; font-weight: 700; margin-bottom: 1.5rem; word-break: break-word; }
@@ -145,7 +143,7 @@
 .flashcard-action-btn {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     min-height: 3.5rem; padding: 0.875rem 0.5rem; border-radius: var(--radius-xl);
-    border: var(--border-width) solid var(--color-border); background: var(--color-surface-high);
+    border: 1px solid var(--color-border); background: var(--color-surface-high);
     font-size: 0.75rem; font-weight: 600; color: var(--color-on-surface);
 }
 .flashcard-action-btn--again { color: var(--color-danger); }
@@ -160,25 +158,23 @@
 /* ---------- Screen 6: focus timer ---------- */
 .focus-shell { min-height: calc(100vh - 12rem); display: flex; flex-direction: column; align-items: center; justify-content: center; max-width: 32rem; margin: 0 auto; }
 .focus-phase-badge { display: inline-flex; align-items: center; gap: 0.375rem; background: var(--color-primary-fixed); color: var(--color-primary); font-size: 0.6875rem; font-weight: 700; padding: 0.3rem 0.9rem; border-radius: var(--radius-full); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.75rem; }
-/* --font-timer defaults to the headline face and is only actually
-   overridden by Pixel (a monospace stack) — see styles/tokens.css. */
-.focus-time-display { display: block; font-family: var(--font-timer); font-size: var(--font-timer-size); font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+.focus-time-display { display: block; font-family: var(--font-headline); font-size: 3.75rem; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
 .focus-goal-label { font-size: 0.8125rem; font-weight: 500; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.15em; margin-top: 0.5rem; display: flex; align-items: center; justify-content: center; gap: 0.25rem; }
 .focus-controls { width: 100%; display: flex; flex-direction: column; gap: 1rem; }
 .focus-controls__row { display: flex; gap: 0.75rem; width: 100%; }
 .focus-reset-btn { width: 4rem; border-radius: var(--radius-2xl); background: var(--color-surface-highest); color: var(--color-outline); display: flex; align-items: center; justify-content: center; border: none; }
 .focus-stats { margin-top: 3rem; width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-.focus-stat-card { padding: 1rem; border-radius: var(--radius-2xl); background: var(--color-surface-lowest); border: var(--border-width) solid var(--color-border); text-align: center; position: relative; overflow: hidden; }
+.focus-stat-card { padding: 1rem; border-radius: var(--radius-2xl); background: var(--color-surface-lowest); border: 1px solid var(--color-border); text-align: center; position: relative; overflow: hidden; }
 .focus-stat-card__accent { position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: var(--color-success); }
 /* ---------- Settings panel ---------- */
 .settings-section { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; }
 .settings-section__title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-outline); }
 .settings-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-.settings-lang-toggle { display: flex; border-radius: var(--radius-lg); overflow: hidden; border: var(--border-width) solid var(--color-border); }
+.settings-lang-toggle { display: flex; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--color-border); }
 .settings-lang-toggle button { flex: 1; padding: 0.6rem; background: var(--color-surface-lowest); border: none; font-weight: 600; }
 .settings-lang-toggle button.is-active { background: var(--color-primary-solid); color: #fff; }
-.settings-theme-toggle { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
-.settings-theme-toggle button { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; padding: 0.75rem 0.5rem; border-radius: var(--radius-lg); border: var(--border-width) solid var(--color-border); background: var(--color-surface-lowest); font-size: 0.6875rem; font-weight: 600; }
+.settings-theme-toggle { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+.settings-theme-toggle button { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; padding: 0.75rem 0.5rem; border-radius: var(--radius-lg); border: 1px solid var(--color-border); background: var(--color-surface-lowest); font-size: 0.6875rem; font-weight: 600; }
 .settings-theme-toggle button.is-active { border-color: var(--color-primary); color: var(--color-primary); background: var(--color-primary-fixed); }
 .settings-file-input { display: none; }
 
@@ -216,7 +212,7 @@
 @media (max-width: 56rem) { .landing-steps { flex-direction: column; gap: 1.75rem; } }
 .landing-step {
     position: relative; flex: 1; padding: 1.75rem 1.5rem; border-radius: var(--radius-xl);
-    background: var(--color-surface-lowest); box-shadow: var(--shadow-sm); border: var(--border-width) solid var(--color-border);
+    background: var(--color-surface-lowest); box-shadow: var(--shadow-sm); border: 1px solid var(--color-border);
     display: flex; flex-direction: column; gap: 0.6rem;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }

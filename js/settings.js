@@ -16,10 +16,11 @@
     const settingsModal = document.getElementById('settingsModal');
     const langBtnTh = document.getElementById('langBtnTh');
     const langBtnEn = document.getElementById('langBtnEn');
-    const themeBtnPixel = document.getElementById('themeBtnPixel');
+    const themeBtnLight = document.getElementById('themeBtnLight');
+    const themeBtnDark = document.getElementById('themeBtnDark');
     const themeBtnPaper = document.getElementById('themeBtnPaper');
     const themeBtnNight = document.getElementById('themeBtnNight');
-    const themeBtnMint = document.getElementById('themeBtnMint');
+    const themeBtnSystem = document.getElementById('themeBtnSystem');
     const dailyGoalInput = document.getElementById('settingsDailyGoalHours');
     const examDateBtn = document.getElementById('settingsExamDateBtn');
     const examDateDisplay = document.getElementById('settingsExamDateDisplay');
@@ -39,11 +40,11 @@
         langBtnEn.classList.toggle('is-active', I18n.getLang() === 'en');
 
         const theme = s.settings.theme;
-        themeBtnPixel.classList.toggle('is-active', theme === 'pixel');
+        themeBtnLight.classList.toggle('is-active', theme === 'light');
+        themeBtnDark.classList.toggle('is-active', theme === 'dark');
         themeBtnPaper.classList.toggle('is-active', theme === 'paper');
         themeBtnNight.classList.toggle('is-active', theme === 'night');
-        themeBtnMint.classList.toggle('is-active', theme === 'mint');
-        if (openThemeCollectionBtnLabel && TFS.Themes) openThemeCollectionBtnLabel.textContent = I18n.pick(TFS.Themes.currentDefinition().collectionName);
+        themeBtnSystem.classList.toggle('is-active', theme === 'system');
 
         dailyGoalInput.value = (s.plan.dailyGoalSeconds / 3600).toFixed(1).replace(/\.0$/, '');
         examDateDisplay.textContent = s.plan.examDateISO ? I18n.formatDate(U.parseISODate(s.plan.examDateISO)) : I18n.t('s2.examDatePlaceholder');
@@ -77,10 +78,11 @@
     langBtnTh.addEventListener('click', () => { I18n.setLanguage('th'); render(); });
     langBtnEn.addEventListener('click', () => { I18n.setLanguage('en'); render(); });
 
-    themeBtnPixel.addEventListener('click', () => { TFS.Theme.setTheme('pixel'); render(); });
+    themeBtnLight.addEventListener('click', () => { TFS.Theme.setTheme('light'); render(); });
+    themeBtnDark.addEventListener('click', () => { TFS.Theme.setTheme('dark'); render(); });
     themeBtnPaper.addEventListener('click', () => { TFS.Theme.setTheme('paper'); render(); });
     themeBtnNight.addEventListener('click', () => { TFS.Theme.setTheme('night'); render(); });
-    themeBtnMint.addEventListener('click', () => { TFS.Theme.setTheme('mint'); render(); });
+    themeBtnSystem.addEventListener('click', () => { TFS.Theme.setTheme('system'); render(); });
 
     dailyGoalInput.addEventListener('change', () => {
         let hrs = parseFloat(dailyGoalInput.value);
@@ -254,30 +256,6 @@
         global.location.href = mailto;
         TFS.Modal.close(reportModal);
     });
-
-    // ---------------------------------------------------------------- Theme collection page (Phase 8, js/themes.js)
-
-    const themeCollectionModal = document.getElementById('themeCollectionModal');
-    const themeCollectionTitle = document.getElementById('themeCollectionTitle');
-    const themeCollectionBody = document.getElementById('themeCollectionBody');
-    const openThemeCollectionBtn = document.getElementById('openThemeCollectionBtn');
-    const openThemeCollectionBtnLabel = document.getElementById('openThemeCollectionBtnLabel');
-    const closeThemeCollectionBtn = document.getElementById('closeThemeCollectionBtn');
-
-    // The label itself (named for the active theme, e.g. "View My Garden"
-    // for Mint) is kept current by render() above, called both on every
-    // theme switch and every time Settings is opened — no separate
-    // language-change listener needed for just this one label.
-    if (openThemeCollectionBtn) {
-        openThemeCollectionBtn.addEventListener('click', () => {
-            if (!TFS.Themes) return;
-            const def = TFS.Themes.currentDefinition();
-            if (themeCollectionTitle) themeCollectionTitle.querySelector('span:last-child').textContent = I18n.pick(def.collectionName);
-            TFS.Themes.renderInto(themeCollectionBody, 'renderCollection');
-            TFS.Modal.open(themeCollectionModal);
-        });
-    }
-    if (closeThemeCollectionBtn) closeThemeCollectionBtn.addEventListener('click', () => TFS.Modal.close(themeCollectionModal));
 
     I18n.onChange(() => { if (TFS.Modal.isOpen(settingsModal)) render(); });
 

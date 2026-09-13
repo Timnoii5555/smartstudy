@@ -118,20 +118,6 @@ A line-by-line pass over the rest of `styles/components.css` and
 `styles/screens.css` across all four themes (light/dark/paper/night),
 including hover/disabled/error states specifically, has not been done.
 
-## Night theme: progressive screen-dimming during long sessions
-
-The Night gimmick's brief (Phase 8) named this alongside its stars/
-constellations mechanic and its shooting stars (the latter did ship —
-see `js/gimmicks/night.js`). It was left out of the same pass because it
-needed a new settings surface (a toggle to opt out) this session wasn't
-confident enough of the exact intended behavior to add without risking
-clutter: is it the whole screen behind the timer that dims, or just the
-gimmick's own scene card; does it reset every round or accumulate across
-a study session; is a toggle even the right control, versus just always
-being subtle enough not to need one? Worth building once these are
-pinned down, ideally starting from a mock of the exact dimming curve
-wanted rather than guessing at one from the brief text alone.
-
 ## Reading-plan regeneration from Settings
 
 Editing the exam date or daily-goal hours from the Settings modal (as

@@ -196,31 +196,6 @@
                 notifTitle: '🤗 ได้เวลาโฟกัสแล้ว!',
                 notifBody: 'มาเริ่มโฟกัสกับการอ่านหนังสือกันเถอะ'
             },
-            mintGarden: {
-                stageSeed: 'เมล็ดพันธุ์', stageSprout: 'ต้นอ่อน', stageStem: 'แตกลำต้น',
-                stageBranching: 'แตกกิ่งก้าน', stageFull: 'ใบเต็มต้น', stageBloom: 'ออกดอกแล้ว',
-                noSubject: 'ยังไม่ได้เลือกวิชา — ปลูกต้นแรกได้เมื่อเลือกวิชาแล้ว',
-                collectionEmpty: 'ยังไม่มีต้นไม้ในส่วนนี้',
-                growingSection: 'กำลังปลูก',
-                shelfSection: 'ชั้นวาง (เรียนจบแล้ว)'
-            },
-            nightSky: {
-                starsThisWeek: 'ดาวสัปดาห์นี้ {n} ดวง',
-                starCount: '{n} ดวง',
-                collectionEmpty: 'ยังไม่มีกลุ่มดาวในคืนที่ผ่านมา'
-            },
-            paperNotebook: {
-                noTasksToday: 'วันนี้ยังไม่มีงานที่ทำเสร็จ',
-                taskFallback: 'งานที่ทำเสร็จแล้ว',
-                doodlesSection: 'ลายเส้นสะสม',
-                pagesSection: 'หน้าเก่า',
-                pagesEmpty: 'ยังไม่มีหน้าเก่าในสมุดเล่มนี้'
-            },
-            pixelMeadow: {
-                characterSection: 'เลือกตัวละคร',
-                petSection: 'เลือกสัตว์เลี้ยง',
-                scenerySection: 'ของประดับที่ปลดล็อกแล้ว'
-            },
             modalGroups: {
                 title: 'กลุ่มเรียน',
                 codePlaceholder: 'รหัสเข้ากลุ่ม',
@@ -362,8 +337,6 @@
             settings: {
                 title: 'ตั้งค่า', language: 'ภาษา', theme: 'ธีม',
                 themeLight: 'สว่าง', themeDark: 'มืด', themePaper: 'กระดาษ', themeNight: 'กลางคืน', themeSystem: 'ตามระบบ',
-                themePixel: 'ทุ่งหญ้า', themeMint: 'ต้นไม้',
-                viewCollection: 'ดูคลังสะสมของธีมนี้',
                 dailyGoal: 'เป้าหมายชั่วโมงอ่านต่อวัน', examDate: 'วันสอบ',
                 pomodoroSection: 'ตั้งเวลาโฟกัส (Pomodoro)',
                 focusMin: 'ช่วงโฟกัส (นาที)', shortBreakMin: 'พักสั้น (นาที)',
@@ -574,31 +547,6 @@
                 notifTitle: '🤗 Time to focus!',
                 notifBody: "Let's start focusing on reading."
             },
-            mintGarden: {
-                stageSeed: 'Seed', stageSprout: 'Sprout', stageStem: 'Growing a stem',
-                stageBranching: 'Branching out', stageFull: 'Full leaves', stageBloom: 'In bloom',
-                noSubject: 'No subject chosen yet — the first plant grows once you pick one.',
-                collectionEmpty: 'Nothing here yet.',
-                growingSection: 'Currently growing',
-                shelfSection: 'Shelf (finished subjects)'
-            },
-            nightSky: {
-                starsThisWeek: '{n} stars this week',
-                starCount: '{n} stars',
-                collectionEmpty: 'No past constellations yet.'
-            },
-            paperNotebook: {
-                noTasksToday: "Nothing finished today yet.",
-                taskFallback: 'A finished task',
-                doodlesSection: 'Doodle collection',
-                pagesSection: 'Old pages',
-                pagesEmpty: 'No old pages in this notebook yet.'
-            },
-            pixelMeadow: {
-                characterSection: 'Choose a character',
-                petSection: 'Choose a pet',
-                scenerySection: 'Unlocked scenery'
-            },
             modalGroups: {
                 title: 'Study groups',
                 codePlaceholder: 'Join code',
@@ -740,8 +688,6 @@
             settings: {
                 title: 'Settings', language: 'Language', theme: 'Theme',
                 themeLight: 'Light', themeDark: 'Dark', themePaper: 'Paper', themeNight: 'Night', themeSystem: 'Follow system',
-                themePixel: 'Pixel', themeMint: 'Mint',
-                viewCollection: "View this theme's collection",
                 dailyGoal: 'Daily study goal (hours)', examDate: 'Exam date',
                 pomodoroSection: 'Focus timer (Pomodoro)',
                 focusMin: 'Focus length (min)', shortBreakMin: 'Short break (min)',

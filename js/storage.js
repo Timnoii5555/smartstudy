@@ -13,7 +13,7 @@
     const U = TFS.Utils;
 
     const STORAGE_KEY = 'tfs:v1:state';
-    const SCHEMA_VERSION = 2;
+    const SCHEMA_VERSION = 1;
 
     // ---- Local profiles ("login") ------------------------------------------
     // There is no server here, so "login" means "which named local profile on
@@ -110,7 +110,7 @@
             schemaVersion: SCHEMA_VERSION,
             settings: {
                 language: null, // null = "not chosen yet", app.js resolves it from the browser
-                theme: 'pixel', // 'pixel' | 'paper' | 'night' | 'mint' — see js/theme.js
+                theme: 'system', // 'light' | 'dark' | 'paper' | 'night' | 'system'
                 soundEnabled: true,
                 ambientType: 'brown', // 'brown' | 'rain'
                 ambientVolume: 0.5,
@@ -179,58 +179,6 @@
                 currentGroupId: null,
                 currentGroupName: null
             },
-            // Phase 8 theme gimmicks — one namespace per theme, all 4 always
-            // collecting in the background regardless of which is active
-            // (js/themes.js's broadcast()), so switching themes never loses
-            // progress in the others.
-            nightSky: {
-                // {dateISO, minutes}[] — this WEEK's stars only, cleared
-                // into weeklyLog once a new week's first star is about to
-                // be added (js/gimmicks/night.js's rolloverIfNeeded()).
-                stars: [],
-                // Past weeks' finished constellations — the "Past Skies"
-                // collection: {weekKey, name:{th,en}, startISO, endISO,
-                // starCount, totalMinutes}[]. A week that ended with under
-                // 3 stars never appears here (its stars are just dropped —
-                // "no message, nothing to see" per the brief).
-                weeklyLog: [],
-                currentWeekKey: null
-            },
-            mintGarden: {
-                // subjectId -> { rounds: number, lastStudiedISO: string }
-                // — js/gimmicks/mint.js. `rounds` is completed-or-kept-
-                // partial focus phases for that subject; a subject not
-                // studied in >7/14 days reads as wilted/leaf-dropped at
-                // render time from `lastStudiedISO`, never stored as a
-                // separate flag (so it can't go stale).
-                plantsBySubject: {}
-            },
-            pixelMeadow: {
-                // js/gimmicks/pixel.js. characterId defaults to the first
-                // of 6 (never blank — a scene always has someone standing
-                // in it); petId is null by default since a pet is opt-in.
-                characterId: 'char1',
-                petId: null,
-                // Scenery ids (js/gimmicks/pixel.js's SCENERY) earned by
-                // crossing a lifetime-focus-hours milestone — kept forever
-                // once earned, same rule as paperNotebook.unlockedDoodles.
-                unlockedScenery: []
-            },
-            paperNotebook: {
-                // dateISO -> string[] (up to 6 completed task/topic titles
-                // that day) — js/gimmicks/paper.js's stylized notebook
-                // page, pruned to the most recent 30 days at write time.
-                // Not the real completion history (that's
-                // state.syllabusProgress, see js/history.js) — just enough
-                // to draw a believable page.
-                pages: {},
-                // Doodle ids (js/gimmicks/paper.js's DOODLES) earned so
-                // far by crossing a lifetime-focus-hours milestone — kept
-                // forever once earned, even if hours were somehow lower
-                // later (they never are, but the rule is the same "never
-                // revoke a collectible" principle as Mint/Night).
-                unlockedDoodles: []
-            },
             streak: {
                 current: 0,               // consecutive days with >=15 min of real focus time, ending today or yesterday
                 longest: 0,               // best streak ever, kept even after the current one breaks
@@ -252,22 +200,6 @@
             // No released schema existed before v1 — treat anything unversioned as legacy/corrupt
             // and start clean rather than guessing at a shape that was never persisted by this app.
             state = defaultState();
-        }
-
-        // Phase 8's 4-theme system (Pixel/Paper/Night/Mint) replaced the
-        // old light/dark/paper/night/system scheme — the same one-time
-        // remap index.html's inline first-paint script already applies to
-        // avoid a flash, kept in sync with it deliberately.
-        if (version < 2 && state.settings && typeof state.settings.theme === 'string') {
-            const oldTheme = state.settings.theme;
-            if (oldTheme === 'light') state.settings.theme = 'mint';
-            else if (oldTheme === 'dark') state.settings.theme = 'pixel';
-            else if (oldTheme === 'system') {
-                const prefersDark = typeof global.matchMedia === 'function' && global.matchMedia('(prefers-color-scheme: dark)').matches;
-                state.settings.theme = prefersDark ? 'pixel' : 'mint';
-            } else if (!['pixel', 'paper', 'night', 'mint'].includes(oldTheme)) {
-                state.settings.theme = 'pixel';
-            }
         }
 
         state.schemaVersion = SCHEMA_VERSION;

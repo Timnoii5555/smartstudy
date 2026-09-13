@@ -1,53 +1,40 @@
 /**
  * theme.js
- * Runtime theme control — Phase 8's 4-theme system (Pixel, Paper, Night,
- * Mint; see styles/tokens.css's header for the full token-mapping
- * rationale). The very first paint's theme is already decided by a tiny
- * inline script at the top of <head> in index.html (it has to run before
- * any CSS paints, before this file — or anything else — loads, so it
- * duplicates a few lines of logic on purpose, including the old-name
- * migration below). This module takes over afterwards: applying explicit
- * theme changes from Settings.
- *
- * Unlike the old light/dark/paper/night/system scheme, none of the 4
- * themes here are ever inferred from the OS's light/dark preference —
- * there is no "system" option anymore (see the phase brief: exactly 4
- * themes, no auto-switching, Pixel by default from first launch). A
- * profile's old saved value migrates once, on first read after this
- * shipped (js/storage.js's migrate()): 'light' -> 'mint', 'dark' -> 'pixel',
- * 'system' -> whichever of those two the OS preference would have
- * resolved to; 'paper'/'night' keep their names (same identities, new
- * palette values).
+ * Runtime theme control (Part 3.2). The very first paint's theme is already
+ * decided by a tiny inline script at the top of <head> in index.html (it has
+ * to run before any CSS paints, before this file — or anything else — loads,
+ * so it duplicates a few lines of logic on purpose). This module takes over
+ * afterwards: applying explicit theme changes from Settings, and reacting to
+ * OS-level light/dark changes while the "system" option is selected.
  */
 (function (global) {
     'use strict';
 
     const TFS = global.TFS = global.TFS || {};
 
-    const THEMES = ['pixel', 'paper', 'night', 'mint'];
-    const DEFAULT_THEME = 'pixel';
+    const mediaQuery = global.matchMedia ? global.matchMedia('(prefers-color-scheme: dark)') : null;
 
-    function isValidTheme(id) {
-        return THEMES.includes(id);
+    // 'paper' (warm/cream, low-contrast) and 'night' (very dark, desaturated,
+    // minimal blue light) are explicit choices only — unlike 'dark', neither
+    // is ever inferred from the OS's light/dark preference, since there is
+    // no OS-level equivalent of either to follow.
+    const EXPLICIT_THEMES = ['light', 'dark', 'paper', 'night'];
+
+    function effectiveTheme(setting) {
+        if (EXPLICIT_THEMES.includes(setting)) return setting;
+        return (mediaQuery && mediaQuery.matches) ? 'dark' : 'light';
     }
 
     function apply(setting) {
-        const eff = isValidTheme(setting) ? setting : DEFAULT_THEME;
-        // Pixel is the classless :root default (matches the old scheme's
-        // "light has no class" convention) — every other theme gets its
-        // own html.<name> class, and never more than one at a time.
-        THEMES.filter((t) => t !== DEFAULT_THEME).forEach((cls) => document.documentElement.classList.toggle(cls, eff === cls));
-        document.documentElement.setAttribute('data-theme-setting', eff);
+        const eff = effectiveTheme(setting);
+        ['dark', 'paper', 'night'].forEach(cls => document.documentElement.classList.toggle(cls, eff === cls));
+        document.documentElement.setAttribute('data-theme-setting', setting);
         // Keep the native UI (scrollbars, form controls) in sync with the theme too.
-        document.documentElement.style.colorScheme = (eff === 'pixel' || eff === 'night') ? 'dark' : 'light';
-        // A theme switch changes which gimmick scene should be showing on
-        // screen 6 right now — js/focus.js exposes the redraw for exactly
-        // this (a no-op if that screen isn't even the active one).
-        if (TFS.Focus && TFS.Focus.refreshThemeGimmickScene) TFS.Focus.refreshThemeGimmickScene();
+        document.documentElement.style.colorScheme = (eff === 'night') ? 'dark' : (eff === 'paper' ? 'light' : eff);
     }
 
     function setTheme(setting) {
-        TFS.State.commit({ settings: { theme: isValidTheme(setting) ? setting : DEFAULT_THEME } });
+        TFS.State.commit({ settings: { theme: setting } });
         apply(setting);
     }
 
@@ -57,8 +44,13 @@
 
     function init() {
         apply(getSetting());
+        if (mediaQuery) {
+            const onChange = () => { if (getSetting() === 'system') apply('system'); };
+            if (mediaQuery.addEventListener) mediaQuery.addEventListener('change', onChange);
+            else if (mediaQuery.addListener) mediaQuery.addListener(onChange); // older Safari
+        }
     }
 
-    TFS.Theme = { init, setTheme, getSetting, THEMES, DEFAULT_THEME, isValidTheme };
+    TFS.Theme = { init, setTheme, getSetting, effectiveTheme };
 
 })(window);
