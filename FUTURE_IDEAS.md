@@ -118,6 +118,34 @@ A line-by-line pass over the rest of `styles/components.css` and
 `styles/screens.css` across all four themes (light/dark/paper/night),
 including hover/disabled/error states specifically, has not been done.
 
+## Night theme: progressive screen-dimming during long sessions
+
+The Night gimmick's brief (Phase 8) named this alongside its stars/
+constellations mechanic and its shooting stars (the latter did ship —
+see `js/gimmicks/night.js`). It was left out of the same pass because it
+needed a new settings surface (a toggle to opt out) this session wasn't
+confident enough of the exact intended behavior to add without risking
+clutter: is it the whole screen behind the timer that dims, or just the
+gimmick's own scene card; does it reset every round or accumulate across
+a study session; is a toggle even the right control, versus just always
+being subtle enough not to need one? Worth building once these are
+pinned down, ideally starting from a mock of the exact dimming curve
+wanted rather than guessing at one from the brief text alone.
+
+## Theme gimmick scenes vs. the Flight Focus visual system
+
+Phase 8 added a `#themeGimmickScene` card to the Focus screen (screen6)
+*alongside* the pre-existing Flight Focus experience (the map, seat
+picker, boarding pass, real-airport distances — all built and iterated
+earlier in the same working session) rather than replacing it. That was
+a deliberate, but unconfirmed, reading of the brief: nothing in it said
+to remove Flight Focus, and swapping out a feature the learner had just
+finished shaping in detail felt like the riskier assumption. The two
+now sit stacked on the same screen. If a cleaner combined design is
+wanted instead — say, folding the flight visual into Pixel's own scene,
+or making the two mutually exclusive per-theme — that's a real redesign
+worth doing deliberately rather than as a side effect of the theme work.
+
 ## Reading-plan regeneration from Settings
 
 Editing the exam date or daily-goal hours from the Settings modal (as
